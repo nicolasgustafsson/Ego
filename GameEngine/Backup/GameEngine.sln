@@ -1,8 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32510.428
-MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameEngine", "GameEngine\GameEngine.csproj", "{44F302C1-D6AD-4760-A939-A44BDFFDBDE7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloTriangle", "HelloTriangle\HelloTriangle.csproj", "{9001B46A-86D5-4CC9-A8D2-1E1247AB52D7}"
@@ -39,11 +36,5 @@ Global
 		{8C6D5AC5-8925-47FB-BDB6-2B48662B7ABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C6D5AC5-8925-47FB-BDB6-2B48662B7ABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8C6D5AC5-8925-47FB-BDB6-2B48662B7ABE}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0A1EEDD5-B547-44FD-B296-AAC805172B07}
 	EndGlobalSection
 EndGlobal

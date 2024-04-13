@@ -1,11 +1,13 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using KHRRTXHelloTriangle;
 
 public static class Program
 {
     public static void Main()
     {
-        Run();
+        HelloTriangle hello = new();
+        hello.Run();
     }
 
     public static void Run()
@@ -22,5 +24,7 @@ public static class Program
         }
 
         renderer.Cleanup();
+        
+        
     }
 }
