@@ -4,6 +4,13 @@ using static Vortice.Vulkan.Vulkan;
 
 namespace Rendering;
 
+enum DisplayServer
+{
+    Windows,
+    X11,
+    Wayland
+}
+
 public unsafe partial class Engine
 {
     private VkInstance myVulkanInstance;
@@ -11,16 +18,39 @@ public unsafe partial class Engine
     private VkPhysicalDevice myPhysicalDevice; 
 
     private VkDebugUtilsMessengerEXT myDebugMessenger = VkDebugUtilsMessengerEXT.Null;
-
+    
     private readonly string[] ValidationLayers = new[]
     {
         "VK_LAYER_KHRONOS_validation"
     };
+    
+    private DisplayServer GetDisplayServer()
+    {
+        if (OperatingSystem.IsWindows())
+            return DisplayServer.Windows;
 
-    private readonly string[] Extensions = new[]
+        return DisplayServer.Wayland;
+    }
+    
+    private string GetSurfaceExtension()
+    {
+        switch(GetDisplayServer())
+        {
+            case DisplayServer.Windows:
+                return "VK_KHR_win32_surface";
+            case DisplayServer.X11:
+                return "VK_KHR_xlib_surface";
+            case DisplayServer.Wayland:
+                return "VK_KHR_wayland_surface";
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private string[] Extensions => new[]
     {
         "VK_KHR_surface",
-        OperatingSystem.IsLinux() ? "VK_KHR_xlib_surface" : "VK_KHR_win32_surface",
+        GetSurfaceExtension(),
         "VK_EXT_debug_utils",
     };
         

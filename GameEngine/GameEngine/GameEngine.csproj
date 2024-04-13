@@ -20,6 +20,9 @@
       <None Update="glfw.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Update="glfwX11.so">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <None Update="glfw.so">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>

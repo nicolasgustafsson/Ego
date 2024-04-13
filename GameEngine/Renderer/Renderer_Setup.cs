@@ -22,29 +22,56 @@ public unsafe partial class Engine
 
     private void CreateSurface(Window aWindow)
     {
+        switch (GetDisplayServer())
+        {
+            case DisplayServer.Windows:
+            {
+                VkWin32SurfaceCreateInfoKHR createInfo = new VkWin32SurfaceCreateInfoKHR()
+                {
+                    hwnd = aWindow.Hwnd,
+                    hinstance = System.Diagnostics.Process.GetCurrentProcess().Handle,
+                };
+                fixed (VkSurfaceKHR* surfacePtr = &mySurface)
+                {
+                    Helpers.CheckErrors(vkCreateWin32SurfaceKHR(myVulkanInstance, &createInfo, null, surfacePtr));
+                }
+                break;
+            }
+            
+            case DisplayServer.X11:
+            {
+                VkXlibSurfaceCreateInfoKHR createInfo = new ()
+                {
+                    display = aWindow.X11Display,
+                    window = (UIntPtr)(long)aWindow.X11Window
+                };
+                fixed (VkSurfaceKHR* surfacePtr = &mySurface)
+                {
+                    Helpers.CheckErrors(vkCreateXlibSurfaceKHR(myVulkanInstance, &createInfo, null, surfacePtr));
+                }
+                break;
+            }
+            case DisplayServer.Wayland:
+            {
+                VkWaylandSurfaceCreateInfoKHR createInfo = new ()
+                {
+                    display = aWindow.WaylandDisplay,
+                    surface = aWindow.WaylandWindow
+                };
+                fixed (VkSurfaceKHR* surfacePtr = &mySurface)
+                {
+                    Helpers.CheckErrors(vkCreateWaylandSurfaceKHR(myVulkanInstance, &createInfo, null, surfacePtr));
+                }
+                break;
+            }
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
         if (OperatingSystem.IsWindows())
         {
-            VkWin32SurfaceCreateInfoKHR createInfo = new VkWin32SurfaceCreateInfoKHR()
-            {
-                hwnd = aWindow.Hwnd,
-                hinstance = System.Diagnostics.Process.GetCurrentProcess().Handle,
-            };
-            fixed (VkSurfaceKHR* surfacePtr = &mySurface)
-            {
-                Helpers.CheckErrors(vkCreateWin32SurfaceKHR(myVulkanInstance, &createInfo, null, surfacePtr));
-            }
         }
         else if (OperatingSystem.IsLinux())
         {
-            VkXlibSurfaceCreateInfoKHR createInfo = new ()
-            {
-                display = aWindow.LinuxDisplay,
-                window = (UIntPtr)(long)aWindow.LinuxWindow
-            };
-            fixed (VkSurfaceKHR* surfacePtr = &mySurface)
-            {
-                Helpers.CheckErrors(vkCreateXlibSurfaceKHR(myVulkanInstance, &createInfo, null, surfacePtr));
-            }
         }
     }
 

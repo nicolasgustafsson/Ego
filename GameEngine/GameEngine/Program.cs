@@ -1,8 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text;
-using KHRRTXHelloTriangle;
-
-public static class Program
+﻿public static class Program
 {
     public static void Main()
     {
@@ -11,12 +7,12 @@ public static class Program
 
     public static void Run()
     {
-        Window window = Window.Create("Game");
+        Window window = new Window("Game", new Vector2(1280, 720));
         Rendering.Engine renderer = null!;
 
         renderer = new(window);
         
-        while (!window.IsClosing)
+        while (!window.IsClosed)
         {
             renderer.Draw();
             window.Update();
