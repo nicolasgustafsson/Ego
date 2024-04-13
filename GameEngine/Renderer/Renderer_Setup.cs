@@ -6,7 +6,7 @@ namespace Rendering;
 
 public unsafe partial class Engine
 {
-    public void Init(Window aWindow)
+    private void Init(Window aWindow)
     {
         InitVulkan(aWindow);
     }
@@ -22,28 +22,42 @@ public unsafe partial class Engine
 
     private void CreateSurface(Window aWindow)
     {
-        VkWin32SurfaceCreateInfoKHR createInfo = new VkWin32SurfaceCreateInfoKHR()
+        if (OperatingSystem.IsWindows())
         {
-            hwnd = aWindow.Hwnd,
-            hinstance = System.Diagnostics.Process.GetCurrentProcess().Handle,
-        };
-
-        fixed (VkSurfaceKHR* surfacePtr = &mySurface)
+            VkWin32SurfaceCreateInfoKHR createInfo = new VkWin32SurfaceCreateInfoKHR()
+            {
+                hwnd = aWindow.Hwnd,
+                hinstance = System.Diagnostics.Process.GetCurrentProcess().Handle,
+            };
+            fixed (VkSurfaceKHR* surfacePtr = &mySurface)
+            {
+                Helpers.CheckErrors(vkCreateWin32SurfaceKHR(myVulkanInstance, &createInfo, null, surfacePtr));
+            }
+        }
+        else if (OperatingSystem.IsLinux())
         {
-            Helpers.CheckErrors(vkCreateWin32SurfaceKHR(myVulkanInstance, &createInfo, null, surfacePtr));
+            VkXlibSurfaceCreateInfoKHR createInfo = new ()
+            {
+                display = aWindow.LinuxDisplay,
+                window = (UIntPtr)(long)aWindow.LinuxWindow
+            };
+            fixed (VkSurfaceKHR* surfacePtr = &mySurface)
+            {
+                Helpers.CheckErrors(vkCreateXlibSurfaceKHR(myVulkanInstance, &createInfo, null, surfacePtr));
+            }
         }
     }
 
     private void CreateVulkanInstance(Window aWindow)
     {
-        VkApplicationInfo appInfo = new VkApplicationInfo(){};
-        
-        appInfo.pApplicationName = aWindow.Name.ToSPointer();
-        appInfo.pEngineName = aWindow.Name.ToSPointer();
-        
-        appInfo.applicationVersion = VkVersion.Version_1_3;
-        appInfo.apiVersion = VkVersion.Version_1_3;
-        appInfo.engineVersion = VkVersion.Version_1_3;
+        VkApplicationInfo appInfo = new VkApplicationInfo
+        {
+            pApplicationName = aWindow.Name.ToSPointer(),
+            pEngineName = "HaveAGreatDay".ToSPointer(),
+            applicationVersion = VkVersion.Version_1_3,
+            apiVersion = VkVersion.Version_1_3,
+            engineVersion = VkVersion.Version_1_3
+        };
 
         VkInstanceCreateInfo info = new();
         info.pApplicationInfo = &appInfo;

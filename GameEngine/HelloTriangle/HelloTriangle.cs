@@ -9,7 +9,6 @@ namespace KHRRTXHelloTriangle
         const uint HEIGHT = 600;
         private NativeWindow myWindow;
 
-
         private void InitWindow()
         {
             

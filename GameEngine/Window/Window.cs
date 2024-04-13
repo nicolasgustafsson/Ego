@@ -6,6 +6,8 @@ public class Window
     public bool IsClosing => myNativeWindow.IsClosing;
     public IntPtr Hwnd => myNativeWindow.Hwnd;
     public string Name => myNativeWindow.Title!;
+    public IntPtr LinuxDisplay => GLFW.Native.GetX11Display();
+    public IntPtr LinuxWindow => GLFW.Native.GetX11Window(myNativeWindow);
     
     public static Window Create(string aName)
     {
@@ -16,12 +18,12 @@ public class Window
 
     private Window(string aName)
     {
-        myNativeWindow = new NativeWindow(1280, 720, aName);
+        myNativeWindow = new NativeWindow(1280, 720, aName);    
     }
     
     public void Update()
     {
-        myNativeWindow.SwapBuffers();
+        //myNativeWindow.SwapBuffers();
         Glfw.PollEvents();
     }
 }
