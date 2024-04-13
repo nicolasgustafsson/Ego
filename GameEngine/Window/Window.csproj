@@ -8,12 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Update="glfw3.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="glfw-net" Version="3.3.1" PrivateAssets="compile"/>
     </ItemGroup>
 

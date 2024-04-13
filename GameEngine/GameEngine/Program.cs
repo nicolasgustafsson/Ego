@@ -6,8 +6,7 @@ public static class Program
 {
     public static void Main()
     {
-        HelloTriangle hello = new();
-        hello.Run();
+        Run();
     }
 
     public static void Run()
@@ -16,15 +15,13 @@ public static class Program
         Rendering.Engine renderer = null!;
 
         renderer = new(window);
-
-        while(!window.IsClosing)
+        
+        while (!window.IsClosing)
         {
             renderer.Draw();
             window.Update();
         }
 
         renderer.Cleanup();
-        
-        
     }
 }

@@ -10,14 +10,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\HelloTriangle\HelloTriangle.csproj" />
-      <ProjectReference Include="..\Renderer\Renderer.csproj" />
-      <ProjectReference Include="..\Utilities\Utilities.csproj" />
-        <ProjectReference Include="..\Window\Window.csproj" />
+      <ProjectReference Include="../HelloTriangle/HelloTriangle.csproj" />
+      <ProjectReference Include="../Renderer/Renderer.csproj" />
+      <ProjectReference Include="../Utilities/Utilities.csproj" />
+        <ProjectReference Include="../Window/Window.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <None Update="glfw.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="glfw.so">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

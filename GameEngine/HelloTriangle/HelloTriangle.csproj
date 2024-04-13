@@ -13,10 +13,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Shaders\frag.spv">
+      <None Update="Shaders/frag.spv">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="Shaders\vert.spv">
+      <None Update="Shaders/vert.spv">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

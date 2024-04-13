@@ -20,7 +20,7 @@ public unsafe partial class Engine
     private readonly string[] Extensions = new[]
     {
         "VK_KHR_surface",
-        "VK_KHR_win32_surface",
+        OperatingSystem.IsLinux() ? "VK_KHR_wayland_surface" : "VK_KHR_win32_surface",
         "VK_EXT_debug_utils",
     };
         
@@ -28,7 +28,9 @@ public unsafe partial class Engine
     {
         vkInitialize();
         
-        Init(aWindow);
+        PrintAllAvailableExtensions();
+        
+        //Init(aWindow);
     }
 
     public void Draw()
