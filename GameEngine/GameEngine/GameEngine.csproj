@@ -11,7 +11,7 @@
 
     <ItemGroup>
       <ProjectReference Include="../HelloTriangle/HelloTriangle.csproj" />
-      <ProjectReference Include="../Renderer/Renderer.csproj" />
+      <ProjectReference Include="..\Rendering\Rendering.csproj" />
       <ProjectReference Include="../Utilities/Utilities.csproj" />
         <ProjectReference Include="../Window/Window.csproj" />
     </ItemGroup>
@@ -20,10 +20,10 @@
       <None Update="glfw.dll">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="glfwX11.so">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
       <None Update="glfw.so">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="glfwWayland.so">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

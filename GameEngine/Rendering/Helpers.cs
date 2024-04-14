@@ -48,7 +48,6 @@ public static unsafe class Helpers
         public ReadOnlySpan<VkPresentModeKHR> PresentModes;
     }
 
-
     public static SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface)
     {
         SwapChainSupportDetails details = new SwapChainSupportDetails();

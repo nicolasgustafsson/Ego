@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace Rendering;
 
-public unsafe partial class Engine
+public unsafe partial class Renderer
 {
     private void Init(Window aWindow)
     {
@@ -67,12 +67,6 @@ public unsafe partial class Engine
             default:
                 throw new ArgumentOutOfRangeException();
         }
-        if (OperatingSystem.IsWindows())
-        {
-        }
-        else if (OperatingSystem.IsLinux())
-        {
-        }
     }
 
     private void CreateVulkanInstance(Window aWindow)
@@ -80,7 +74,7 @@ public unsafe partial class Engine
         VkApplicationInfo appInfo = new VkApplicationInfo
         {
             pApplicationName = aWindow.Name.ToSPointer(),
-            pEngineName = "HaveAGreatDay".ToSPointer(),
+            pEngineName = "Have A Great Day".ToSPointer(),
             applicationVersion = VkVersion.Version_1_3,
             apiVersion = VkVersion.Version_1_3,
             engineVersion = VkVersion.Version_1_3
@@ -150,7 +144,7 @@ public unsafe partial class Engine
                 myPhysicalDevice = physicalDevice;
                 if (discrete)
                 {
-                    // If this is discrete GPU, look no further (prioritize discrete GPU)
+                    // Prioritize discrete GPU
                     break;
                 }
             }
