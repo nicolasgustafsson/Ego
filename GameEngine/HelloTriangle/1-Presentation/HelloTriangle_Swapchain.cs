@@ -71,7 +71,7 @@ namespace KHRRTXHelloTriangle
             foreach (var availablePresentMode in availablePresentModes)
             {
                 if (availablePresentMode == VkPresentModeKHR.VK_PRESENT_MODE_MAILBOX_KHR)
-                    {
+                {
                     return availablePresentMode;
                 }
             }

@@ -43,4 +43,11 @@ public class Window
       Marshal.Copy(ptr, numArray, 0, length);
       return Encoding.UTF8.GetString(numArray);
     }
+    
+    public (int width, int height) GetFramebufferSize()
+    {
+        Glfw.GetFramebufferSize(myNativeWindow, out int width, out int height);
+
+        return (width, height);
+    }
 }

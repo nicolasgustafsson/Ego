@@ -8,6 +8,7 @@ public unsafe partial class Renderer
 {
     private void Init(Window aWindow)
     {
+        myWindow = aWindow;
         InitVulkan(aWindow);
     }
     
@@ -18,6 +19,59 @@ public unsafe partial class Renderer
         CreateSurface(aWindow);
 
         PickPhysicalDevice();
+
+        CreateLogicalDevice();
+
+        CreateSwapchain();
+    }
+    
+    private VkSurfaceFormatKHR GetFormat()
+    {
+        ReadOnlySpan<VkSurfaceFormatKHR> formats = vkGetPhysicalDeviceSurfaceFormatsKHR(myPhysicalDevice, mySurface);
+        
+        foreach(VkSurfaceFormatKHR format in formats)
+        {
+            if (format.format == PreferredFormat && format.colorSpace == PreferredColorSpace)
+                return format;
+        }
+
+        return formats[0];
+    }
+    
+    private VkPresentModeKHR GetPresentMode()
+    {
+        ReadOnlySpan<VkPresentModeKHR> presentModes = vkGetPhysicalDeviceSurfacePresentModesKHR(myPhysicalDevice, mySurface);
+        
+        foreach(VkPresentModeKHR presentMode in presentModes)
+        {
+            if (presentMode == PreferredPresentMode)
+                return presentMode;
+        }
+
+        return presentModes[0];
+    }
+    
+    private VkExtent2D GetSwapbufferExtents()
+    {
+        if (mySurfaceCapabilities.currentExtent.width != uint.MaxValue)
+        {
+            return mySurfaceCapabilities.currentExtent;
+        }
+
+        (int width, int height) size = myWindow.GetFramebufferSize();
+
+        VkExtent2D extent;
+        extent.width = (uint)size.width;
+        extent.height = (uint)size.height;
+        
+        
+    }
+
+    private void CreateSwapchain()
+    {
+        VkSurfaceFormatKHR format = GetFormat();
+        VkPresentModeKHR presentMode = GetPresentMode();
+        
     }
 
     private void CreateSurface(Window aWindow)
@@ -151,7 +205,33 @@ public unsafe partial class Renderer
         }
     }
     
-    private static bool IsDeviceSuitable(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface)
+    private void CreateLogicalDevice()
+    {
+        var indices = FindQueueFamilies(myPhysicalDevice, mySurface);
+
+        myGraphicsFamily = indices.graphicsFamily;
+
+        float queuePriority = 1f;
+        VkDeviceQueueCreateInfo deviceQueueCreateInfo = new();
+        deviceQueueCreateInfo.queueFamilyIndex = indices.graphicsFamily;
+        deviceQueueCreateInfo.queueCount = 1;
+        deviceQueueCreateInfo.pQueuePriorities = &queuePriority;
+
+        VkPhysicalDeviceFeatures deviceFeatures = new();
+
+        VkDeviceCreateInfo deviceCreateInfo = new();
+        deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;
+        deviceCreateInfo.queueCreateInfoCount = 1;
+        deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+
+        vkCreateDevice(myPhysicalDevice, &deviceCreateInfo, null, out myDevice);
+
+        vkLoadDevice(myDevice);
+        
+        vkGetDeviceQueue(myDevice, indices.graphicsFamily, 0, out myDrawQueue);
+    }
+    
+    private bool IsDeviceSuitable(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface)
     {
         var checkQueueFamilies = FindQueueFamilies(physicalDevice, surface);
         if (checkQueueFamilies.graphicsFamily == VK_QUEUE_FAMILY_IGNORED)
@@ -161,6 +241,9 @@ public unsafe partial class Renderer
             return false;
 
         Helpers.SwapChainSupportDetails swapChainSupport = Helpers.QuerySwapChainSupport(physicalDevice, surface);
+
+        mySurfaceCapabilities = swapChainSupport.Capabilities;
+        
         return !swapChainSupport.Formats.IsEmpty && !swapChainSupport.PresentModes.IsEmpty;
     } 
     
@@ -200,6 +283,7 @@ public unsafe partial class Renderer
     {
         vkDestroySurfaceKHR(myVulkanInstance, mySurface);
         vkDestroyDebugUtilsMessengerEXT(myVulkanInstance, myDebugMessenger);
+        vkDestroyDevice(myDevice);
         vkDestroyInstance(myVulkanInstance);
     }
 }

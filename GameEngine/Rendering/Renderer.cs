@@ -13,9 +13,15 @@ enum DisplayServer
 
 public unsafe partial class Renderer
 {
+    private Window myWindow;
+    
     private VkInstance myVulkanInstance;
     private VkSurfaceKHR mySurface;
     private VkPhysicalDevice myPhysicalDevice; 
+    private VkDevice myDevice;
+    private VkQueue myDrawQueue;
+    private uint myGraphicsFamily;
+    private VkSurfaceCapabilitiesKHR mySurfaceCapabilities;
 
     private VkDebugUtilsMessengerEXT myDebugMessenger = VkDebugUtilsMessengerEXT.Null;
 
