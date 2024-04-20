@@ -31,15 +31,6 @@ public static unsafe class Helpers
 
         return System.Text.Encoding.UTF8.GetString((byte*)stringStart, characters);
     }
-
-    [Conditional("DEBUG")]
-    public static void CheckErrors(VkResult result)
-    {
-        if (result != VkResult.Success)
-        {
-            throw new InvalidOperationException(result.ToString());
-        }
-    }
     
     public ref struct SwapChainSupportDetails
     {

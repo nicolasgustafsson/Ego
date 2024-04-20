@@ -1,3 +1,4 @@
+global using Utilities.CommonExtensions;
 using Vortice.Vulkan;
 using static Vortice.Vulkan.Vulkan;
 using System.Runtime.InteropServices;
@@ -8,23 +9,88 @@ public unsafe partial class Renderer
 {
     private void Init(Window aWindow)
     {
-        myWindow = aWindow;
         InitVulkan(aWindow);
     }
     
     private void InitVulkan(Window aWindow)
     {
+        Console.WriteLine("Creating renderer...");
+        
+        vkInitialize();
+
+        if (PrintExtensions)
+            PrintAllAvailableInstanceExtensions();
+        
         CreateVulkanInstance(aWindow);
         
         CreateSurface(aWindow);
 
         PickPhysicalDevice();
 
+        if (PrintExtensions)
+            PrintAllAvailableDeviceExtensions();
+
         CreateLogicalDevice();
 
         CreateSwapchain();
+
+        CreateImageViews();
+
+        CreateFrameData();
+        
+        Console.WriteLine("Renderer successfully created!");
     }
     
+    private void CreateFrameData()
+    {
+        VkCommandPoolCreateInfo createInfo = new();
+        createInfo.flags = VkCommandPoolCreateFlags.ResetCommandBuffer;
+        createInfo.queueFamilyIndex = myGraphicsFamily;
+        
+        for(int i = 0; i < FrameOverlap; i++)
+        {
+            FrameData newFrame = new();
+            
+            vkCreateCommandPool(myDevice, &createInfo, null, out newFrame.MyCommandPool).CheckResult();
+
+            VkCommandBufferAllocateInfo allocateInfo = new();
+            allocateInfo.commandPool = newFrame.MyCommandPool;
+            allocateInfo.commandBufferCount = 1;
+            allocateInfo.level = VkCommandBufferLevel.Primary;
+
+            vkAllocateCommandBuffer(myDevice, &allocateInfo, out newFrame.MyCommandBuffer).CheckResult();
+
+            vkCreateSemaphore(myDevice, out newFrame.MyRenderFinishedSemaphore).CheckResult();
+            vkCreateSemaphore(myDevice, out newFrame.MyImageAvailableSemaphore).CheckResult();
+
+            vkCreateFence(myDevice, VkFenceCreateFlags.Signaled, out newFrame.MyRenderFence).CheckResult();
+
+            myFrameData.Add(newFrame);
+        }
+    }
+
+    private void CreateImageViews()
+    {
+        foreach(var image in myImages)
+        {
+            VkImageViewCreateInfo createInfo = new();
+
+            createInfo.image = image;
+            createInfo.format = mySwapchainImageFormat;
+            
+            createInfo.components = VkComponentMapping.Identity;
+            createInfo.viewType = VkImageViewType.Image2D;
+            createInfo.subresourceRange.aspectMask = VkImageAspectFlags.Color;
+            createInfo.subresourceRange.baseMipLevel = 0;
+            createInfo.subresourceRange.levelCount = 1;
+            createInfo.subresourceRange.baseArrayLayer = 0;
+            createInfo.subresourceRange.layerCount = 1;
+
+            vkCreateImageView(myDevice, &createInfo, null, out var view).CheckResult();
+            myImageViews.Add(view);
+        }
+    }
+
     private VkSurfaceFormatKHR GetFormat()
     {
         ReadOnlySpan<VkSurfaceFormatKHR> formats = vkGetPhysicalDeviceSurfaceFormatsKHR(myPhysicalDevice, mySurface);
@@ -51,7 +117,7 @@ public unsafe partial class Renderer
         return presentModes[0];
     }
     
-    private VkExtent2D GetSwapbufferExtents()
+    private VkExtent2D GetSwapbufferExtent()
     {
         if (mySurfaceCapabilities.currentExtent.width != uint.MaxValue)
         {
@@ -61,17 +127,50 @@ public unsafe partial class Renderer
         (int width, int height) size = myWindow.GetFramebufferSize();
 
         VkExtent2D extent;
-        extent.width = (uint)size.width;
+        extent.width = ((uint)size.width);
         extent.height = (uint)size.height;
-        
-        
+
+        extent.width = extent.width.Within(mySurfaceCapabilities.minImageExtent.width, mySurfaceCapabilities.maxImageExtent.width);
+        extent.height = extent.height.Within(mySurfaceCapabilities.minImageExtent.height, mySurfaceCapabilities.maxImageExtent.height);
+
+        return extent;
     }
 
     private void CreateSwapchain()
     {
-        VkSurfaceFormatKHR format = GetFormat();
+        VkSurfaceFormatKHR surfaceFormat = GetFormat();
         VkPresentModeKHR presentMode = GetPresentMode();
         
+        mySwapchainExtents = GetSwapbufferExtent();
+        mySwapchainImageFormat = surfaceFormat.format;
+        
+        uint imageCount = (mySurfaceCapabilities.minImageCount + 1);
+        if (mySurfaceCapabilities.maxImageCount > 0)
+            imageCount = imageCount.AtMost(mySurfaceCapabilities.maxImageCount);
+
+        VkSwapchainCreateInfoKHR createInfo = new();
+        createInfo.minImageCount = imageCount;
+        createInfo.imageFormat = surfaceFormat.format;
+        createInfo.imageColorSpace = surfaceFormat.colorSpace;
+        createInfo.presentMode = presentMode;
+        createInfo.imageExtent = mySwapchainExtents;
+        createInfo.imageArrayLayers = 1;
+        createInfo.imageUsage = VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst;
+
+        var families = FindQueueFamilies(myPhysicalDevice, mySurface);
+        bool differentFamiliesForPresentingAndRastering = families.presentFamily != families.graphicsFamily;
+        
+        createInfo.imageSharingMode = differentFamiliesForPresentingAndRastering ? VkSharingMode.Concurrent : VkSharingMode.Exclusive;
+        createInfo.preTransform = mySurfaceCapabilities.currentTransform;
+        createInfo.compositeAlpha = VkCompositeAlphaFlagsKHR.Opaque;
+        createInfo.clipped = true;
+        createInfo.oldSwapchain = VkSwapchainKHR.Null;
+        createInfo.surface = mySurface;
+
+        vkCreateSwapchainKHR(myDevice, &createInfo, null, out mySwapchain).CheckResult();
+
+        ReadOnlySpan<VkImage> images = vkGetSwapchainImagesKHR(myDevice, mySwapchain);
+        myImages = images.ToArray().ToList();
     }
 
     private void CreateSurface(Window aWindow)
@@ -84,14 +183,14 @@ public unsafe partial class Renderer
                 {
                     hwnd = aWindow.Hwnd,
                     hinstance = System.Diagnostics.Process.GetCurrentProcess().Handle,
+                    
                 };
                 fixed (VkSurfaceKHR* surfacePtr = &mySurface)
                 {
-                    Helpers.CheckErrors(vkCreateWin32SurfaceKHR(myVulkanInstance, &createInfo, null, surfacePtr));
+                    vkCreateWin32SurfaceKHR(myVulkanInstance, &createInfo, null, surfacePtr).CheckResult();
                 }
                 break;
             }
-            
             case DisplayServer.X11:
             {
                 VkXlibSurfaceCreateInfoKHR createInfo = new ()
@@ -101,7 +200,7 @@ public unsafe partial class Renderer
                 };
                 fixed (VkSurfaceKHR* surfacePtr = &mySurface)
                 {
-                    Helpers.CheckErrors(vkCreateXlibSurfaceKHR(myVulkanInstance, &createInfo, null, surfacePtr));
+                    vkCreateXlibSurfaceKHR(myVulkanInstance, &createInfo, null, surfacePtr).CheckResult();
                 }
                 break;
             }
@@ -114,7 +213,7 @@ public unsafe partial class Renderer
                 };
                 fixed (VkSurfaceKHR* surfacePtr = &mySurface)
                 {
-                    Helpers.CheckErrors(vkCreateWaylandSurfaceKHR(myVulkanInstance, &createInfo, null, surfacePtr));
+                    vkCreateWaylandSurfaceKHR(myVulkanInstance, &createInfo, null, surfacePtr).CheckResult();
                 }
                 break;
             }
@@ -137,13 +236,13 @@ public unsafe partial class Renderer
         VkInstanceCreateInfo info = new();
         info.pApplicationInfo = &appInfo;
         
-        IntPtr* extensionsToBytesArray = stackalloc IntPtr[Extensions.Length];
-        for (int i = 0; i < Extensions.Length; i++)
+        IntPtr* extensionsToBytesArray = stackalloc IntPtr[InstanceExtensions.Length];
+        for (int i = 0; i < InstanceExtensions.Length; i++)
         {
-            extensionsToBytesArray[i] = Marshal.StringToHGlobalAnsi(Extensions[i]);
+            extensionsToBytesArray[i] = Marshal.StringToHGlobalAnsi(InstanceExtensions[i]);
         }
 
-        info.enabledExtensionCount = (uint)Extensions.Length;
+        info.enabledExtensionCount = (uint)InstanceExtensions.Length;
         info.ppEnabledExtensionNames = (sbyte**)extensionsToBytesArray;
         
 #if DEBUG
@@ -165,7 +264,7 @@ public unsafe partial class Renderer
         createInfo.enabledLayerCount = 0;
         createInfo.pNext = null;
 #endif
-        Helpers.CheckErrors(vkCreateInstance(&info, null, out myVulkanInstance));
+        vkCreateInstance(&info, null, out myVulkanInstance).CheckResult();
         vkLoadInstanceOnly(myVulkanInstance);
         vkCreateDebugUtilsMessengerEXT(myVulkanInstance, &debugUtilsCreateInfo, null, out myDebugMessenger).CheckResult(); 
     }
@@ -219,12 +318,26 @@ public unsafe partial class Renderer
 
         VkPhysicalDeviceFeatures deviceFeatures = new();
 
+        VkPhysicalDeviceVulkan13Features device13Features = new();
+        device13Features.synchronization2 = true;
+
+        
         VkDeviceCreateInfo deviceCreateInfo = new();
+        deviceCreateInfo.pNext = &device13Features;
         deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;
         deviceCreateInfo.queueCreateInfoCount = 1;
         deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+        
+        IntPtr* extensionsToBytesArray = stackalloc IntPtr[DeviceExtensions.Length];
+        for (int i = 0; i < DeviceExtensions.Length; i++)
+        {
+            extensionsToBytesArray[i] = Marshal.StringToHGlobalAnsi(DeviceExtensions[i]);
+        }
 
-        vkCreateDevice(myPhysicalDevice, &deviceCreateInfo, null, out myDevice);
+        deviceCreateInfo.enabledExtensionCount = (uint)DeviceExtensions.Length;
+        deviceCreateInfo.ppEnabledExtensionNames = (sbyte**)extensionsToBytesArray;
+
+        vkCreateDevice(myPhysicalDevice, &deviceCreateInfo, null, out myDevice).CheckResult();
 
         vkLoadDevice(myDevice);
         
@@ -277,13 +390,39 @@ public unsafe partial class Renderer
         }
 
         return (graphicsFamily, presentFamily);
-    } 
+    }
     
     public void Cleanup()
     {
+        Console.WriteLine("Destroying renderer...");
+        
+        vkDeviceWaitIdle(myDevice);
+        
+        foreach (var frameData in myFrameData)
+        {
+            vkDestroyCommandPool(myDevice, frameData.MyCommandPool);
+            vkDestroySemaphore(myDevice, frameData.MyRenderFinishedSemaphore);
+            vkDestroySemaphore(myDevice, frameData.MyImageAvailableSemaphore);
+            vkDestroyFence(myDevice, frameData.MyRenderFence);
+        }
+
+        myFrameData.Clear();
+
+        vkDeviceWaitIdle(myDevice);
+        
+        foreach(var imageView in myImageViews)
+            vkDestroyImageView(myDevice, imageView, null);
+        
+        myImageViews.Clear();
+        
+        vkDestroySwapchainKHR(myDevice, mySwapchain);
+        
         vkDestroySurfaceKHR(myVulkanInstance, mySurface);
-        vkDestroyDebugUtilsMessengerEXT(myVulkanInstance, myDebugMessenger);
         vkDestroyDevice(myDevice);
+        
+        vkDestroyDebugUtilsMessengerEXT(myVulkanInstance, myDebugMessenger);
         vkDestroyInstance(myVulkanInstance);
+        
+        Console.WriteLine("Renderer successfully destroyed!");
     }
 }

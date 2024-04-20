@@ -10,6 +10,7 @@
     </PropertyGroup>
     <ItemGroup>
       <ProjectReference Include="../Window/Window.csproj" />
+      <ProjectReference Include="..\Utilities\Utilities.csproj" />
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="Vortice.Vulkan" Version="1.8.7" />

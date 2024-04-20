@@ -5,15 +5,12 @@ using GLFW;
 
 public class Window
 {
-    private static readonly ErrorCallback errorCallback = new ErrorCallback(GlfwError);
+    private static readonly ErrorCallback errorCallback = GlfwError;
     private readonly NativeWindow myNativeWindow;
+    public bool WantsToClose = false;
+    private bool myAllowClosing = false;
 
-    public Window(string aName, System.Numerics.Vector2 aWindowSize)
-    {
-        Glfw.SetErrorCallback(errorCallback);
-        myNativeWindow = new((int)aWindowSize.X, (int)aWindowSize.Y, aName);
-    }
-
+    public bool IsClosing => myNativeWindow.IsClosing;
     public bool IsClosed => myNativeWindow.IsClosed;
     public IntPtr Hwnd => myNativeWindow.Hwnd;
     public string Name => myNativeWindow.Title!;
@@ -23,6 +20,26 @@ public class Window
 
     public IntPtr WaylandDisplay => GLFW.Native.GetWaylandDisplay();
     public IntPtr WaylandWindow => GLFW.Native.GetWaylandWindow(myNativeWindow);
+
+    public Window(string aName, System.Numerics.Vector2 aWindowSize)
+    {
+        Glfw.SetErrorCallback(errorCallback);
+        myNativeWindow = new((int)aWindowSize.X, (int)aWindowSize.Y, aName);
+
+        myNativeWindow.Closing += (sender, args) =>
+        {
+            if (!myAllowClosing)
+            {
+                args.Cancel = true;
+                WantsToClose = true;
+            }
+            else
+            {
+                args.Cancel = false;
+            }
+        };
+    }
+    
     public void Update()
     {
         myNativeWindow.SwapBuffers();
@@ -49,5 +66,14 @@ public class Window
         Glfw.GetFramebufferSize(myNativeWindow, out int width, out int height);
 
         return (width, height);
+    }
+
+    public void Close()
+    {
+        myAllowClosing = true;
+
+        //myNativeWindow.SwapBuffers();
+        //Glfw.PollEvents();
+        //myNativeWindow.Close();
     }
 }
