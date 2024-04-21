@@ -1,32 +1,28 @@
 ﻿using System.Runtime.InteropServices;
+using Graphics;
 using Vortice.Vulkan;
 using static Vortice.Vulkan.Vulkan;
 
 namespace Rendering;
 
-enum DisplayServer
-{
-    Windows,
-    X11,
-    Wayland
-}
-
 public unsafe partial class Renderer
 {
     private Window myWindow;
+
+    private Api myApi = null!;
+    private Surface mySurface = null!;
+    private Gpu myGpu = null!;
+    private Device myDevice = null!;
     
-    private VkInstance myVulkanInstance;
-    private VkSurfaceKHR mySurface;
-    private VkPhysicalDevice myPhysicalDevice; 
-    private VkDevice myDevice;
-    private VkQueue myDrawQueue;
-    private uint myGraphicsFamily;
+    private VkDevice myVkDevice => myDevice.MyVkDevice;
+    
+    private VkQueue myDrawQueue => myDevice.MyDrawQueue;
+    private uint myGraphicsFamily => myDevice.MyDrawQueueIndex;
     private VkSwapchainKHR mySwapchain = new();
-    private VkSurfaceCapabilitiesKHR mySurfaceCapabilities;
+    private VkSurfaceCapabilitiesKHR mySurfaceCapabilities => mySurface.MySurfaceCapabilities;
     private List<VkImage> myImages = null!;
     private List<VkImageView> myImageViews = new();
 
-    private VkDebugUtilsMessengerEXT myDebugMessenger = VkDebugUtilsMessengerEXT.Null;
     private VkFormat mySwapchainImageFormat;
     private VkExtent2D mySwapchainExtents;
 
@@ -43,9 +39,9 @@ public unsafe partial class Renderer
 
     public void Draw()
     {
-        vkWaitForFences(myDevice, myCurrentFrame.MyRenderFence, true, 1_000_000_000).CheckResult();
-        vkResetFences(myDevice, myCurrentFrame.MyRenderFence).CheckResult();
-        vkAcquireNextImageKHR(myDevice, mySwapchain, 1_000_000_000, myCurrentFrame.MyImageAvailableSemaphore, VkFence.Null, out uint imageIndex);
+        vkWaitForFences(myVkDevice, myCurrentFrame.MyRenderFence, true, 1_000_000_000).CheckResult();
+        vkResetFences(myVkDevice, myCurrentFrame.MyRenderFence).CheckResult();
+        vkAcquireNextImageKHR(myVkDevice, mySwapchain, 1_000_000_000, myCurrentFrame.MyImageAvailableSemaphore, VkFence.Null, out uint imageIndex);
 
         VkCommandBuffer cmd = myCurrentFrame.MyCommandBuffer;
         vkResetCommandBuffer(cmd, VkCommandBufferResetFlags.None).CheckResult();

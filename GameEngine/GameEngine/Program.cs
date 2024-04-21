@@ -1,4 +1,6 @@
-﻿public static class Program
+﻿using System.Diagnostics;
+
+public static class Program
 {
     public static void Main()
     {
@@ -11,11 +13,14 @@
         Rendering.Renderer renderer = null!;
 
         renderer = new(window);
-        
+
+        Stopwatch stopwatch = new();
         while (!window.WantsToClose)
         {
+            stopwatch.Restart();
             renderer.Draw();
             window.Update();
+            Console.WriteLine($"FPS: {1d / stopwatch.Elapsed.TotalSeconds}");
         }
 
         renderer.Cleanup();

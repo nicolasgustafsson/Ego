@@ -4,25 +4,14 @@ namespace Rendering;
 
 public partial class Renderer
 {
-    private readonly string[] ValidationLayers = new[]
-    {
-        "VK_LAYER_KHRONOS_validation"
-    };
+    private readonly string[] ValidationLayers = ["VK_LAYER_KHRONOS_validation"];
     
-    private string[] InstanceExtensions => new[]
-    {
-        "VK_KHR_surface",
-        GetSurfaceExtension(),
-        "VK_EXT_debug_utils",
-    };
-    
-    private string[] DeviceExtensions => new[]
-    {
+    private string[] DeviceExtensions =>
+    [
         "VK_KHR_swapchain",
-        "VK_KHR_synchronization2",
-    };
+        "VK_KHR_synchronization2"
+    ];
 
-    private DisplayServer LinuxDisplayServer = DisplayServer.X11;
 
     private VkFormat PreferredFormat = VkFormat.B8G8R8A8Unorm;
     private VkColorSpaceKHR PreferredColorSpace = VkColorSpaceKHR.SrgbNonLinear;

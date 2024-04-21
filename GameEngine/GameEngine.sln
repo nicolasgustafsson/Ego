@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Window", "Window/Window.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utilities", "Utilities/Utilities.csproj", "{8C6D5AC5-8925-47FB-BDB6-2B48662B7ABE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VulkanApi", "VulkanApi\VulkanApi.csproj", "{50051395-2F2E-4009-B1B1-E44A9D59DDBE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{8C6D5AC5-8925-47FB-BDB6-2B48662B7ABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C6D5AC5-8925-47FB-BDB6-2B48662B7ABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8C6D5AC5-8925-47FB-BDB6-2B48662B7ABE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50051395-2F2E-4009-B1B1-E44A9D59DDBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50051395-2F2E-4009-B1B1-E44A9D59DDBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50051395-2F2E-4009-B1B1-E44A9D59DDBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50051395-2F2E-4009-B1B1-E44A9D59DDBE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
