@@ -5,6 +5,9 @@ namespace Graphics;
 public unsafe class Gpu
 {
     public VkPhysicalDevice MyPhysicalDevice;
+
+    public uint MyGraphicsFamily;
+    public uint MyPresentFamily;
     
     internal Gpu(Api aApi, Surface aSurface)
     {
@@ -23,6 +26,8 @@ public unsafe class Gpu
         {
             VkPhysicalDevice physicalDevice = physicalDevices[i];
 
+            (MyGraphicsFamily, MyPresentFamily) = FindQueueFamilies(physicalDevice, aSurface.MyVkSurface);
+            
             if (IsDeviceSuitable(physicalDevice, aSurface) == false)
                 continue;
 
@@ -39,15 +44,15 @@ public unsafe class Gpu
                 }
             }
         }
+
     }
     
     private bool IsDeviceSuitable(VkPhysicalDevice physicalDevice, Surface surface)
     {
-        var checkQueueFamilies = FindQueueFamilies(physicalDevice, surface.MyVkSurface);
-        if (checkQueueFamilies.graphicsFamily == VK_QUEUE_FAMILY_IGNORED)
+        if (MyGraphicsFamily == VK_QUEUE_FAMILY_IGNORED)
             return false;
 
-        if (checkQueueFamilies.presentFamily == VK_QUEUE_FAMILY_IGNORED)
+        if (MyPresentFamily == VK_QUEUE_FAMILY_IGNORED)
             return false;
 
         Helpers.SwapChainSupportDetails swapChainSupport = Helpers.QuerySwapChainSupport(physicalDevice, surface.MyVkSurface);
@@ -63,13 +68,9 @@ public unsafe class Gpu
         string[] deviceExtensions = aDeviceExtensions.ToArray();
         Device device = new();
         
-        var indices = FindQueueFamilies(aSurface);
-
-        uint graphicsFamily = indices.graphicsFamily;
-
         float queuePriority = 1f;
         VkDeviceQueueCreateInfo deviceQueueCreateInfo = new();
-        deviceQueueCreateInfo.queueFamilyIndex = indices.graphicsFamily;
+        deviceQueueCreateInfo.queueFamilyIndex = MyGraphicsFamily;
         deviceQueueCreateInfo.queueCount = 1;
         deviceQueueCreateInfo.pQueuePriorities = &queuePriority;
 
@@ -97,8 +98,6 @@ public unsafe class Gpu
 
         device.LoadFunctions();
 
-        device.Setup(indices.graphicsFamily);
-        
         return device;
     }
     
@@ -144,6 +143,32 @@ public unsafe class Gpu
         return (graphicsFamily, presentFamily);
     }
 
+    public VkSurfaceFormatKHR GetSurfaceFormat(Surface aSurface, VkFormat aPreferredFormat, VkColorSpaceKHR aPreferredColorSpace)
+    {
+        ReadOnlySpan<VkSurfaceFormatKHR> formats = vkGetPhysicalDeviceSurfaceFormatsKHR(MyPhysicalDevice, aSurface.MyVkSurface);
+        
+        foreach(VkSurfaceFormatKHR format in formats)
+        {
+            if (format.format == aPreferredFormat && format.colorSpace == aPreferredColorSpace)
+                return format;
+        }
+
+        return formats[0];
+    }
+
+    public VkPresentModeKHR GetPresentMode(Surface aSurface, VkPresentModeKHR aPreferredPresentMode)
+    {
+        ReadOnlySpan<VkPresentModeKHR> presentModes = vkGetPhysicalDeviceSurfacePresentModesKHR(MyPhysicalDevice, aSurface.MyVkSurface);
+        
+        foreach(VkPresentModeKHR presentMode in presentModes)
+        {
+            if (presentMode == aPreferredPresentMode)
+                return presentMode;
+        }
+
+        return presentModes[0];
+    }
+    
     public void PrintAllAvailableDeviceExtensions()
     {
         Console.WriteLine("--- AVAILABLE DEVICE EXTENSIONS ---");

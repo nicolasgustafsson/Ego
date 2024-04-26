@@ -1,14 +1,15 @@
-﻿using Vortice.Vulkan;
+﻿using Graphics;
+using Vortice.Vulkan;
+using Semaphore = Graphics.Semaphore;
 
 namespace Rendering;
 
 public class FrameData
 {
-    public VkCommandPool MyCommandPool;
-    public VkCommandBuffer MyCommandBuffer;
+    public CommandBuffer MyCommandBuffer = null!;
     
-    public VkSemaphore MyImageAvailableSemaphore;
-    public VkSemaphore MyRenderFinishedSemaphore;
+    public Semaphore MyImageAvailableSemaphore = null!;
+    public Semaphore MyRenderFinishedSemaphore = null!;
 
-    public VkFence MyRenderFence;
+    public Fence MyRenderFence = null!;
 }

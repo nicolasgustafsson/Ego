@@ -1,25 +1,37 @@
 ﻿namespace Graphics;
 
-public class Device
+public unsafe class Device
 {
     public VkDevice MyVkDevice;
-    public VkQueue MyDrawQueue;
-    public uint MyDrawQueueIndex;
 
     public void LoadFunctions()
     {
         vkLoadDevice(MyVkDevice);
     }
     
-    public void Setup(uint aDrawQueue)
-    {
-        MyDrawQueueIndex = aDrawQueue;
-
-        vkGetDeviceQueue(MyVkDevice, MyDrawQueueIndex, 0, out MyDrawQueue);
-    }
-    
     public void WaitUntilIdle()
     {
         vkDeviceWaitIdle(MyVkDevice);
+    }
+    
+    public void WaitForFence(VkFence aFence)
+    {
+        vkWaitForFences(MyVkDevice, aFence, true, 1_000_000_000).CheckResult();
+    }
+    
+    public void ResetFence(VkFence aFence)
+    {
+        vkResetFences(MyVkDevice, aFence).CheckResult();
+    }
+    
+    public uint AcquireNextImage(Swapchain aSwapchain, Semaphore aImageAvailableSemaphore)
+    {
+        vkAcquireNextImageKHR(MyVkDevice, aSwapchain.MyVkSwapchain, 1_000_000_000, aImageAvailableSemaphore.MyVkSemaphore, VkFence.Null, out uint imageIndex);
+        return imageIndex;
+    }
+
+    public void DestroySelf()
+    {
+        vkDestroyDevice(MyVkDevice);
     }
 }

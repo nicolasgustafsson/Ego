@@ -25,7 +25,6 @@ public static class Program
 
         renderer.Cleanup();
 
-        //enable this after triangle hihi
-        //window.Close();
+        window.Close();
     }
 }

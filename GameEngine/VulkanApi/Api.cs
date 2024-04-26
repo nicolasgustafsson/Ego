@@ -17,7 +17,6 @@ public unsafe class Api
     public VkInstance MyVkInstance;
     private VkDebugUtilsMessengerEXT myDebugMessenger = VkDebugUtilsMessengerEXT.Null;
     
-    
     public Api(Window aWindow, List<string> aInstanceExtensions)
     {
         vkInitialize();
