@@ -49,21 +49,7 @@ public unsafe class Swapchain
         List<ImageView> views = new();
         foreach(var image in MyImages)
         {
-            VkImageViewCreateInfo createInfo = new();
-
-            createInfo.image = image;
-            createInfo.format = MyImageFormat;
-            
-            createInfo.components = VkComponentMapping.Identity;
-            createInfo.viewType = VkImageViewType.Image2D;
-            createInfo.subresourceRange.aspectMask = VkImageAspectFlags.Color;
-            createInfo.subresourceRange.baseMipLevel = 0;
-            createInfo.subresourceRange.levelCount = 1;
-            createInfo.subresourceRange.baseArrayLayer = 0;
-            createInfo.subresourceRange.layerCount = 1;
-
-            vkCreateImageView(aDevice.MyVkDevice, &createInfo, null, out var view).CheckResult();
-            views.Add(new(){MyVkImageView = view});
+            views.Add(new(aDevice, image, MyImageFormat){});
         }
 
         return views;

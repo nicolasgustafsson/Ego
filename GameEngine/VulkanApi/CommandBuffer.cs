@@ -42,6 +42,11 @@ public unsafe class CommandBuffer
         vkEndCommandBuffer(MyVkCommandBuffer);
     }
     
+    public void TransitionImage(Image aImage, VkImageLayout aFrom, VkImageLayout aTo)
+    {
+        TransitionImage(aImage.MyVkImage, aFrom, aTo);
+    }
+    
     public void TransitionImage(VkImage aImage, VkImageLayout aFrom, VkImageLayout aTo)
     {
         VkImageMemoryBarrier2 imageBarrier = new();
@@ -66,9 +71,51 @@ public unsafe class CommandBuffer
         vkCmdPipelineBarrier2(MyVkCommandBuffer, &depInfo);
     }
     
-    public void ClearColor(VkImage aImage, VkImageLayout aImageLayout, VkClearColorValue aColor)
+    public void Blit(Image aFrom, Image aTo)
+    {
+        Blit(aFrom, aTo.MyVkImage, new VkExtent2D(aTo.MyExtent.width, aTo.MyExtent.height));
+    }
+    
+    public void Blit(Image aFrom, VkImage aTo, VkExtent2D aExtent)
+    {
+        VkImageBlit2 blitRegion = new();
+
+        blitRegion.srcOffsets[1].x = (int)aFrom.MyExtent.width;
+        blitRegion.srcOffsets[1].y = (int)aFrom.MyExtent.height;
+        blitRegion.srcOffsets[1].z = 1;
+        
+        blitRegion.dstOffsets[1].x = (int)aExtent.width;
+        blitRegion.dstOffsets[1].y = (int)aExtent.height;
+        blitRegion.dstOffsets[1].z = 1;
+
+        blitRegion.srcSubresource.aspectMask = VkImageAspectFlags.Color;
+        blitRegion.srcSubresource.baseArrayLayer = 0;
+        blitRegion.srcSubresource.layerCount = 1;
+        blitRegion.srcSubresource.mipLevel = 0;
+        
+        blitRegion.dstSubresource.aspectMask = VkImageAspectFlags.Color;
+        blitRegion.dstSubresource.baseArrayLayer = 0;
+        blitRegion.dstSubresource.layerCount = 1;
+        blitRegion.dstSubresource.mipLevel = 0;
+
+        VkBlitImageInfo2 blitInfo = new();
+
+        blitInfo.srcImage = aFrom.MyVkImage;
+        blitInfo.srcImageLayout = VkImageLayout.TransferSrcOptimal;
+        
+        blitInfo.dstImage = aTo;
+        blitInfo.dstImageLayout = VkImageLayout.TransferDstOptimal;
+        
+        blitInfo.filter = VkFilter.Linear;
+        blitInfo.regionCount = 1;
+        blitInfo.pRegions = &blitRegion;
+
+        vkCmdBlitImage2(MyVkCommandBuffer, &blitInfo);
+    }
+    
+    public void ClearColor(Image aImage, VkImageLayout aImageLayout, VkClearColorValue aColor)
     {
         VkImageSubresourceRange clearRange = new VkImageSubresourceRange(VkImageAspectFlags.Color);
-        vkCmdClearColorImage(MyVkCommandBuffer, aImage, aImageLayout, &aColor, 1, &clearRange);
+        vkCmdClearColorImage(MyVkCommandBuffer, aImage.MyVkImage, aImageLayout, &aColor, 1, &clearRange);
     }
 }

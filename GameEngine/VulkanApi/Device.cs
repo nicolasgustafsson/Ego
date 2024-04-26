@@ -30,7 +30,7 @@ public unsafe class Device
         return imageIndex;
     }
 
-    public void DestroySelf()
+    public void Destroy()
     {
         vkDestroyDevice(MyVkDevice);
     }

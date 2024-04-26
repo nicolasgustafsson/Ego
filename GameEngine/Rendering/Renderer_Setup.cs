@@ -17,31 +17,83 @@ public partial class Renderer
     {
         Console.WriteLine("Creating renderer...");
         
-        myApi = new(aWindow, Defaults.InstanceExtensions);
+        CreateApi(aWindow);
+
+        CreateSurface(aWindow);
+
+        PickGpu();
 
         if (PrintExtensions)
-            myApi.PrintAllAvailableInstanceExtensions();
+            PrintAllExtensions();
+        
+        CreateDevice();
 
-        mySurface = myApi.CreateSurface(aWindow);
-
-        myGpu = myApi.PickGpu(mySurface);
-
-        if (PrintExtensions)
-            myGpu.PrintAllAvailableDeviceExtensions();
-
-        myDevice = myGpu.CreateDevice(mySurface, Defaults.DeviceExtensions);
-
-        myDrawQueue = new(myDevice, myGpu);
+        CreateDrawQueue();
 
         CreateSwapchain();
 
-        myImageViews = mySwapchain.CreateImageViews(myDevice);
+        CreateImageViews();
 
+        CreateMemoryAllocator();
+        
         CreateFrameData();
         
         Console.WriteLine("Renderer successfully created!");
     }
-    
+
+    private void CreateMemoryAllocator()
+    {
+        myMemoryAllocator = new MemoryAllocator(myGpu, myDevice, myApi);
+        myCleanupQueue.Add(() => myMemoryAllocator.Destroy());
+    }
+
+    private void PrintAllExtensions()
+    {
+        myApi.PrintAllAvailableInstanceExtensions();
+        myGpu.PrintAllAvailableDeviceExtensions();
+    }
+
+    private void PickGpu()
+    {
+        myGpu = myApi.PickGpu(mySurface);
+    }
+
+    private void CreateDrawQueue()
+    {
+        myDrawQueue = new DrawQueue(myDevice, myGpu);
+    }
+
+    private void CreateApi(Window aWindow)
+    {
+        myApi = new(aWindow, Defaults.InstanceExtensions);
+        myCleanupQueue.Add(() => myApi.Destroy());
+    }
+
+    private void CreateSurface(Window aWindow)
+    {
+        mySurface = myApi.CreateSurface(aWindow);
+        myCleanupQueue.Add(() => mySurface.Destroy(myApi));
+    }
+
+    private void CreateImageViews()
+    {
+        myImageViews = mySwapchain.CreateImageViews(myDevice);
+
+        myCleanupQueue.Add(() =>
+        {
+            foreach (var imageView in myImageViews)
+                imageView.Destroy(myDevice);
+
+            myImageViews.Clear();
+        });
+    }
+
+    private void CreateDevice()
+    {
+        myDevice = myGpu.CreateDevice(Defaults.DeviceExtensions);
+        myCleanupQueue.Add(() => myDevice.Destroy());
+    }
+
     private void CreateFrameData()
     {
         for(int i = 0; i < FrameOverlap; i++)
@@ -49,14 +101,22 @@ public partial class Renderer
             FrameData newFrame = new();
 
             newFrame.MyCommandBuffer = new CommandBuffer(myDevice, myDrawQueue);
-
             newFrame.MyRenderFinishedSemaphore = new(myDevice);
             newFrame.MyImageAvailableSemaphore = new(myDevice);
-
             newFrame.MyRenderFence = new(myDevice);
+
+            newFrame.MyImage = new(myDevice, myMemoryAllocator, VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
 
             myFrameData.Add(newFrame);
         }
+
+        myCleanupQueue.Add(() =>
+        {
+            foreach (FrameData frameData in myFrameData)
+                frameData.Destroy(myDevice, myMemoryAllocator);
+
+            myFrameData.Clear();
+        });
     }
 
     private void CreateSwapchain()
@@ -65,6 +125,7 @@ public partial class Renderer
         VkPresentModeKHR presentMode = myGpu.GetPresentMode(mySurface, PreferredPresentMode);
 
         mySwapchain = new Swapchain(myDevice, myGpu, mySurface, surfaceFormat, presentMode);
+        myCleanupQueue.Add(() => mySwapchain.Destroy(myDevice));
     }
     
     public void Cleanup()
@@ -73,28 +134,7 @@ public partial class Renderer
 
         myDevice.WaitUntilIdle();
         
-        foreach (var frameData in myFrameData)
-        {
-            frameData.MyCommandBuffer.Destroy(myDevice);
-            frameData.MyImageAvailableSemaphore.Destroy(myDevice);
-            frameData.MyRenderFinishedSemaphore.Destroy(myDevice);
-            frameData.MyRenderFence.Destroy(myDevice);
-        }
-
-        myFrameData.Clear();
-
-        foreach (var imageView in myImageViews)
-            imageView.Destroy(myDevice);
-        
-        myImageViews.Clear();
-
-        mySwapchain.Destroy(myDevice);
-        
-        mySurface.Destroy(myApi);
-
-        myDevice.DestroySelf();
-
-        myApi.Destroy();
+        myCleanupQueue.Flush();
         
         Console.WriteLine("Renderer successfully destroyed!");
     }

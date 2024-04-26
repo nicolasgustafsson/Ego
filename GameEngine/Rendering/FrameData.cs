@@ -12,4 +12,18 @@ public class FrameData
     public Semaphore MyRenderFinishedSemaphore = null!;
 
     public Fence MyRenderFence = null!;
+
+    public Image MyImage = null!;
+    
+    public DeletionQueue MyDeletionQueue = new();
+    
+    public void Destroy(Device aDevice, MemoryAllocator aAllocator)
+    {
+        MyCommandBuffer.Destroy(aDevice);
+        MyImageAvailableSemaphore.Destroy(aDevice);
+        MyRenderFinishedSemaphore.Destroy(aDevice);
+        MyRenderFence.Destroy(aDevice);
+
+        MyImage.Destroy(aDevice, aAllocator);
+    }
 }
