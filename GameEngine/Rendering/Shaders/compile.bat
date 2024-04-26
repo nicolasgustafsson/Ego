@@ -1,0 +1,1 @@
+C:/VulkanSDK/1.3.280.0/Bin/glslangValidator.exe -V gradient.comp
