@@ -1,6 +1,8 @@
 ﻿using System.Runtime.InteropServices;
 
 using Graphics;
+using Vortice.Vulkan;
+
 namespace Rendering;
 
 public partial class Renderer
@@ -11,7 +13,14 @@ public partial class Renderer
     private Device myDevice = null!;
     private Swapchain mySwapchain = null!;
     private DrawQueue myDrawQueue = null!;
+    private Image myDrawImage = null!;
+    
     private List<ImageView> myImageViews = new();
+    private DescriptorAllocator myGlobalDescriptorAllocator = new();
+    private VkDescriptorSet myDrawImageDescriptors;
+    private VkDescriptorSetLayout myDrawImageDescriptorLayout;
+    private VkPipeline myGradientPipeline;
+    private VkPipelineLayout myGradientPipelineLayout;
 
     private MemoryAllocator myMemoryAllocator = null!;
     

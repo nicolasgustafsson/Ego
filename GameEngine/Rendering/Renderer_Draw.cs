@@ -18,7 +18,7 @@ public partial class Renderer
         cmd.Reset();
         cmd.BeginRecording();
 
-        Image currentDrawImage = myCurrentFrame.MyImage;
+        Image currentDrawImage = myDrawImage;
         VkImage currentSwapchainImage = mySwapchain.MyImages[(int)imageIndex];
         
         cmd.TransitionImage(currentDrawImage, VkImageLayout.Undefined, VkImageLayout.General);
@@ -43,8 +43,12 @@ public partial class Renderer
 
     private void DrawBackground(CommandBuffer cmd, Image aCurrentImage)
     {
-        VkClearColorValue clearColor = new((float)Math.Sin((double)myFrameNumber/144d), 0f, 0f);
+        Vulkan.vkCmdBindPipeline(cmd.MyVkCommandBuffer, VkPipelineBindPoint.Compute, myGradientPipeline);
 
-        cmd.ClearColor(aCurrentImage, VkImageLayout.General, clearColor);
+        Vulkan.vkCmdBindDescriptorSets(cmd.MyVkCommandBuffer, VkPipelineBindPoint.Compute, myGradientPipelineLayout, 0, myDrawImageDescriptors);
+
+        Vulkan.vkCmdDispatch(cmd.MyVkCommandBuffer, (uint)Math.Ceiling(mySwapchain.MyExtents.width / 16d),
+            (uint)Math.Ceiling(mySwapchain.MyExtents.height / 16d), 1);
+
     }
 }

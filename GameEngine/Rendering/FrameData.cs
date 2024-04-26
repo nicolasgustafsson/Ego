@@ -13,8 +13,6 @@ public class FrameData
 
     public Fence MyRenderFence = null!;
 
-    public Image MyImage = null!;
-    
     public DeletionQueue MyDeletionQueue = new();
     
     public void Destroy(Device aDevice, MemoryAllocator aAllocator)
@@ -23,7 +21,5 @@ public class FrameData
         MyImageAvailableSemaphore.Destroy(aDevice);
         MyRenderFinishedSemaphore.Destroy(aDevice);
         MyRenderFence.Destroy(aDevice);
-
-        MyImage.Destroy(aDevice, aAllocator);
     }
 }

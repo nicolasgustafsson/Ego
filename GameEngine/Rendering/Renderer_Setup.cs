@@ -36,9 +36,103 @@ public partial class Renderer
 
         CreateMemoryAllocator();
         
+        CreateDrawImage();
+        
         CreateFrameData();
+
+        InitializeDescriptors();
+
+        InitializePipelines();
         
         Console.WriteLine("Renderer successfully created!");
+    }
+
+    private void InitializePipelines()
+    {
+        InitializeBackgroundPipelines();
+    }
+
+    private unsafe void InitializeBackgroundPipelines()
+    {
+        VkPipelineLayoutCreateInfo computeLayout = new();
+        
+        fixed(VkDescriptorSetLayout* pLayout = &myDrawImageDescriptorLayout)
+        {
+            computeLayout.pSetLayouts = pLayout;
+        }
+
+        computeLayout.setLayoutCount = 1;
+
+        vkCreatePipelineLayout(myDevice.MyVkDevice, &computeLayout, null, out myGradientPipelineLayout);
+
+        ShaderModule? computeDrawShader = ShaderModule.Load("Shaders/comp.spv", myDevice);
+        
+        if (computeDrawShader == null)
+        {
+            Console.WriteLine("Could not create shader!");
+            return;
+        }
+
+        VkPipelineShaderStageCreateInfo stageInfo = new();
+        stageInfo.stage = VkShaderStageFlags.Compute;
+        stageInfo.module = computeDrawShader.MyModule;
+        stageInfo.pName = "main".ToSPointer();
+
+        VkComputePipelineCreateInfo computePipelineCreateInfo = new();
+        computePipelineCreateInfo.layout = myGradientPipelineLayout;
+        computePipelineCreateInfo.stage = stageInfo;
+
+        VkPipeline pipeline;
+        vkCreateComputePipelines(myDevice.MyVkDevice, Vortice.Vulkan.VkPipelineCache.Null, computePipelineCreateInfo, &pipeline);
+
+        myGradientPipeline = pipeline;
+
+        computeDrawShader.Destroy(myDevice);
+
+        myCleanupQueue.Add(() =>
+        {
+            vkDestroyPipelineLayout(myDevice.MyVkDevice, myGradientPipelineLayout);
+            vkDestroyPipeline(myDevice.MyVkDevice, myGradientPipeline);
+        });
+    }
+
+    private void CreateDrawImage()
+    {
+         myDrawImage = new Image(myDevice, myMemoryAllocator, VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
+         myCleanupQueue.Add(() => { myDrawImage.Destroy(myDevice, myMemoryAllocator); });
+    }
+
+    private unsafe void InitializeDescriptors()
+    {
+        List<DescriptorAllocator.PoolSizeRatio> sizes = new List<DescriptorAllocator.PoolSizeRatio> { new() { Ratio = 1f, Type = VkDescriptorType.StorageImage} };
+
+        myGlobalDescriptorAllocator = new();
+        myGlobalDescriptorAllocator.InitPool(myDevice, 10, sizes);
+
+        DescriptorLayoutBuilder builder = new();
+        builder.AddBinding(0, VkDescriptorType.StorageImage);
+        myDrawImageDescriptorLayout = builder.Build(myDevice, VkShaderStageFlags.Compute);
+
+        myDrawImageDescriptors = myGlobalDescriptorAllocator.Allocate(myDevice, myDrawImageDescriptorLayout);
+
+        VkDescriptorImageInfo imageInfo = new();
+        imageInfo.imageLayout = VkImageLayout.General;
+        imageInfo.imageView = myDrawImage.MyImageView.MyVkImageView;
+
+        VkWriteDescriptorSet drawImageWrite = new();
+        drawImageWrite.dstBinding = 0;
+        drawImageWrite.dstSet = myDrawImageDescriptors;
+        drawImageWrite.descriptorCount = 1;
+        drawImageWrite.descriptorType = VkDescriptorType.StorageImage;
+        drawImageWrite.pImageInfo = &imageInfo;
+
+        vkUpdateDescriptorSets(myDevice.MyVkDevice, 1, &drawImageWrite, 0, null);
+
+        myCleanupQueue.Add(() =>
+        {
+            vkDestroyDescriptorSetLayout(myDevice.MyVkDevice, myDrawImageDescriptorLayout);
+            myGlobalDescriptorAllocator.DestroyPool(myDevice);
+        });
     }
 
     private void CreateMemoryAllocator()
@@ -104,8 +198,6 @@ public partial class Renderer
             newFrame.MyRenderFinishedSemaphore = new(myDevice);
             newFrame.MyImageAvailableSemaphore = new(myDevice);
             newFrame.MyRenderFence = new(myDevice);
-
-            newFrame.MyImage = new(myDevice, myMemoryAllocator, VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
 
             myFrameData.Add(newFrame);
         }
