@@ -31,4 +31,14 @@ public unsafe class ShaderModule
     {
         vkDestroyShaderModule(aDevice.MyVkDevice, MyModule);
     }
+    
+    public VkPipelineShaderStageCreateInfo GetCreateInfo(VkShaderStageFlags aStage)
+    {
+        VkPipelineShaderStageCreateInfo stageInfo = new();
+        stageInfo.stage = aStage;
+        stageInfo.module = MyModule;
+        stageInfo.pName = "main".ToSPointer();
+
+        return stageInfo;
+    }
 }

@@ -21,7 +21,7 @@ public unsafe class DescriptorLayoutBuilder
     
     public VkDescriptorSetLayout Build(Device aDevice, VkShaderStageFlags aShaderStages, void* pNext, VkDescriptorSetLayoutCreateFlags aFlags)
     {
-        VkDescriptorSetLayoutCreateInfo createInfo;
+        VkDescriptorSetLayoutCreateInfo createInfo = new();
         for(int i = 0; i < MyBindings.Count; i++)
         {
             var binding = MyBindings[i];

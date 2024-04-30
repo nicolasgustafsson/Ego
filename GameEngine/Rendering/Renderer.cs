@@ -22,6 +22,9 @@ public partial class Renderer
     private VkPipeline myGradientPipeline;
     private VkPipelineLayout myGradientPipelineLayout;
 
+    private VkPipeline myTrianglePipeline;
+    private VkPipelineLayout myTrianglePipelineLayout;
+    
     private MemoryAllocator myMemoryAllocator = null!;
     
     private List<FrameData> myFrameData = new() { };

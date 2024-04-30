@@ -50,6 +50,50 @@ public partial class Renderer
     private void InitializePipelines()
     {
         InitializeBackgroundPipelines();
+
+        InitializeTrianglePipeline();
+    }
+
+    private unsafe void InitializeTrianglePipeline()
+    {
+        ShaderModule? vertexShader = ShaderModule.Load("Shaders/vert.spv", myDevice);
+        ShaderModule? fragmentShader = ShaderModule.Load("Shaders/frag.spv", myDevice);
+
+        if (vertexShader is null || fragmentShader is null)
+            return;
+        
+        VkPipelineLayoutCreateInfo layoutCreateInfo = new();
+        
+        fixed(VkDescriptorSetLayout* pLayout = &myDrawImageDescriptorLayout)
+        {
+            layoutCreateInfo.pSetLayouts = pLayout;
+        }
+
+        layoutCreateInfo.setLayoutCount = 1;
+
+        vkCreatePipelineLayout(myDevice.MyVkDevice, &layoutCreateInfo, null, out myTrianglePipelineLayout).CheckResult();
+
+        PipelineBuilder pipelineBuilder = new();
+        pipelineBuilder.SetLayout(myTrianglePipelineLayout);
+        pipelineBuilder.SetShaders(vertexShader, fragmentShader);
+        pipelineBuilder.SetTopology(VkPrimitiveTopology.TriangleList);
+        pipelineBuilder.SetPolygonMode(VkPolygonMode.Fill);
+        pipelineBuilder.SetCullMode(VkCullModeFlags.None, VkFrontFace.Clockwise);
+        pipelineBuilder.DisableMultisampling();
+        pipelineBuilder.DisableDepthTest();
+        pipelineBuilder.DisableBlending();
+        pipelineBuilder.SetColorAttachmentFormat(myDrawImage.MyImageFormat);
+        pipelineBuilder.SetDepthFormat(VkFormat.Undefined);
+
+        myTrianglePipeline = pipelineBuilder.Build(myDevice);
+
+        vertexShader.Destroy(myDevice);
+        fragmentShader.Destroy(myDevice);
+        myCleanupQueue.Add(() =>
+        {
+            vkDestroyPipelineLayout(myDevice.MyVkDevice, myTrianglePipelineLayout);
+            vkDestroyPipeline(myDevice.MyVkDevice, myTrianglePipeline);
+        });
     }
 
     private unsafe void InitializeBackgroundPipelines()
@@ -71,7 +115,7 @@ public partial class Renderer
         computeLayout.pPushConstantRanges = &pushConstantRange;
         computeLayout.pushConstantRangeCount = 1;
 
-        vkCreatePipelineLayout(myDevice.MyVkDevice, &computeLayout, null, out myGradientPipelineLayout);
+        vkCreatePipelineLayout(myDevice.MyVkDevice, &computeLayout, null, out myGradientPipelineLayout).CheckResult();
 
         ShaderModule? computeDrawShader = ShaderModule.Load("Shaders/comp.spv", myDevice);
         
@@ -80,18 +124,13 @@ public partial class Renderer
             Console.WriteLine("Could not create shader!");
             return;
         }
-
-        VkPipelineShaderStageCreateInfo stageInfo = new();
-        stageInfo.stage = VkShaderStageFlags.Compute;
-        stageInfo.module = computeDrawShader.MyModule;
-        stageInfo.pName = "main".ToSPointer();
-
+        
         VkComputePipelineCreateInfo computePipelineCreateInfo = new();
         computePipelineCreateInfo.layout = myGradientPipelineLayout;
-        computePipelineCreateInfo.stage = stageInfo;
+        computePipelineCreateInfo.stage = computeDrawShader.GetCreateInfo(VkShaderStageFlags.Compute);
 
         VkPipeline pipeline;
-        vkCreateComputePipelines(myDevice.MyVkDevice, Vortice.Vulkan.VkPipelineCache.Null, computePipelineCreateInfo, &pipeline);
+        vkCreateComputePipelines(myDevice.MyVkDevice, Vortice.Vulkan.VkPipelineCache.Null, computePipelineCreateInfo, &pipeline).CheckResult();
 
         myGradientPipeline = pipeline;
 

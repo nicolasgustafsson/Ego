@@ -20,7 +20,7 @@ public static class Program
             stopwatch.Restart();
             renderer.Draw();
             window.Update();
-            Console.WriteLine($"FPS: {1d / stopwatch.Elapsed.TotalSeconds}");
+            //Console.WriteLine($"FPS: {1d / stopwatch.Elapsed.TotalSeconds}");
         }
 
         renderer.Cleanup();

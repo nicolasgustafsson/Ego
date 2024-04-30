@@ -4,7 +4,7 @@ namespace Rendering;
 using Vortice.Vulkan;
 using Graphics;
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Sequential, Pack = 4)]
 struct PushConstants
 {
     public System.Numerics.Vector4 data1;
@@ -34,9 +34,13 @@ public partial class Renderer
         
         cmd.TransitionImage(currentDrawImage, VkImageLayout.Undefined, VkImageLayout.General);
 
-        DrawBackground(cmd, currentDrawImage);
+        //DrawBackground(cmd);
 
-        cmd.TransitionImage(currentDrawImage, VkImageLayout.General, VkImageLayout.TransferSrcOptimal);
+        cmd.TransitionImage(currentDrawImage, VkImageLayout.General, VkImageLayout.ColorAttachmentOptimal);
+
+        DrawGeometry(cmd);
+
+        cmd.TransitionImage(currentDrawImage, VkImageLayout.ColorAttachmentOptimal, VkImageLayout.TransferSrcOptimal);
         cmd.TransitionImage(currentSwapchainImage, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal);
 
         cmd.Blit(currentDrawImage, currentSwapchainImage, mySwapchain.MyExtents);
@@ -52,7 +56,37 @@ public partial class Renderer
         myFrameNumber++;
     }
 
-    private unsafe void DrawBackground(CommandBuffer cmd, Image aCurrentImage)
+    private unsafe void DrawGeometry(CommandBuffer cmd)
+    {
+        VkRenderingAttachmentInfo attachmentInfo = myDrawImage.GetAttachmentInfo(null, VkImageLayout.General);
+        VkRenderingInfo renderingInfo = myDrawImage.GetRenderingInfo(new VkExtent2D(myDrawImage.MyExtent.width, myDrawImage.MyExtent.height), attachmentInfo, null);
+
+        Vulkan.vkCmdBeginRendering(cmd.MyVkCommandBuffer, &renderingInfo);
+
+        Vulkan.vkCmdBindPipeline(cmd.MyVkCommandBuffer, VkPipelineBindPoint.Graphics, myTrianglePipeline);
+
+        VkViewport dynamicViewport = new();
+        dynamicViewport.x = 0;
+        dynamicViewport.y = 0;
+        dynamicViewport.width = myDrawImage.MyExtent.width;
+        dynamicViewport.height = myDrawImage.MyExtent.height;
+        dynamicViewport.minDepth = 0f;
+        dynamicViewport.maxDepth = 1f;
+
+        Vulkan.vkCmdSetViewport(cmd.MyVkCommandBuffer, 0, dynamicViewport);
+
+        VkRect2D scissor = new();
+        scissor.extent = new VkExtent2D(myDrawImage.MyExtent.width, myDrawImage.MyExtent.height);
+        scissor.offset = new VkOffset2D(0, 0);
+
+        Vulkan.vkCmdSetScissor(cmd.MyVkCommandBuffer, 0, scissor);
+
+        Vulkan.vkCmdDraw(cmd.MyVkCommandBuffer, 3, 1, 0, 0);
+
+        Vulkan.vkCmdEndRendering(cmd.MyVkCommandBuffer);
+    }
+
+    private unsafe void DrawBackground(CommandBuffer cmd)
     {
         Vulkan.vkCmdBindPipeline(cmd.MyVkCommandBuffer, VkPipelineBindPoint.Compute, myGradientPipeline);
 
@@ -66,6 +100,5 @@ public partial class Renderer
 
         Vulkan.vkCmdDispatch(cmd.MyVkCommandBuffer, (uint)Math.Ceiling(mySwapchain.MyExtents.width / 16d),
             (uint)Math.Ceiling(mySwapchain.MyExtents.height / 16d), 1);
-
     }
 }
