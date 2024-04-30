@@ -15,11 +15,11 @@ public class FrameData
 
     public DeletionQueue MyDeletionQueue = new();
     
-    public void Destroy(Device aDevice, MemoryAllocator aAllocator)
+    public void Destroy()
     {
-        MyCommandBuffer.Destroy(aDevice);
-        MyImageAvailableSemaphore.Destroy(aDevice);
-        MyRenderFinishedSemaphore.Destroy(aDevice);
-        MyRenderFence.Destroy(aDevice);
+        MyCommandBuffer.Destroy();
+        MyImageAvailableSemaphore.Destroy();
+        MyRenderFinishedSemaphore.Destroy();
+        MyRenderFence.Destroy();
     }
 }

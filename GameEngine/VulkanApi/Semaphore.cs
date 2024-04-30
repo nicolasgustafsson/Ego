@@ -3,13 +3,13 @@ namespace Graphics;
 public unsafe class Semaphore
 {
     public VkSemaphore MyVkSemaphore;
-    public Semaphore(Device aDevice)
+    public Semaphore()
     {
-        vkCreateSemaphore(aDevice.MyVkDevice, out MyVkSemaphore).CheckResult();
+        vkCreateSemaphore(Device.MyVkDevice, out MyVkSemaphore).CheckResult();
     }
     
-    public void Destroy(Device aDevice)
+    public void Destroy()
     {
-        vkDestroySemaphore(aDevice.MyVkDevice, MyVkSemaphore);
+        vkDestroySemaphore(Device.MyVkDevice, MyVkSemaphore);
     }
 }

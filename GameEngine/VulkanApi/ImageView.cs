@@ -4,7 +4,7 @@ public unsafe class ImageView
 {
     public VkImageView MyVkImageView;
     
-    public ImageView(Device aDevice, VkImage aImage, VkFormat aFormat)
+    public ImageView(VkImage aImage, VkFormat aFormat)
     {
         VkImageViewCreateInfo createInfo = new();
 
@@ -19,11 +19,11 @@ public unsafe class ImageView
         createInfo.subresourceRange.baseArrayLayer = 0;
         createInfo.subresourceRange.layerCount = 1;
 
-        vkCreateImageView(aDevice.MyVkDevice, &createInfo, null, out MyVkImageView).CheckResult();
+        vkCreateImageView(Device.MyVkDevice, &createInfo, null, out MyVkImageView).CheckResult();
     }
     
-    public void Destroy(Device aDevice)
+    public void Destroy()
     {
-        vkDestroyImageView(aDevice.MyVkDevice, MyVkImageView, null);
+        vkDestroyImageView(Device.MyVkDevice, MyVkImageView, null);
     }
 }

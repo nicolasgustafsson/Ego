@@ -5,7 +5,7 @@ public unsafe class Queue
     public VkQueue MyVkQueue;
     public uint MyQueueFamilyIndex;
     
-    protected VkSemaphoreSubmitInfo GetSemaphoreSubmitInfo(VkPipelineStageFlags2 aStageMask, Graphics.Semaphore aSemaphore)
+    protected VkSemaphoreSubmitInfo GetSemaphoreSubmitInfo(VkPipelineStageFlags2 aStageMask, Semaphore aSemaphore)
     {
         VkSemaphoreSubmitInfo info = new();
         info.semaphore = aSemaphore.MyVkSemaphore;
@@ -43,9 +43,9 @@ public unsafe class Queue
         return info;
     }
     
-    protected Queue(Device aDevice, uint aQueueFamilyIndex)
+    protected Queue(uint aQueueFamilyIndex)
     {
-        vkGetDeviceQueue(aDevice.MyVkDevice, aQueueFamilyIndex, 0, out MyVkQueue);
+        vkGetDeviceQueue(Device.MyVkDevice, aQueueFamilyIndex, 0, out MyVkQueue);
     }
     
 }

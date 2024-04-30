@@ -5,9 +5,9 @@ public unsafe class Pipeline
     public VkPipeline MyVkPipeline;
     public VkPipelineLayout MyVkLayout;
     
-    public void Destroy(Device aDevice)
+    public void Destroy()
     {
-        vkDestroyPipelineLayout(aDevice.MyVkDevice, MyVkLayout);
-        vkDestroyPipeline(aDevice.MyVkDevice, MyVkPipeline);
+        vkDestroyPipelineLayout(Device.MyVkDevice, MyVkLayout);
+        vkDestroyPipeline(Device.MyVkDevice, MyVkPipeline);
     }
 }

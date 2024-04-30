@@ -17,12 +17,12 @@ public partial class Renderer
 {
     private void DrawInternal()
     {
-        myCurrentFrame.MyRenderFence.Wait(myDevice);
-        myCurrentFrame.MyRenderFence.Reset(myDevice);
+        myCurrentFrame.MyRenderFence.Wait();
+        myCurrentFrame.MyRenderFence.Reset();
 
         myCurrentFrame.MyDeletionQueue.Flush();
         
-        uint imageIndex = myDevice.AcquireNextImage(mySwapchain, myCurrentFrame.MyImageAvailableSemaphore);
+        uint imageIndex = Device.AcquireNextImage(mySwapchain, myCurrentFrame.MyImageAvailableSemaphore);
 
         CommandBuffer cmd = myCurrentFrame.MyCommandBuffer;
 
@@ -71,7 +71,7 @@ public partial class Renderer
     {
         Vulkan.vkCmdBindPipeline(cmd.MyVkCommandBuffer, VkPipelineBindPoint.Compute, myGradientPipeline.MyVkPipeline);
 
-        Vulkan.vkCmdBindDescriptorSets(cmd.MyVkCommandBuffer, VkPipelineBindPoint.Compute, myGradientPipeline.MyVkLayout, 0, myDrawImageDescriptors);
+        Vulkan.vkCmdBindDescriptorSets(cmd.MyVkCommandBuffer, VkPipelineBindPoint.Compute, myGradientPipeline.MyVkLayout, 0, myDrawImageDescriptorSet);
 
         PushConstants pushConstants = new();
         pushConstants.data1.X = 0f;

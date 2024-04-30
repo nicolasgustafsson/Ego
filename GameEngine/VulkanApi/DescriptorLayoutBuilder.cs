@@ -14,12 +14,12 @@ public unsafe class DescriptorLayoutBuilder
         MyBindings.Clear();
     }
 
-    public VkDescriptorSetLayout Build(Device aDevice, VkShaderStageFlags aShaderStages)
+    public VkDescriptorSetLayout Build(VkShaderStageFlags aShaderStages)
     {
-        return Build(aDevice, aShaderStages, null, VkDescriptorSetLayoutCreateFlags.None);
+        return Build(aShaderStages, null, VkDescriptorSetLayoutCreateFlags.None);
     }
     
-    public VkDescriptorSetLayout Build(Device aDevice, VkShaderStageFlags aShaderStages, void* pNext, VkDescriptorSetLayoutCreateFlags aFlags)
+    public VkDescriptorSetLayout Build(VkShaderStageFlags aShaderStages, void* pNext, VkDescriptorSetLayoutCreateFlags aFlags)
     {
         VkDescriptorSetLayoutCreateInfo createInfo = new();
         for(int i = 0; i < MyBindings.Count; i++)
@@ -39,7 +39,7 @@ public unsafe class DescriptorLayoutBuilder
         createInfo.pBindings = bindingsArray;
         createInfo.flags = aFlags;
 
-        vkCreateDescriptorSetLayout(aDevice.MyVkDevice, &createInfo, null, out VkDescriptorSetLayout layout).CheckResult();
+        vkCreateDescriptorSetLayout(Device.MyVkDevice, &createInfo, null, out VkDescriptorSetLayout layout).CheckResult();
         
         return layout;
     }

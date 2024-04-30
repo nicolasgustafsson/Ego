@@ -54,10 +54,10 @@ public partial class Renderer
         InitializeTrianglePipeline();
     }
 
-    private unsafe void InitializeTrianglePipeline()
+    private void InitializeTrianglePipeline()
     {
         myTrianglePipeline = GraphicsPipeline
-            .StartBuild(myDevice)
+            .StartBuild()
             .AddLayout(myDrawImageDescriptorLayout)
             .SetVertexShader("Shaders/vert.spv")
             .SetFragmentShader("Shaders/frag.spv")
@@ -73,23 +73,23 @@ public partial class Renderer
         
         myCleanupQueue.Add(() =>
         {
-            myTrianglePipeline.Destroy(myDevice);
+            myTrianglePipeline.Destroy();
         });
     }
 
-    private unsafe void InitializeBackgroundPipelines()
+    private void InitializeBackgroundPipelines()
     {
-        myGradientPipeline = ComputePipeline.StartBuild(myDevice).SetComputeShader("Shaders/comp.spv").AddLayout(myDrawImageDescriptorLayout).AddPushConstant<PushConstants>().Build();
+        myGradientPipeline = ComputePipeline.StartBuild().SetComputeShader("Shaders/comp.spv").AddLayout(myDrawImageDescriptorLayout).AddPushConstant<PushConstants>().Build();
         myCleanupQueue.Add(() =>
         {
-            myGradientPipeline.Destroy(myDevice);
+            myGradientPipeline.Destroy();
         });
     }
 
     private void CreateDrawImage()
     {
-         myDrawImage = new Image(myDevice, myMemoryAllocator, VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
-         myCleanupQueue.Add(() => { myDrawImage.Destroy(myDevice, myMemoryAllocator); });
+         myDrawImage = new Image(myMemoryAllocator, VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
+         myCleanupQueue.Add(() => { myDrawImage.Destroy(myMemoryAllocator); });
     }
 
     private unsafe void InitializeDescriptors()
@@ -97,37 +97,37 @@ public partial class Renderer
         List<DescriptorAllocator.PoolSizeRatio> sizes = new List<DescriptorAllocator.PoolSizeRatio> { new() { Ratio = 1f, Type = VkDescriptorType.StorageImage} };
 
         myGlobalDescriptorAllocator = new();
-        myGlobalDescriptorAllocator.InitPool(myDevice, 10, sizes);
+        myGlobalDescriptorAllocator.InitPool(10, sizes);
 
         DescriptorLayoutBuilder builder = new();
         builder.AddBinding(0, VkDescriptorType.StorageImage);
-        myDrawImageDescriptorLayout = builder.Build(myDevice, VkShaderStageFlags.Compute | VkShaderStageFlags.Fragment);
+        myDrawImageDescriptorLayout = builder.Build(VkShaderStageFlags.Compute | VkShaderStageFlags.Fragment);
 
-        myDrawImageDescriptors = myGlobalDescriptorAllocator.Allocate(myDevice, myDrawImageDescriptorLayout);
-
+        myDrawImageDescriptorSet = myGlobalDescriptorAllocator.Allocate(myDrawImageDescriptorLayout);
+        
         VkDescriptorImageInfo imageInfo = new();
         imageInfo.imageLayout = VkImageLayout.General;
         imageInfo.imageView = myDrawImage.MyImageView.MyVkImageView;
 
         VkWriteDescriptorSet drawImageWrite = new();
         drawImageWrite.dstBinding = 0;
-        drawImageWrite.dstSet = myDrawImageDescriptors;
+        drawImageWrite.dstSet = myDrawImageDescriptorSet;
         drawImageWrite.descriptorCount = 1;
         drawImageWrite.descriptorType = VkDescriptorType.StorageImage;
         drawImageWrite.pImageInfo = &imageInfo;
 
-        vkUpdateDescriptorSets(myDevice.MyVkDevice, 1, &drawImageWrite, 0, null);
+        vkUpdateDescriptorSets(Device.MyVkDevice, 1, &drawImageWrite, 0, null);
 
         myCleanupQueue.Add(() =>
         {
-            vkDestroyDescriptorSetLayout(myDevice.MyVkDevice, myDrawImageDescriptorLayout);
-            myGlobalDescriptorAllocator.DestroyPool(myDevice);
+            vkDestroyDescriptorSetLayout(Device.MyVkDevice, myDrawImageDescriptorLayout);
+            myGlobalDescriptorAllocator.DestroyPool();
         });
     }
 
     private void CreateMemoryAllocator()
     {
-        myMemoryAllocator = new MemoryAllocator(myGpu, myDevice, myApi);
+        myMemoryAllocator = new MemoryAllocator(myGpu, myApi);
         myCleanupQueue.Add(() => myMemoryAllocator.Destroy());
     }
 
@@ -144,7 +144,7 @@ public partial class Renderer
 
     private void CreateDrawQueue()
     {
-        myDrawQueue = new DrawQueue(myDevice, myGpu);
+        myDrawQueue = new DrawQueue(myGpu);
     }
 
     private void CreateApi(Window aWindow)
@@ -161,12 +161,12 @@ public partial class Renderer
 
     private void CreateImageViews()
     {
-        myImageViews = mySwapchain.CreateImageViews(myDevice);
+        myImageViews = mySwapchain.CreateImageViews();
 
         myCleanupQueue.Add(() =>
         {
             foreach (var imageView in myImageViews)
-                imageView.Destroy(myDevice);
+                imageView.Destroy();
 
             myImageViews.Clear();
         });
@@ -174,8 +174,8 @@ public partial class Renderer
 
     private void CreateDevice()
     {
-        myDevice = myGpu.CreateDevice(Defaults.DeviceExtensions);
-        myCleanupQueue.Add(() => myDevice.Destroy());
+        myGpu.CreateDevice(Defaults.DeviceExtensions);
+        myCleanupQueue.Add(() => Device.Destroy());
     }
 
     private void CreateFrameData()
@@ -184,10 +184,10 @@ public partial class Renderer
         {
             FrameData newFrame = new();
 
-            newFrame.MyCommandBuffer = new CommandBuffer(myDevice, myDrawQueue);
-            newFrame.MyRenderFinishedSemaphore = new(myDevice);
-            newFrame.MyImageAvailableSemaphore = new(myDevice);
-            newFrame.MyRenderFence = new(myDevice);
+            newFrame.MyCommandBuffer = new CommandBuffer(myDrawQueue);
+            newFrame.MyRenderFinishedSemaphore = new();
+            newFrame.MyImageAvailableSemaphore = new();
+            newFrame.MyRenderFence = new();
 
             myFrameData.Add(newFrame);
         }
@@ -195,7 +195,7 @@ public partial class Renderer
         myCleanupQueue.Add(() =>
         {
             foreach (FrameData frameData in myFrameData)
-                frameData.Destroy(myDevice, myMemoryAllocator);
+                frameData.Destroy();
 
             myFrameData.Clear();
         });
@@ -206,15 +206,15 @@ public partial class Renderer
         VkSurfaceFormatKHR surfaceFormat = myGpu.GetSurfaceFormat(mySurface, PreferredFormat, PreferredColorSpace);
         VkPresentModeKHR presentMode = myGpu.GetPresentMode(mySurface, PreferredPresentMode);
 
-        mySwapchain = new Swapchain(myDevice, myGpu, mySurface, surfaceFormat, presentMode);
-        myCleanupQueue.Add(() => mySwapchain.Destroy(myDevice));
+        mySwapchain = new Swapchain(myGpu, mySurface, surfaceFormat, presentMode);
+        myCleanupQueue.Add(() => mySwapchain.Destroy());
     }
     
     public void Cleanup()
     {
         Console.WriteLine("Destroying renderer...");
 
-        myDevice.WaitUntilIdle();
+        Device.WaitUntilIdle();
         
         myCleanupQueue.Flush();
         

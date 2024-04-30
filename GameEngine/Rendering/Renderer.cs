@@ -1,5 +1,6 @@
-﻿using System.Runtime.InteropServices;
+﻿global using static Graphics.LogicalDevice;
 
+using System.Runtime.InteropServices;
 using Graphics;
 using Vortice.Vulkan;
 
@@ -10,7 +11,6 @@ public partial class Renderer
     private Api myApi = null!;
     private Surface mySurface = null!;
     private Gpu myGpu = null!;
-    private Device myDevice = null!;
     private Swapchain mySwapchain = null!;
     private DrawQueue myDrawQueue = null!;
     private Image myDrawImage = null!;
@@ -19,7 +19,7 @@ public partial class Renderer
     
     private List<ImageView> myImageViews = new();
     private DescriptorAllocator myGlobalDescriptorAllocator = new();
-    private VkDescriptorSet myDrawImageDescriptors;
+    private VkDescriptorSet myDrawImageDescriptorSet;
     private VkDescriptorSetLayout myDrawImageDescriptorLayout;
 
     private MemoryAllocator myMemoryAllocator = null!;

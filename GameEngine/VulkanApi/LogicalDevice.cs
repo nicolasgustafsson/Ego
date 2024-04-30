@@ -1,7 +1,9 @@
-﻿namespace Graphics;
+﻿global using static Graphics.LogicalDevice;
+namespace Graphics;
 
-public unsafe class Device
+public unsafe class LogicalDevice
 {
+    public static LogicalDevice Device;
     public VkDevice MyVkDevice;
 
     public void LoadFunctions()

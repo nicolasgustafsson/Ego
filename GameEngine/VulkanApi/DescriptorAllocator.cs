@@ -13,7 +13,7 @@ public unsafe class DescriptorAllocator
 
     public VkDescriptorPool MyPool;
 
-    public void InitPool(Device aDevice, uint aMaxSets, List<PoolSizeRatio> aRatios)
+    public void InitPool(uint aMaxSets, List<PoolSizeRatio> aRatios)
     {
         List<VkDescriptorPoolSize> sizes = aRatios.Select(ratio => new VkDescriptorPoolSize(ratio.Type, (uint)(ratio.Ratio * (float)aMaxSets))).ToList();
         VkDescriptorPoolCreateInfo createInfo = new();
@@ -22,20 +22,20 @@ public unsafe class DescriptorAllocator
         createInfo.poolSizeCount = (uint)aRatios.Count;
         createInfo.pPoolSizes = sizes.AsSpan().GetPointerUnsafe();
 
-        vkCreateDescriptorPool(aDevice.MyVkDevice, &createInfo, null, out MyPool).CheckResult();
+        vkCreateDescriptorPool(Device.MyVkDevice, &createInfo, null, out MyPool).CheckResult();
     }
     
-    public void ClearDescriptors(Device aDevice)
+    public void ClearDescriptors()
     {
-        vkResetDescriptorPool(aDevice.MyVkDevice, MyPool, VkDescriptorPoolResetFlags.None);
+        vkResetDescriptorPool(Device.MyVkDevice, MyPool, VkDescriptorPoolResetFlags.None);
     }
     
-    public void DestroyPool(Device aDevice)
+    public void DestroyPool()
     {
-        vkDestroyDescriptorPool(aDevice.MyVkDevice, MyPool, null);
+        vkDestroyDescriptorPool(Device.MyVkDevice, MyPool, null);
     }
     
-    public VkDescriptorSet Allocate(Device aDevice, VkDescriptorSetLayout aLayout)
+    public VkDescriptorSet Allocate(VkDescriptorSetLayout aLayout)
     {
         VkDescriptorSetAllocateInfo allocInfo = new();
         allocInfo.descriptorPool = MyPool;
@@ -43,7 +43,7 @@ public unsafe class DescriptorAllocator
         allocInfo.pSetLayouts = &aLayout;
 
         VkDescriptorSet descriptorSet;
-        vkAllocateDescriptorSets(aDevice.MyVkDevice, &allocInfo, &descriptorSet);
+        vkAllocateDescriptorSets(Device.MyVkDevice, &allocInfo, &descriptorSet);
 
         return descriptorSet;
     }

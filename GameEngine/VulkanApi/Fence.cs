@@ -3,23 +3,23 @@ namespace Graphics;
 public unsafe class Fence
 {
     public VkFence MyVkFence;
-    public Fence(Device aDevice)
+    public Fence()
     {
-        vkCreateFence(aDevice.MyVkDevice, VkFenceCreateFlags.Signaled, out MyVkFence).CheckResult();
+        vkCreateFence(Device.MyVkDevice, VkFenceCreateFlags.Signaled, out MyVkFence).CheckResult();
     }
     
-    public void Destroy(Device aDevice)
+    public void Destroy()
     {
-        vkDestroyFence(aDevice.MyVkDevice, MyVkFence);
+        vkDestroyFence(Device.MyVkDevice, MyVkFence);
     }
     
-    public void Wait(Device aDevice)
+    public void Wait()
     {
-        aDevice.WaitForFence(MyVkFence);
+        Device.WaitForFence(MyVkFence);
     }
     
-    public void Reset(Device aDevice)
+    public void Reset()
     {
-        aDevice.ResetFence(MyVkFence);
+        Device.ResetFence(MyVkFence);
     }
 }

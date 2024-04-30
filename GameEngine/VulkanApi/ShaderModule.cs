@@ -4,7 +4,7 @@ public unsafe class ShaderModule
 {
     public VkShaderModule MyModule;
     
-    private ShaderModule(Device aDevice, byte[] aBytes)
+    private ShaderModule(byte[] aBytes)
     {
         VkShaderModuleCreateInfo createInfo = new VkShaderModuleCreateInfo();
         createInfo.codeSize = (UIntPtr)aBytes.Length;
@@ -14,22 +14,22 @@ public unsafe class ShaderModule
             createInfo.pCode = (uint*)sourcePointer;
         }
 
-        vkCreateShaderModule(aDevice.MyVkDevice, &createInfo, null, out MyModule).CheckResult();
+        vkCreateShaderModule(Device.MyVkDevice, &createInfo, null, out MyModule).CheckResult();
     }
     
-    public static ShaderModule? Load(string aFilePath, Device aDevice)
+    public static ShaderModule? Load(string aFilePath)
     {
         if (!File.Exists(aFilePath))
             return null;
         
         var bytes = File.ReadAllBytes(aFilePath);
         
-        return new(aDevice, bytes);
+        return new(bytes);
     }
 
-    public void Destroy(Device aDevice)
+    public void Destroy()
     {
-        vkDestroyShaderModule(aDevice.MyVkDevice, MyModule);
+        vkDestroyShaderModule(Device.MyVkDevice, MyModule);
     }
     
     public VkPipelineShaderStageCreateInfo GetCreateInfo(VkShaderStageFlags aStage)

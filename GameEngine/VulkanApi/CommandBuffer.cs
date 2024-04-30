@@ -6,25 +6,25 @@ public unsafe class CommandBuffer
     public VkCommandPool MyVkCommandPool;
     public VkCommandBuffer MyVkCommandBuffer;
     
-    public CommandBuffer(Device aDevice, Queue aQueue)
+    public CommandBuffer(Queue aQueue)
     {
         VkCommandPoolCreateInfo createInfo = new();
         createInfo.flags = VkCommandPoolCreateFlags.ResetCommandBuffer;
         createInfo.queueFamilyIndex = aQueue.MyQueueFamilyIndex;
         
-        vkCreateCommandPool(aDevice.MyVkDevice, &createInfo, null, out MyVkCommandPool).CheckResult();
+        vkCreateCommandPool(Device.MyVkDevice, &createInfo, null, out MyVkCommandPool).CheckResult();
 
         VkCommandBufferAllocateInfo allocateInfo = new();
         allocateInfo.commandPool = MyVkCommandPool;
         allocateInfo.commandBufferCount = 1;
         allocateInfo.level = VkCommandBufferLevel.Primary;
 
-        vkAllocateCommandBuffer(aDevice.MyVkDevice, &allocateInfo, out MyVkCommandBuffer).CheckResult();
+        vkAllocateCommandBuffer(Device.MyVkDevice, &allocateInfo, out MyVkCommandBuffer).CheckResult();
     }
     
-    public void Destroy(Device aDevice)
+    public void Destroy()
     {
-        vkDestroyCommandPool(aDevice.MyVkDevice, MyVkCommandPool);
+        vkDestroyCommandPool(Device.MyVkDevice, MyVkCommandPool);
     }
     
     public void Reset()

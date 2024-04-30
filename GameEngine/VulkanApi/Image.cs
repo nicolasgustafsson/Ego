@@ -10,7 +10,7 @@ public unsafe class Image
     
     public VkImageLayout MyCurrentLayout = VkImageLayout.Undefined;
     
-    public Image(Device aDevice, MemoryAllocator aAllocator, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent)
+    public Image(MemoryAllocator aAllocator, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent)
     {
         MyExtent = aExtent;
         MyImageFormat = aFormat;
@@ -34,12 +34,12 @@ public unsafe class Image
         
         Vma.vmaCreateImage(aAllocator.myVmaAllocator, &createInfo, &allocationInfo, out MyVkImage, out MyAllocation, out VmaAllocationInfo allocInfo).CheckResult();
 
-        MyImageView = new(aDevice, MyVkImage, aFormat);
+        MyImageView = new(MyVkImage, aFormat);
     }
     
-    public void Destroy(Device aDevice, MemoryAllocator aAllocator)
+    public void Destroy(MemoryAllocator aAllocator)
     {
-        MyImageView.Destroy(aDevice);
+        MyImageView.Destroy();
 
         Vma.vmaDestroyImage(aAllocator.myVmaAllocator, MyVkImage, MyAllocation);
     }

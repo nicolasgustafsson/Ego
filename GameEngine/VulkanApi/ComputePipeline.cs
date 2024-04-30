@@ -2,9 +2,9 @@
 
 namespace Graphics;
 
-public unsafe class ComputePipeline : Pipeline
+public class ComputePipeline : Pipeline
 {
-    public unsafe class ComputePipelineBuilder(Device myDevice)
+    public unsafe class ComputePipelineBuilder()
     {
         private List<VkDescriptorSetLayout> myLayouts = new();
         private List<VkPushConstantRange> myPushConstants = new();
@@ -38,7 +38,7 @@ public unsafe class ComputePipeline : Pipeline
         
         public ComputePipelineBuilder SetComputeShader(string aShaderModulePath)
         {
-            ShaderModule? shader = ShaderModule.Load(aShaderModulePath, myDevice);
+            ShaderModule? shader = ShaderModule.Load(aShaderModulePath);
             
             if (shader == null)
             {
@@ -68,26 +68,26 @@ public unsafe class ComputePipeline : Pipeline
             computeLayout.pPushConstantRanges = myPushConstants.AsSpan().GetPointerUnsafe();
             computeLayout.pushConstantRangeCount = (uint)myPushConstants.Count();
 
-            vkCreatePipelineLayout(myDevice.MyVkDevice, &computeLayout, null, out computePipeline.MyVkLayout).CheckResult();
+            vkCreatePipelineLayout(Device.MyVkDevice, &computeLayout, null, out computePipeline.MyVkLayout).CheckResult();
 
             VkComputePipelineCreateInfo computePipelineCreateInfo = new();
             computePipelineCreateInfo.layout = computePipeline.MyVkLayout;
             computePipelineCreateInfo.stage = myComputeShader.GetCreateInfo(VkShaderStageFlags.Compute);
 
             VkPipeline pipeline;
-            vkCreateComputePipelines(myDevice.MyVkDevice, VkPipelineCache.Null, computePipelineCreateInfo, &pipeline).CheckResult();
+            vkCreateComputePipelines(Device.MyVkDevice, VkPipelineCache.Null, computePipelineCreateInfo, &pipeline).CheckResult();
 
             computePipeline.MyVkPipeline = pipeline;
 
-            myComputeShader.Destroy(myDevice);
+            myComputeShader.Destroy();
 
             return computePipeline;
         }
     }
     
-    public static ComputePipelineBuilder StartBuild(Device aDevice)
+    public static ComputePipelineBuilder StartBuild()
     {
-        return new ComputePipelineBuilder(aDevice);
+        return new ComputePipelineBuilder();
     }
     
     internal ComputePipeline()

@@ -4,7 +4,7 @@ namespace Graphics;
 
 public class GraphicsPipeline : Pipeline
 {
-    public unsafe class GraphicsPipelineBuilder(Device myDevice)
+    public unsafe class GraphicsPipelineBuilder()
     {
         private List<VkDescriptorSetLayout> myLayouts = new();
         private List<VkPushConstantRange> myPushConstants = new();
@@ -47,7 +47,7 @@ public class GraphicsPipeline : Pipeline
         
         public GraphicsPipelineBuilder SetVertexShader(string aShaderModulePath)
         {
-            ShaderModule? shader = ShaderModule.Load(aShaderModulePath, myDevice);
+            ShaderModule? shader = ShaderModule.Load(aShaderModulePath);
             
             if (shader == null)
             {
@@ -66,7 +66,7 @@ public class GraphicsPipeline : Pipeline
         
         public GraphicsPipelineBuilder SetFragmentShader(string aShaderModulePath)
         {
-            ShaderModule? shader = ShaderModule.Load(aShaderModulePath, myDevice);
+            ShaderModule? shader = ShaderModule.Load(aShaderModulePath);
             
             if (shader == null)
             {
@@ -166,7 +166,7 @@ public class GraphicsPipeline : Pipeline
 
             VkPipelineLayout layout = new();
 
-            vkCreatePipelineLayout(myDevice.MyVkDevice, &layoutCreateInfo, null, out layout).CheckResult();
+            vkCreatePipelineLayout(Device.MyVkDevice, &layoutCreateInfo, null, out layout).CheckResult();
             
             GraphicsPipeline graphicsPipeline = new();
             VkPipelineViewportStateCreateInfo viewportStateCreateInfo = new();
@@ -220,20 +220,20 @@ public class GraphicsPipeline : Pipeline
 
             pipelineCreateInfo.pDynamicState = &dynamicInfo;
 
-            vkCreateGraphicsPipeline(myDevice.MyVkDevice, pipelineCreateInfo, out VkPipeline pipeline).CheckResult("Could not create pipeline :(");
+            vkCreateGraphicsPipeline(Device.MyVkDevice, pipelineCreateInfo, out VkPipeline pipeline).CheckResult("Could not create pipeline :(");
 
             graphicsPipeline.MyVkPipeline = pipeline;
             graphicsPipeline.MyVkLayout = layout;
 
-            vkDestroyShaderModule(myDevice.MyVkDevice, myFragmentShader.MyModule); 
-            vkDestroyShaderModule(myDevice.MyVkDevice, myVertexShader.MyModule); 
+            vkDestroyShaderModule(Device.MyVkDevice, myFragmentShader.MyModule); 
+            vkDestroyShaderModule(Device.MyVkDevice, myVertexShader.MyModule); 
             
             return graphicsPipeline;
         }
     }
     
-    public static GraphicsPipelineBuilder StartBuild(Device aDevice)
+    public static GraphicsPipelineBuilder StartBuild()
     {
-        return new GraphicsPipelineBuilder(aDevice);
+        return new GraphicsPipelineBuilder();
     }
 }

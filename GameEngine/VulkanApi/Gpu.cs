@@ -63,10 +63,10 @@ public unsafe class Gpu
         return !swapChainSupport.Formats.IsEmpty && !swapChainSupport.PresentModes.IsEmpty;
     }
     
-    public Device CreateDevice(List<string> aDeviceExtensions)
+    public void CreateDevice(List<string> aDeviceExtensions)
     {
         string[] deviceExtensions = aDeviceExtensions.ToArray();
-        Device device = new();
+        LogicalDevice logicalDevice = new();
         
         float queuePriority = 1f;
         VkDeviceQueueCreateInfo deviceQueueCreateInfo = new();
@@ -100,11 +100,11 @@ public unsafe class Gpu
         deviceCreateInfo.enabledExtensionCount = (uint)deviceExtensions.Length;
         deviceCreateInfo.ppEnabledExtensionNames = (sbyte**)extensionsToBytesArray;
 
-        vkCreateDevice(MyVkPhysicalDevice, &deviceCreateInfo, null, out device.MyVkDevice).CheckResult();
+        vkCreateDevice(MyVkPhysicalDevice, &deviceCreateInfo, null, out logicalDevice.MyVkDevice).CheckResult();
 
-        device.LoadFunctions();
+        logicalDevice.LoadFunctions();
 
-        return device;
+        Device = logicalDevice;
     }
     
     public (uint graphicsFamily, uint presentFamily) FindQueueFamilies(Surface aSurface)

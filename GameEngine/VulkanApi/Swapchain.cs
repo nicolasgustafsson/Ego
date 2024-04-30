@@ -8,7 +8,7 @@ public unsafe class Swapchain
     public VkExtent2D MyExtents;
     public readonly List<VkImage> MyImages;
 
-    public Swapchain(Device aDevice, Gpu aGpu, Surface aSurface, VkSurfaceFormatKHR aSurfaceFormat, VkPresentModeKHR aPresentMode)
+    public Swapchain(Gpu aGpu, Surface aSurface, VkSurfaceFormatKHR aSurfaceFormat, VkPresentModeKHR aPresentMode)
     {
         MyExtents = aSurface.GetSwapbufferExtent();
         MyImageFormat = aSurfaceFormat.format;
@@ -38,25 +38,25 @@ public unsafe class Swapchain
         createInfo.oldSwapchain = VkSwapchainKHR.Null;
         createInfo.surface = aSurface.MyVkSurface;
 
-        vkCreateSwapchainKHR(aDevice.MyVkDevice, &createInfo, null, out MyVkSwapchain).CheckResult();
+        vkCreateSwapchainKHR(Device.MyVkDevice, &createInfo, null, out MyVkSwapchain).CheckResult();
         
-        ReadOnlySpan<VkImage> images = vkGetSwapchainImagesKHR(aDevice.MyVkDevice, MyVkSwapchain);
+        ReadOnlySpan<VkImage> images = vkGetSwapchainImagesKHR(Device.MyVkDevice, MyVkSwapchain);
         MyImages = images.ToArray().ToList();
     }
     
-    public List<ImageView> CreateImageViews(Device aDevice)
+    public List<ImageView> CreateImageViews()
     {
         List<ImageView> views = new();
         foreach(var image in MyImages)
         {
-            views.Add(new(aDevice, image, MyImageFormat){});
+            views.Add(new(image, MyImageFormat){});
         }
 
         return views;
     }
     
-    public void Destroy(Device aDevice)
+    public void Destroy()
     {
-        vkDestroySwapchainKHR(aDevice.MyVkDevice, MyVkSwapchain);
+        vkDestroySwapchainKHR(Device.MyVkDevice, MyVkSwapchain);
     }
 }
