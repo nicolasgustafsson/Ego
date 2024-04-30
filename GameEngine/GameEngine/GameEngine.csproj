@@ -10,7 +10,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="../HelloTriangle/HelloTriangle.csproj" />
       <ProjectReference Include="..\Rendering\Rendering.csproj" />
       <ProjectReference Include="../Utilities/Utilities.csproj" />
         <ProjectReference Include="../Window/Window.csproj" />

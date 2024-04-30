@@ -63,6 +63,14 @@ public partial class Renderer
 
         computeLayout.setLayoutCount = 1;
 
+        VkPushConstantRange pushConstantRange = new();
+        pushConstantRange.offset = 0;
+        pushConstantRange.size = (uint)sizeof(PushConstants);
+        pushConstantRange.stageFlags = VkShaderStageFlags.Compute;
+        
+        computeLayout.pPushConstantRanges = &pushConstantRange;
+        computeLayout.pushConstantRangeCount = 1;
+
         vkCreatePipelineLayout(myDevice.MyVkDevice, &computeLayout, null, out myGradientPipelineLayout);
 
         ShaderModule? computeDrawShader = ShaderModule.Load("Shaders/comp.spv", myDevice);

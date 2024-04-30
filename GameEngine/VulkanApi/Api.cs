@@ -44,6 +44,7 @@ public unsafe class Api
         info.enabledExtensionCount = (uint)InstanceExtensions.Length;
         info.ppEnabledExtensionNames = (sbyte**)extensionsToBytesArray;
         
+        
 #if DEBUG
         string[] validationLayers = ["VK_LAYER_KHRONOS_validation"];
         IntPtr* layersToBytesArray = stackalloc IntPtr[validationLayers.Length];
@@ -61,12 +62,16 @@ public unsafe class Api
         debugUtilsCreateInfo.pfnUserCallback = &DebugMessengerCallback;
         info.pNext = &debugUtilsCreateInfo;
 #else
-        createInfo.enabledLayerCount = 0;
-        createInfo.pNext = null;
+        info.enabledLayerCount = 0;
+        info.pNext = null;
 #endif
         vkCreateInstance(&info, null, out MyVkInstance).CheckResult();
         vkLoadInstanceOnly(MyVkInstance);
+        
+        
+#if DEBUG
         vkCreateDebugUtilsMessengerEXT(MyVkInstance, &debugUtilsCreateInfo, null, out myDebugMessenger).CheckResult();
+#endif
     }
     
     public void Destroy()

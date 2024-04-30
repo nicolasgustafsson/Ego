@@ -1,6 +1,17 @@
+using System.Runtime.InteropServices;
+
 namespace Rendering;
 using Vortice.Vulkan;
 using Graphics;
+
+[StructLayout(LayoutKind.Sequential)]
+struct PushConstants
+{
+    public System.Numerics.Vector4 data1;
+    public System.Numerics.Vector4 data2;
+    public System.Numerics.Vector4 data3;
+    public System.Numerics.Vector4 data4;
+}
 
 public partial class Renderer
 {
@@ -41,11 +52,17 @@ public partial class Renderer
         myFrameNumber++;
     }
 
-    private void DrawBackground(CommandBuffer cmd, Image aCurrentImage)
+    private unsafe void DrawBackground(CommandBuffer cmd, Image aCurrentImage)
     {
         Vulkan.vkCmdBindPipeline(cmd.MyVkCommandBuffer, VkPipelineBindPoint.Compute, myGradientPipeline);
 
         Vulkan.vkCmdBindDescriptorSets(cmd.MyVkCommandBuffer, VkPipelineBindPoint.Compute, myGradientPipelineLayout, 0, myDrawImageDescriptors);
+
+        PushConstants pushConstants = new();
+        pushConstants.data1.X = 0f;
+
+        Vulkan.vkCmdPushConstants(cmd.MyVkCommandBuffer, myGradientPipelineLayout, VkShaderStageFlags.Compute, 0,
+            (uint)sizeof(PushConstants), &pushConstants);
 
         Vulkan.vkCmdDispatch(cmd.MyVkCommandBuffer, (uint)Math.Ceiling(mySwapchain.MyExtents.width / 16d),
             (uint)Math.Ceiling(mySwapchain.MyExtents.height / 16d), 1);
