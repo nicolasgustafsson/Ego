@@ -14,17 +14,14 @@ public partial class Renderer
     private Swapchain mySwapchain = null!;
     private DrawQueue myDrawQueue = null!;
     private Image myDrawImage = null!;
+    private ComputePipeline myGradientPipeline = null!;
+    private GraphicsPipeline myTrianglePipeline = null!;
     
     private List<ImageView> myImageViews = new();
     private DescriptorAllocator myGlobalDescriptorAllocator = new();
     private VkDescriptorSet myDrawImageDescriptors;
     private VkDescriptorSetLayout myDrawImageDescriptorLayout;
-    private VkPipeline myGradientPipeline;
-    private VkPipelineLayout myGradientPipelineLayout;
 
-    private VkPipeline myTrianglePipeline;
-    private VkPipelineLayout myTrianglePipelineLayout;
-    
     private MemoryAllocator myMemoryAllocator = null!;
     
     private List<FrameData> myFrameData = new() { };

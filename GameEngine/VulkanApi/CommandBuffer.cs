@@ -42,9 +42,11 @@ public unsafe class CommandBuffer
         vkEndCommandBuffer(MyVkCommandBuffer);
     }
     
-    public void TransitionImage(Image aImage, VkImageLayout aFrom, VkImageLayout aTo)
+    public void TransitionImage(Image aImage, VkImageLayout aTo)
     {
-        TransitionImage(aImage.MyVkImage, aFrom, aTo);
+        TransitionImage(aImage.MyVkImage, aImage.MyCurrentLayout, aTo);
+
+        aImage.MyCurrentLayout = aTo;
     }
     
     public void TransitionImage(VkImage aImage, VkImageLayout aFrom, VkImageLayout aTo)
@@ -117,5 +119,34 @@ public unsafe class CommandBuffer
     {
         VkImageSubresourceRange clearRange = new VkImageSubresourceRange(VkImageAspectFlags.Color);
         vkCmdClearColorImage(MyVkCommandBuffer, aImage.MyVkImage, aImageLayout, &aColor, 1, &clearRange);
+    }
+    
+    public void BeginRendering(Image aImage)
+    {
+        VkRenderingAttachmentInfo attachmentInfo = aImage.GetAttachmentInfo(null, VkImageLayout.General);
+        VkRenderingInfo renderingInfo = aImage.GetRenderingInfo(new VkExtent2D(aImage.MyExtent.width, aImage.MyExtent.height), attachmentInfo, null);
+
+        vkCmdBeginRendering(MyVkCommandBuffer, &renderingInfo);
+
+        VkViewport dynamicViewport = new();
+        dynamicViewport.x = 0;
+        dynamicViewport.y = 0;
+        dynamicViewport.width = aImage.MyExtent.width;
+        dynamicViewport.height = aImage.MyExtent.height;
+        dynamicViewport.minDepth = 0f;
+        dynamicViewport.maxDepth = 1f;
+
+        vkCmdSetViewport(MyVkCommandBuffer, 0, dynamicViewport);
+
+        VkRect2D scissor = new();
+        scissor.extent = new VkExtent2D(aImage.MyExtent.width, aImage.MyExtent.height);
+        scissor.offset = new VkOffset2D(0, 0);
+
+        vkCmdSetScissor(MyVkCommandBuffer, 0, scissor);
+    }
+    
+    public void EndRendering()
+    {
+        vkCmdEndRendering(MyVkCommandBuffer);
     }
 }

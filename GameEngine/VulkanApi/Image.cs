@@ -8,6 +8,8 @@ public unsafe class Image
     public VkExtent3D MyExtent;
     public VkFormat MyImageFormat;
     
+    public VkImageLayout MyCurrentLayout = VkImageLayout.Undefined;
+    
     public Image(Device aDevice, MemoryAllocator aAllocator, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent)
     {
         MyExtent = aExtent;
