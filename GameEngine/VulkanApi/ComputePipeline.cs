@@ -78,6 +78,7 @@ public class ComputePipeline : Pipeline
             vkCreateComputePipelines(Device.MyVkDevice, VkPipelineCache.Null, computePipelineCreateInfo, &pipeline).CheckResult();
 
             computePipeline.MyVkPipeline = pipeline;
+            computePipeline.MyBindPoint = VkPipelineBindPoint.Compute;
 
             myComputeShader.Destroy();
 

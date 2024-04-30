@@ -23,27 +23,26 @@ public partial class Renderer
         myCurrentFrame.MyDeletionQueue.Flush();
         
         uint imageIndex = Device.AcquireNextImage(mySwapchain, myCurrentFrame.MyImageAvailableSemaphore);
+        VkImage currentSwapchainImage = mySwapchain.MyImages[(int)imageIndex];
 
         CommandBuffer cmd = myCurrentFrame.MyCommandBuffer;
 
         cmd.Reset();
         cmd.BeginRecording();
 
-        Image currentDrawImage = myDrawImage;
-        VkImage currentSwapchainImage = mySwapchain.MyImages[(int)imageIndex];
         
-        cmd.TransitionImage(currentDrawImage, VkImageLayout.General);
+        cmd.TransitionImage(myDrawImage, VkImageLayout.General);
 
         DrawBackground(cmd);
 
-        cmd.TransitionImage(currentDrawImage, VkImageLayout.ColorAttachmentOptimal);
+        cmd.TransitionImage(myDrawImage, VkImageLayout.ColorAttachmentOptimal);
 
         DrawGeometry(cmd);
 
-        cmd.TransitionImage(currentDrawImage, VkImageLayout.TransferSrcOptimal);
+        cmd.TransitionImage(myDrawImage, VkImageLayout.TransferSrcOptimal);
         cmd.TransitionImage(currentSwapchainImage, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal);
 
-        cmd.Blit(currentDrawImage, currentSwapchainImage, mySwapchain.MyExtents);
+        cmd.Blit(myDrawImage, currentSwapchainImage, mySwapchain.MyExtents);
         
         cmd.TransitionImage(currentSwapchainImage, VkImageLayout.TransferDstOptimal, VkImageLayout.PresentSrcKHR);
 
@@ -59,17 +58,17 @@ public partial class Renderer
     private void DrawGeometry(CommandBuffer cmd)
     {
         cmd.BeginRendering(myDrawImage);
-        
-        Vulkan.vkCmdBindPipeline(cmd.MyVkCommandBuffer, VkPipelineBindPoint.Graphics, myTrianglePipeline.MyVkPipeline);
 
-        Vulkan.vkCmdDraw(cmd.MyVkCommandBuffer, 3, 1, 0, 0);
+        cmd.BindPipeline(myTrianglePipeline);
+
+        cmd.Draw(3);
 
         cmd.EndRendering();
     }
 
     private unsafe void DrawBackground(CommandBuffer cmd)
     {
-        Vulkan.vkCmdBindPipeline(cmd.MyVkCommandBuffer, VkPipelineBindPoint.Compute, myGradientPipeline.MyVkPipeline);
+        cmd.BindPipeline(myGradientPipeline);
 
         Vulkan.vkCmdBindDescriptorSets(cmd.MyVkCommandBuffer, VkPipelineBindPoint.Compute, myGradientPipeline.MyVkLayout, 0, myDrawImageDescriptorSet);
 

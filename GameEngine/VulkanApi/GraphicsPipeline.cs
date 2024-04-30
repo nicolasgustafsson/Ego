@@ -224,6 +224,7 @@ public class GraphicsPipeline : Pipeline
 
             graphicsPipeline.MyVkPipeline = pipeline;
             graphicsPipeline.MyVkLayout = layout;
+            graphicsPipeline.MyBindPoint = VkPipelineBindPoint.Graphics;
 
             vkDestroyShaderModule(Device.MyVkDevice, myFragmentShader.MyModule); 
             vkDestroyShaderModule(Device.MyVkDevice, myVertexShader.MyModule); 

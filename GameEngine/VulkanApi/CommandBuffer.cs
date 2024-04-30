@@ -121,6 +121,16 @@ public unsafe class CommandBuffer
         vkCmdClearColorImage(MyVkCommandBuffer, aImage.MyVkImage, aImageLayout, &aColor, 1, &clearRange);
     }
     
+    public void BindPipeline(Pipeline aPipeline)
+    {
+        vkCmdBindPipeline(MyVkCommandBuffer, aPipeline.MyBindPoint, aPipeline.MyVkPipeline);
+    }
+    
+    public void Draw(int aVertexCount)
+    {
+        vkCmdDraw(MyVkCommandBuffer, (uint)aVertexCount, 1, 0, 0);
+    }
+    
     public void BeginRendering(Image aImage)
     {
         VkRenderingAttachmentInfo attachmentInfo = aImage.GetAttachmentInfo(null, VkImageLayout.General);

@@ -4,6 +4,7 @@ public unsafe class Pipeline
 {
     public VkPipeline MyVkPipeline;
     public VkPipelineLayout MyVkLayout;
+    public VkPipelineBindPoint MyBindPoint;
     
     public void Destroy()
     {
