@@ -4,18 +4,19 @@ public static class ExtensionNames
 {
     public static class Instance
     {
-        public static string Surface = "VK_KHR_surface";
-        public static string DebugUtils = "VK_EXT_debug_utils";
+        public static readonly string Surface = "VK_KHR_surface";
+        public static readonly string DebugUtils = "VK_EXT_debug_utils";
 
-        public static string Win32Surface = "VK_KHR_win32_surface";
-        public static string X11Surface = "VK_KHR_xlib_surface";
-        public static string WaylandSurface = "VK_KHR_wayland_surface";
+        public static readonly string Win32Surface = "VK_KHR_win32_surface";
+        public static readonly string X11Surface = "VK_KHR_xlib_surface";
+        public static readonly string WaylandSurface = "VK_KHR_wayland_surface";
     }
     
     public static class Device
     {
-        public static string Swapchain = "VK_KHR_swapchain";
-        public static string Synchronization2 = "VK_KHR_synchronization2";
+        public static readonly string Swapchain = "VK_KHR_swapchain";
+        public static readonly string Synchronization2 = "VK_KHR_synchronization2";
+        public static readonly string DeviceAddress = "VK_KHR_buffer_device_address";
     }
 }
 
@@ -32,5 +33,6 @@ public static partial class Defaults
     [
         ExtensionNames.Device.Swapchain,
         ExtensionNames.Device.Synchronization2,
+        ExtensionNames.Device.DeviceAddress,
     ];
 }

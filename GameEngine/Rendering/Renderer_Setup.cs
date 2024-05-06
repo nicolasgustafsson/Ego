@@ -37,6 +37,8 @@ public partial class Renderer
         CreateMemoryAllocator();
         
         CreateDrawImage();
+
+        CreateImmediateCommandBuffer();
         
         CreateFrameData();
 
@@ -44,20 +46,64 @@ public partial class Renderer
 
         InitializePipelines();
         
+        SetupTriangleMesh();
+        
         Console.WriteLine("Renderer successfully created!");
+    }
+    
+    private void SetupTriangleMesh()
+    {
+        List<Vertex> vertices = new();
+
+        vertices.Add(new Vertex()
+        {
+            Position = new Vector3(0.5f, -0.5f, 0f),
+            Color = new Vector4(0f, 0f, 0f, 1f)
+        });
+
+        vertices.Add(new Vertex()
+        {
+            Position = new Vector3(0.5f, 0.5f, 0f),
+            Color = new Vector4(0.5f, 0.5f, 0.5f, 1f)
+        });
+        vertices.Add(new Vertex()
+        {
+            Position = new Vector3(-0.5f, -0.5f, 0f),
+            Color = new Vector4(1f, 0f, 0f, 1f)
+        });
+        vertices.Add(new Vertex()
+        {
+            Position = new Vector3(-0.5f, 0.5f, 0f),
+            Color = new Vector4(0f, 1f, 0f, 1f)
+        });
+
+        List<uint> indices = new(){0, 1, 2, 2, 1, 3};
+
+        myTriangleMeshBuffers = new(this, myMemoryAllocator, indices, vertices);
+
+        myCleanupQueue.Add(() => myTriangleMeshBuffers.Destroy(myMemoryAllocator));
+    }
+
+    private void CreateImmediateCommandBuffer()
+    {
+        myImmediateFence = new();
+        myImmediateCommandBuffer = new(myDrawQueue);
+        myCleanupQueue.Add(() => myImmediateFence.Destroy());
+        myCleanupQueue.Add(() => myImmediateCommandBuffer.Destroy());
     }
 
     private void InitializePipelines()
     {
         InitializeBackgroundPipelines();
 
-        InitializeTrianglePipeline();
+        InitializeMeshTrianglePipeline();
     }
 
-    private void InitializeTrianglePipeline()
+    private void InitializeMeshTrianglePipeline()
     {
         myTrianglePipeline = GraphicsPipeline
             .StartBuild()
+            .AddPushConstant<MeshPushConstants>(VkShaderStageFlags.Vertex)
             .AddLayout(myDrawImageDescriptorLayout)
             .SetVertexShader("Shaders/vert.spv")
             .SetFragmentShader("Shaders/frag.spv")

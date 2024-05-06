@@ -27,12 +27,12 @@ public class GraphicsPipeline : Pipeline
             return this;
         }
         
-        public GraphicsPipelineBuilder AddPushConstant<T>() where T : unmanaged
+        public GraphicsPipelineBuilder AddPushConstant<T>(VkShaderStageFlags aShaderStages) where T : unmanaged
         {
             VkPushConstantRange range = new();
             range.offset = myCurrentPushConstantOffset;
             range.size = (uint)sizeof(T);
-            range.stageFlags = VkShaderStageFlags.Compute;
+            range.stageFlags = aShaderStages;
 
             myCurrentPushConstantOffset += (uint)sizeof(T);
 

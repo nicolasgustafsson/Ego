@@ -131,6 +131,11 @@ public unsafe class CommandBuffer
         vkCmdDraw(MyVkCommandBuffer, (uint)aVertexCount, 1, 0, 0);
     }
     
+    public void DrawIndexed(int aIndexCount)
+    {
+        vkCmdDrawIndexed(MyVkCommandBuffer, (uint)aIndexCount, 1, 0, 0, 0);
+    }
+    
     public void BeginRendering(Image aImage)
     {
         VkRenderingAttachmentInfo attachmentInfo = aImage.GetAttachmentInfo(null, VkImageLayout.General);

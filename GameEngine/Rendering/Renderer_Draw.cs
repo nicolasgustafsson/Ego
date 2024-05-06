@@ -7,10 +7,10 @@ using Graphics;
 [StructLayout(LayoutKind.Sequential, Pack = 4)]
 struct PushConstants
 {
-    public System.Numerics.Vector4 data1;
-    public System.Numerics.Vector4 data2;
-    public System.Numerics.Vector4 data3;
-    public System.Numerics.Vector4 data4;
+    public Vector4 data1;
+    public Vector4 data2;
+    public Vector4 data3;
+    public Vector4 data4;
 }
 
 public partial class Renderer
@@ -30,7 +30,6 @@ public partial class Renderer
         cmd.Reset();
         cmd.BeginRecording();
 
-        
         cmd.TransitionImage(myDrawImage, VkImageLayout.General);
 
         DrawBackground(cmd);
@@ -55,13 +54,20 @@ public partial class Renderer
         myFrameNumber++;
     }
 
-    private void DrawGeometry(CommandBuffer cmd)
+    private unsafe void DrawGeometry(CommandBuffer cmd)
     {
         cmd.BeginRendering(myDrawImage);
 
         cmd.BindPipeline(myTrianglePipeline);
 
-        cmd.Draw(3);
+        MeshPushConstants pushConstants = new();
+        pushConstants.WorldMatrix = Matrix4x4.Identity;
+        pushConstants.VertexBufferAddress = myTriangleMeshBuffers.MyVertexBufferAddress;
+
+        Vulkan.vkCmdPushConstants(cmd.MyVkCommandBuffer, myTrianglePipeline.MyVkLayout, VkShaderStageFlags.Vertex, 0, (uint)sizeof(MeshPushConstants), &pushConstants);
+        Vulkan.vkCmdBindIndexBuffer(cmd.MyVkCommandBuffer, myTriangleMeshBuffers.MyIndexBuffer.MyBuffer, 0, VkIndexType.Uint32);
+
+        cmd.DrawIndexed(6);
 
         cmd.EndRendering();
     }

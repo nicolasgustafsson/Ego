@@ -75,18 +75,18 @@ public unsafe class Gpu
         deviceQueueCreateInfo.pQueuePriorities = &queuePriority;
 
         VkPhysicalDeviceFeatures deviceFeatures = new();
-
-        VkPhysicalDeviceVulkan13Features device13Features = new();
-        device13Features.synchronization2 = true;
-        device13Features.dynamicRendering = true;
         
         VkPhysicalDeviceVulkan12Features device12Features = new();
         device12Features.bufferDeviceAddress = true;
         device12Features.descriptorIndexing = true;
-        device12Features.pNext = &device13Features;
+
+        VkPhysicalDeviceVulkan13Features device13Features = new();
+        device13Features.synchronization2 = true;
+        device13Features.dynamicRendering = true;
+        device13Features.pNext = &device12Features;
         
         VkDeviceCreateInfo deviceCreateInfo = new();
-        deviceCreateInfo.pNext = &device12Features;
+        deviceCreateInfo.pNext = &device13Features;
         deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;
         deviceCreateInfo.queueCreateInfoCount = 1;
         deviceCreateInfo.pEnabledFeatures = &deviceFeatures;

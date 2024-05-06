@@ -23,6 +23,7 @@ public class Window
 
     public Window(string aName, System.Numerics.Vector2 aWindowSize)
     {
+        Glfw.WindowHint(Hint.ClientApi, ClientApi.None);
         Glfw.SetErrorCallback(errorCallback);
         myNativeWindow = new((int)aWindowSize.X, (int)aWindowSize.Y, aName);
 
@@ -42,7 +43,6 @@ public class Window
     
     public void Update()
     {
-        myNativeWindow.SwapBuffers();
         Glfw.PollEvents();
     }
     

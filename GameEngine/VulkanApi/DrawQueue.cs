@@ -14,6 +14,14 @@ public unsafe class DrawQueue : Queue
         vkQueueSubmit2(MyVkQueue, 1, &submitInfo, aRenderFence.MyVkFence);
     }
     
+    public void Submit(CommandBuffer aCommandBuffer, Fence aRenderFence)
+    {
+        VkCommandBufferSubmitInfo cmdInfo = GetCommandBufferSubmitInfo(aCommandBuffer);
+
+        VkSubmitInfo2 submitInfo = GetSubmitInfo(&cmdInfo, null, null);
+        vkQueueSubmit2(MyVkQueue, 1, &submitInfo, aRenderFence.MyVkFence);
+    }
+    
     //Currently the draw queue handles presenting too; this might be changed in the future
     public void Present(Swapchain aSwapchain, Semaphore aRenderFinishedSemaphore, uint aImageIndex)
     {

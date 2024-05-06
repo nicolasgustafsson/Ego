@@ -27,13 +27,13 @@ public unsafe class Queue
     {
         VkSubmitInfo2 info = new();
         
-        info.signalSemaphoreInfoCount = 1;
+        info.signalSemaphoreInfoCount = (uint)(aSignalSemaphoreInfo == null ? 0 : 1);
         
         info.pSignalSemaphoreInfos = aSignalSemaphoreInfo;
 
         info.waitSemaphoreInfoCount = 0;
         
-        info.waitSemaphoreInfoCount = 1;
+        info.waitSemaphoreInfoCount = (uint)(aWaitSemaphoreInfo == null ? 0 : 1);
         
         info.pWaitSemaphoreInfos = aWaitSemaphoreInfo;
 

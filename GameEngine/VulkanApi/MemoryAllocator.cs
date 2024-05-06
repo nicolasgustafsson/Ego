@@ -9,6 +9,8 @@ public unsafe class MemoryAllocator
         createInfo.physicalDevice = aGpu.MyVkPhysicalDevice;
         createInfo.instance = aApi.MyVkInstance;
         createInfo.device = Device.MyVkDevice;
+        createInfo.flags = VmaAllocatorCreateFlags.BufferDeviceAddress;
+        
         createInfo.vulkanApiVersion = VkVersion.Version_1_3;
 
         vmaCreateAllocator(&createInfo, out myVmaAllocator).CheckResult();
