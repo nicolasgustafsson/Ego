@@ -47,10 +47,17 @@ public partial class Renderer
         InitializePipelines();
         
         SetupTriangleMesh();
+
+        CreateImGui(aWindow);
         
         Console.WriteLine("Renderer successfully created!");
     }
-    
+
+    private void CreateImGui(Window aWindow)
+    {
+        myImGuiContext = new(this, aWindow);
+    }
+
     private void SetupTriangleMesh()
     {
         List<Vertex> vertices = new();
@@ -79,9 +86,9 @@ public partial class Renderer
 
         List<uint> indices = new(){0, 1, 2, 2, 1, 3};
 
-        myTriangleMeshBuffers = new(this, myMemoryAllocator, indices, vertices);
+        myTriangleMeshBuffers = new(this, MyMemoryAllocator, indices, vertices);
 
-        myCleanupQueue.Add(() => myTriangleMeshBuffers.Destroy(myMemoryAllocator));
+        myCleanupQueue.Add(() => myTriangleMeshBuffers.Destroy(MyMemoryAllocator));
     }
 
     private void CreateImmediateCommandBuffer()
@@ -134,22 +141,26 @@ public partial class Renderer
 
     private void CreateDrawImage()
     {
-         myDrawImage = new Image(myMemoryAllocator, VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
-         myCleanupQueue.Add(() => { myDrawImage.Destroy(myMemoryAllocator); });
+         myDrawImage = new Image(MyMemoryAllocator, VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
+         myCleanupQueue.Add(() => { myDrawImage.Destroy(MyMemoryAllocator); });
     }
 
     private unsafe void InitializeDescriptors()
     {
-        List<DescriptorAllocator.PoolSizeRatio> sizes = new List<DescriptorAllocator.PoolSizeRatio> { new() { Ratio = 1f, Type = VkDescriptorType.StorageImage} };
+        List<DescriptorAllocator.PoolSizeRatio> sizes = new List<DescriptorAllocator.PoolSizeRatio>
+        {
+            new() { Ratio = 1f, Type = VkDescriptorType.StorageImage},
+            new() { Ratio = 1f, Type = VkDescriptorType.CombinedImageSampler},
+        };
 
-        myGlobalDescriptorAllocator = new();
-        myGlobalDescriptorAllocator.InitPool(10, sizes);
+        MyGlobalDescriptorAllocator = new();
+        MyGlobalDescriptorAllocator.InitPool(10, sizes);
 
         DescriptorLayoutBuilder builder = new();
         builder.AddBinding(0, VkDescriptorType.StorageImage);
         myDrawImageDescriptorLayout = builder.Build(VkShaderStageFlags.Compute | VkShaderStageFlags.Fragment);
 
-        myDrawImageDescriptorSet = myGlobalDescriptorAllocator.Allocate(myDrawImageDescriptorLayout);
+        myDrawImageDescriptorSet = MyGlobalDescriptorAllocator.Allocate(myDrawImageDescriptorLayout);
         
         VkDescriptorImageInfo imageInfo = new();
         imageInfo.imageLayout = VkImageLayout.General;
@@ -167,14 +178,14 @@ public partial class Renderer
         myCleanupQueue.Add(() =>
         {
             vkDestroyDescriptorSetLayout(Device.MyVkDevice, myDrawImageDescriptorLayout);
-            myGlobalDescriptorAllocator.DestroyPool();
+            MyGlobalDescriptorAllocator.DestroyPool();
         });
     }
 
     private void CreateMemoryAllocator()
     {
-        myMemoryAllocator = new MemoryAllocator(myGpu, myApi);
-        myCleanupQueue.Add(() => myMemoryAllocator.Destroy());
+        MyMemoryAllocator = new MemoryAllocator(myGpu, myApi);
+        myCleanupQueue.Add(() => MyMemoryAllocator.Destroy());
     }
 
     private void PrintAllExtensions()

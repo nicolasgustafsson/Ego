@@ -16,7 +16,6 @@ public static class ExtensionNames
     {
         public static readonly string Swapchain = "VK_KHR_swapchain";
         public static readonly string Synchronization2 = "VK_KHR_synchronization2";
-        public static readonly string DeviceAddress = "VK_KHR_buffer_device_address";
     }
 }
 
@@ -33,6 +32,5 @@ public static partial class Defaults
     [
         ExtensionNames.Device.Swapchain,
         ExtensionNames.Device.Synchronization2,
-        ExtensionNames.Device.DeviceAddress,
     ];
 }

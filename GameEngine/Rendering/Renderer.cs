@@ -14,20 +14,22 @@ public partial class Renderer
     private Swapchain mySwapchain = null!;
     private DrawQueue myDrawQueue = null!;
     private Image myDrawImage = null!;
+    public DescriptorAllocator MyGlobalDescriptorAllocator = new();
     
     private ComputePipeline myGradientPipeline = null!;
     private GraphicsPipeline myTrianglePipeline = null!;
     private MeshBuffers myTriangleMeshBuffers = null!;
 
+    private ImGuiContext myImGuiContext = null!;
+
     private Fence myImmediateFence = null!;
     private CommandBuffer myImmediateCommandBuffer = null!;
     
     private List<ImageView> myImageViews = new();
-    private DescriptorAllocator myGlobalDescriptorAllocator = new();
     private VkDescriptorSet myDrawImageDescriptorSet;
     private VkDescriptorSetLayout myDrawImageDescriptorLayout;
 
-    private MemoryAllocator myMemoryAllocator = null!;
+    public MemoryAllocator MyMemoryAllocator = null!;
     
     private List<FrameData> myFrameData = new() { };
     private FrameData myCurrentFrame => myFrameData[(int)(myFrameNumber % FrameOverlap)];
