@@ -131,7 +131,7 @@ public unsafe class CommandBuffer
         vkCmdDraw(MyVkCommandBuffer, (uint)aVertexCount, 1, 0, 0);
     }
     
-    public void DrawIndexed(int aIndexCount)
+    public void DrawIndexed(uint aIndexCount)
     {
         vkCmdDrawIndexed(MyVkCommandBuffer, (uint)aIndexCount, 1, 0, 0, 0);
     }

@@ -60,15 +60,20 @@ public partial class Renderer
 
         cmd.BindPipeline(myTrianglePipeline);
 
+        Matrix4x4 view = Matrix4x4.CreateTranslation(new Vector3(0f, 0f, -5f));
+        Matrix4x4 projection = Matrix4x4.CreatePerspectiveFieldOfView(70f * (float)(Math.PI/180f), (float)myDrawImage.MyExtent.width / (float)myDrawImage.MyExtent.height, 0.1f, 10000f);
+
+        projection[1, 1] *= -1f;
+
         MeshPushConstants pushConstants = new();
-        pushConstants.WorldMatrix = Matrix4x4.Identity;
-        pushConstants.VertexBufferAddress = myTriangleMeshBuffers.MyVertexBufferAddress;
+        pushConstants.WorldMatrix = projection * view;
+        pushConstants.VertexBufferAddress = myMonke.MyMeshBuffers.MyVertexBufferAddress;
 
         Vulkan.vkCmdPushConstants(cmd.MyVkCommandBuffer, myTrianglePipeline.MyVkLayout, VkShaderStageFlags.Vertex, 0, (uint)sizeof(MeshPushConstants), &pushConstants);
-        Vulkan.vkCmdBindIndexBuffer(cmd.MyVkCommandBuffer, myTriangleMeshBuffers.MyIndexBuffer.MyBuffer, 0, VkIndexType.Uint32);
+        Vulkan.vkCmdBindIndexBuffer(cmd.MyVkCommandBuffer, myMonke.MyMeshBuffers.MyIndexBuffer.MyBuffer, 0, VkIndexType.Uint32);
 
-        cmd.DrawIndexed(6);
-
+        cmd.DrawIndexed(myMonke.MySurfaces[0].Count);
+       
         cmd.EndRendering();
     }
 

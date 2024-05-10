@@ -46,49 +46,28 @@ public partial class Renderer
 
         InitializePipelines();
         
-        SetupTriangleMesh();
-
         CreateImGui(aWindow);
+
+        CreateMonke();
         
         Console.WriteLine("Renderer successfully created!");
     }
 
-    private void CreateImGui(Window aWindow)
+    private void CreateMonke()
     {
-        myImGuiContext = new(this, aWindow);
+        myMeshes = Mesh.LoadGltf(this, "Models/basicmesh.glb").ToArray();
+        myCleanupQueue.Add(() =>
+        {
+            foreach(var mesh in myMeshes)
+            {
+                mesh.Destroy(MyMemoryAllocator);
+            }
+        });
     }
 
-    private void SetupTriangleMesh()
+    private void CreateImGui(Window aWindow)
     {
-        List<Vertex> vertices = new();
-
-        vertices.Add(new Vertex()
-        {
-            Position = new Vector3(0.5f, -0.5f, 0f),
-            Color = new Vector4(0f, 0f, 0f, 1f)
-        });
-
-        vertices.Add(new Vertex()
-        {
-            Position = new Vector3(0.5f, 0.5f, 0f),
-            Color = new Vector4(0.5f, 0.5f, 0.5f, 1f)
-        });
-        vertices.Add(new Vertex()
-        {
-            Position = new Vector3(-0.5f, -0.5f, 0f),
-            Color = new Vector4(1f, 0f, 0f, 1f)
-        });
-        vertices.Add(new Vertex()
-        {
-            Position = new Vector3(-0.5f, 0.5f, 0f),
-            Color = new Vector4(0f, 1f, 0f, 1f)
-        });
-
-        List<uint> indices = new(){0, 1, 2, 2, 1, 3};
-
-        myTriangleMeshBuffers = new(this, MyMemoryAllocator, indices, vertices);
-
-        myCleanupQueue.Add(() => myTriangleMeshBuffers.Destroy(MyMemoryAllocator));
+        //myImGuiContext = new(this, aWindow);
     }
 
     private void CreateImmediateCommandBuffer()
@@ -153,14 +132,14 @@ public partial class Renderer
             new() { Ratio = 1f, Type = VkDescriptorType.CombinedImageSampler},
         };
 
-        MyGlobalDescriptorAllocator = new();
-        MyGlobalDescriptorAllocator.InitPool(10, sizes);
+        myGlobalDescriptorAllocator = new();
+        myGlobalDescriptorAllocator.InitPool(10, sizes);
 
         DescriptorLayoutBuilder builder = new();
         builder.AddBinding(0, VkDescriptorType.StorageImage);
         myDrawImageDescriptorLayout = builder.Build(VkShaderStageFlags.Compute | VkShaderStageFlags.Fragment);
 
-        myDrawImageDescriptorSet = MyGlobalDescriptorAllocator.Allocate(myDrawImageDescriptorLayout);
+        myDrawImageDescriptorSet = myGlobalDescriptorAllocator.Allocate(myDrawImageDescriptorLayout);
         
         VkDescriptorImageInfo imageInfo = new();
         imageInfo.imageLayout = VkImageLayout.General;
@@ -178,7 +157,7 @@ public partial class Renderer
         myCleanupQueue.Add(() =>
         {
             vkDestroyDescriptorSetLayout(Device.MyVkDevice, myDrawImageDescriptorLayout);
-            MyGlobalDescriptorAllocator.DestroyPool();
+            myGlobalDescriptorAllocator.DestroyPool();
         });
     }
 

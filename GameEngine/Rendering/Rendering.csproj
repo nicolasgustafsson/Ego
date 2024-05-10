@@ -15,6 +15,8 @@
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="ImGui.NET" Version="1.90.5.1" />
+      <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0031" />
+      <PackageReference Include="SharpGLTF.Toolkit" Version="1.0.0-alpha0031" />
       <PackageReference Include="Vortice.ShaderCompiler" Version="1.7.3" />
       <PackageReference Include="Vortice.Vulkan" Version="1.8.7" />
       <PackageReference Include="Vortice.VulkanMemoryAllocator" Version="1.4.5" />
@@ -33,6 +35,9 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="Shaders\triangle.vert">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\basicmesh.glb">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
