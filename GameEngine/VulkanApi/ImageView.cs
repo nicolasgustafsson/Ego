@@ -4,7 +4,7 @@ public unsafe class ImageView
 {
     public VkImageView MyVkImageView;
     
-    public ImageView(VkImage aImage, VkFormat aFormat)
+    public ImageView(VkImage aImage, VkFormat aFormat, VkImageAspectFlags aAspectFlags)
     {
         VkImageViewCreateInfo createInfo = new();
 
@@ -13,7 +13,7 @@ public unsafe class ImageView
         
         createInfo.components = VkComponentMapping.Identity;
         createInfo.viewType = VkImageViewType.Image2D;
-        createInfo.subresourceRange.aspectMask = VkImageAspectFlags.Color;
+        createInfo.subresourceRange.aspectMask = aAspectFlags;
         createInfo.subresourceRange.baseMipLevel = 0;
         createInfo.subresourceRange.levelCount = 1;
         createInfo.subresourceRange.baseArrayLayer = 0;

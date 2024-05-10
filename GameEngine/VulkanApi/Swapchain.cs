@@ -49,7 +49,7 @@ public unsafe class Swapchain
         List<ImageView> views = new();
         foreach(var image in MyImages)
         {
-            views.Add(new(image, MyImageFormat){});
+            views.Add(new(image, MyImageFormat, VkImageAspectFlags.Color){});
         }
 
         return views;

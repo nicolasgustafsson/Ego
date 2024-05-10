@@ -31,6 +31,7 @@ public partial class Renderer
         cmd.BeginRecording();
 
         cmd.TransitionImage(myDrawImage, VkImageLayout.General);
+        cmd.TransitionImage(myDepthImage, VkImageLayout.DepthAttachmentOptimal);
 
         DrawBackground(cmd);
 
@@ -56,17 +57,17 @@ public partial class Renderer
 
     private unsafe void DrawGeometry(CommandBuffer cmd)
     {
-        cmd.BeginRendering(myDrawImage);
+        cmd.BeginRendering(myDrawImage, myDepthImage);
 
         cmd.BindPipeline(myTrianglePipeline);
 
-        Matrix4x4 view = Matrix4x4.CreateTranslation(new Vector3(0f, 0f, -5f));
-        Matrix4x4 projection = Matrix4x4.CreatePerspectiveFieldOfView(70f * (float)(Math.PI/180f), (float)myDrawImage.MyExtent.width / (float)myDrawImage.MyExtent.height, 0.1f, 10000f);
+        Matrix4x4 view = Matrix4x4.CreateTranslation(new Vector3(0f, 0f, -3f));
+        Matrix4x4 projection = MatrixExtensions.CreatePerspectiveFieldOfView(90f * (float)(Math.PI/180f), (float)myDrawImage.MyExtent.width / (float)myDrawImage.MyExtent.height, 10000f, 0.1f);
 
         projection[1, 1] *= -1f;
 
         MeshPushConstants pushConstants = new();
-        pushConstants.WorldMatrix = projection * view;
+        pushConstants.WorldMatrix = view * projection;
         pushConstants.VertexBufferAddress = myMonke.MyMeshBuffers.MyVertexBufferAddress;
 
         Vulkan.vkCmdPushConstants(cmd.MyVkCommandBuffer, myTrianglePipeline.MyVkLayout, VkShaderStageFlags.Vertex, 0, (uint)sizeof(MeshPushConstants), &pushConstants);

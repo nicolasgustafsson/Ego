@@ -97,10 +97,10 @@ public partial class Renderer
             .SetPolygonMode(VkPolygonMode.Fill)
             .SetCullMode(VkCullModeFlags.None, VkFrontFace.Clockwise)
             .DisableMultisampling()
-            .DisableDepthTest()
+            .EnableDepthTest()
             .DisableBlending()
             .SetColorAttachmentFormat(myDrawImage.MyImageFormat)
-            .SetDepthFormat(VkFormat.Undefined)
+            .SetDepthFormat(VkFormat.D32Sfloat)
             .Build();
         
         myCleanupQueue.Add(() =>
@@ -122,6 +122,9 @@ public partial class Renderer
     {
          myDrawImage = new Image(MyMemoryAllocator, VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
          myCleanupQueue.Add(() => { myDrawImage.Destroy(MyMemoryAllocator); });
+         
+         myDepthImage = new Image(MyMemoryAllocator, VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
+         myCleanupQueue.Add(() => { myDepthImage.Destroy(MyMemoryAllocator); });
     }
 
     private unsafe void InitializeDescriptors()

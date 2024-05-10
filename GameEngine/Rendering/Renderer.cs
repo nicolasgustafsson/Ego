@@ -14,6 +14,7 @@ public partial class Renderer
     private Swapchain mySwapchain = null!;
     private DrawQueue myDrawQueue = null!;
     private Image myDrawImage = null!;
+    private Image myDepthImage = null!;
     private DescriptorAllocator myGlobalDescriptorAllocator = new();
     
     private ComputePipeline myGradientPipeline = null!;

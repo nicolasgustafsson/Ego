@@ -136,25 +136,26 @@ public unsafe class CommandBuffer
         vkCmdDrawIndexed(MyVkCommandBuffer, (uint)aIndexCount, 1, 0, 0, 0);
     }
     
-    public void BeginRendering(Image aImage)
+    public void BeginRendering(Image aDrawImage, Image aDepthImage)
     {
-        VkRenderingAttachmentInfo attachmentInfo = aImage.GetAttachmentInfo(null, VkImageLayout.General);
-        VkRenderingInfo renderingInfo = aImage.GetRenderingInfo(new VkExtent2D(aImage.MyExtent.width, aImage.MyExtent.height), attachmentInfo, null);
+        VkRenderingAttachmentInfo attachmentInfo = aDrawImage.GetAttachmentInfo(null, VkImageLayout.General);
+        VkRenderingAttachmentInfo depthAttachmentInfo = aDepthImage.GetDepthAttachmentInfo(VkImageLayout.DepthAttachmentOptimal);
+        VkRenderingInfo renderingInfo = aDrawImage.GetRenderingInfo(new VkExtent2D(aDrawImage.MyExtent.width, aDrawImage.MyExtent.height), attachmentInfo, depthAttachmentInfo);
 
         vkCmdBeginRendering(MyVkCommandBuffer, &renderingInfo);
 
         VkViewport dynamicViewport = new();
         dynamicViewport.x = 0;
         dynamicViewport.y = 0;
-        dynamicViewport.width = aImage.MyExtent.width;
-        dynamicViewport.height = aImage.MyExtent.height;
+        dynamicViewport.width = aDrawImage.MyExtent.width;
+        dynamicViewport.height = aDrawImage.MyExtent.height;
         dynamicViewport.minDepth = 0f;
         dynamicViewport.maxDepth = 1f;
 
         vkCmdSetViewport(MyVkCommandBuffer, 0, dynamicViewport);
 
         VkRect2D scissor = new();
-        scissor.extent = new VkExtent2D(aImage.MyExtent.width, aImage.MyExtent.height);
+        scissor.extent = new VkExtent2D(aDrawImage.MyExtent.width, aDrawImage.MyExtent.height);
         scissor.offset = new VkOffset2D(0, 0);
 
         vkCmdSetScissor(MyVkCommandBuffer, 0, scissor);

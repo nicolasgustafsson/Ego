@@ -34,7 +34,7 @@ public unsafe class Image
         
         Vma.vmaCreateImage(aAllocator.myVmaAllocator, &createInfo, &allocationInfo, out MyVkImage, out MyAllocation, out VmaAllocationInfo allocInfo).CheckResult();
 
-        MyImageView = new(MyVkImage, aFormat);
+        MyImageView = new(MyVkImage, aFormat, (int)(aUsageFlags & VkImageUsageFlags.DepthStencilAttachment) != 0 ? VkImageAspectFlags.Depth : VkImageAspectFlags.Color);
     }
     
     public void Destroy(MemoryAllocator aAllocator)
@@ -58,9 +58,10 @@ public unsafe class Image
         return colorAttachment;
     }
     
-    public VkRenderingAttachmentInfo GetDepthAttachmentInfo(VkImageLayout layout = VkImageLayout.ColorAttachmentOptimal)
+    public VkRenderingAttachmentInfo GetDepthAttachmentInfo(VkImageLayout layout = VkImageLayout.DepthAttachmentOptimal)
     {
         VkRenderingAttachmentInfo depthAttachment = new();
+        
         depthAttachment.imageView = MyImageView.MyVkImageView;
         depthAttachment.imageLayout = layout;
         depthAttachment.loadOp = VkAttachmentLoadOp.Clear;
@@ -70,7 +71,7 @@ public unsafe class Image
         return depthAttachment;
     }
     
-    public VkRenderingInfo GetRenderingInfo(VkExtent2D renderExtent, VkRenderingAttachmentInfo colorAttachment, VkRenderingAttachmentInfo? depthAttachment)
+    public VkRenderingInfo GetRenderingInfo(VkExtent2D renderExtent, VkRenderingAttachmentInfo colorAttachment, VkRenderingAttachmentInfo depthAttachment)
     {
         VkRenderingInfo renderInfo = new();
         
@@ -78,15 +79,7 @@ public unsafe class Image
         renderInfo.layerCount = 1;
         renderInfo.colorAttachmentCount = 1;
         renderInfo.pColorAttachments = &colorAttachment;
-        if (depthAttachment.HasValue)
-        {
-            VkRenderingAttachmentInfo depthAttachmentRealsies = depthAttachment.Value;
-            renderInfo.pDepthAttachment = &depthAttachmentRealsies;
-        }
-        else
-        {
-            renderInfo.pDepthAttachment = null;
-        }
+        renderInfo.pDepthAttachment = &depthAttachment;
         
         renderInfo.pStencilAttachment = null;
 

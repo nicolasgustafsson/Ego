@@ -132,6 +132,20 @@ public class GraphicsPipeline : Pipeline
             return this;
         }
         
+        public GraphicsPipelineBuilder EnableDepthTest()
+        {
+            myDepthStencilState.depthTestEnable = true;
+            myDepthStencilState.depthWriteEnable = true;
+            myDepthStencilState.depthCompareOp = VkCompareOp.Greater;
+            myDepthStencilState.depthBoundsTestEnable = false;
+            myDepthStencilState.stencilTestEnable = false;
+            myDepthStencilState.front = new();
+            myDepthStencilState.back = new();
+            myDepthStencilState.minDepthBounds = 0f;
+            myDepthStencilState.maxDepthBounds = 1f;
+            return this;
+        }
+        
         public GraphicsPipelineBuilder SetTopology(VkPrimitiveTopology aTopology)
         {
             myInputAssembly.topology = aTopology;
@@ -208,7 +222,10 @@ public class GraphicsPipeline : Pipeline
             pipelineCreateInfo.pColorBlendState = &blendStateCreateInfo;
             
             fixed(VkPipelineDepthStencilStateCreateInfo* pointer = &myDepthStencilState)
+            {
                 pipelineCreateInfo.pDepthStencilState = pointer;
+                
+            }
 
             pipelineCreateInfo.layout = layout;
             
@@ -231,6 +248,7 @@ public class GraphicsPipeline : Pipeline
             
             return graphicsPipeline;
         }
+
     }
     
     public static GraphicsPipelineBuilder StartBuild()
