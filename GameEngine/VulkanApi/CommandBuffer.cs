@@ -121,10 +121,31 @@ public unsafe class CommandBuffer
         vkCmdClearColorImage(MyVkCommandBuffer, aImage.MyVkImage, aImageLayout, &aColor, 1, &clearRange);
     }
     
+    public void SetPushConstants<T>(T aPushConstants, VkPipelineLayout aLayout, VkShaderStageFlags aShaderStages) where T : unmanaged
+    {
+        vkCmdPushConstants(MyVkCommandBuffer, aLayout, aShaderStages, 0, (uint)sizeof(T), &aPushConstants);
+    }
+    
+    public void DispatchCompute(uint X, uint Y, uint Z = 1)
+    {
+        vkCmdDispatch(MyVkCommandBuffer, X, Y, Z);
+    }
+    
     public void BindPipeline(Pipeline aPipeline)
     {
         vkCmdBindPipeline(MyVkCommandBuffer, aPipeline.MyBindPoint, aPipeline.MyVkPipeline);
     }
+    
+    public void BindIndexBuffer(AllocatedBuffer aIndexBuffer)
+    {
+        vkCmdBindIndexBuffer(MyVkCommandBuffer, aIndexBuffer.MyBuffer, 0, VkIndexType.Uint32);
+    }
+    
+    public void BindDescriptorSet(VkPipelineLayout aLayout, VkDescriptorSet aDescriptorSet, VkPipelineBindPoint aBindPoint)
+    {
+        vkCmdBindDescriptorSets(MyVkCommandBuffer, aBindPoint, aLayout, 0, aDescriptorSet);
+    }
+        
     
     public void Draw(int aVertexCount)
     {

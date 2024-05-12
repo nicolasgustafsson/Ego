@@ -55,13 +55,13 @@ public partial class Renderer
         myFrameNumber++;
     }
 
-    private unsafe void DrawGeometry(CommandBuffer cmd)
+    private void DrawGeometry(CommandBuffer cmd)
     {
         cmd.BeginRendering(myDrawImage, myDepthImage);
 
         cmd.BindPipeline(myTrianglePipeline);
 
-        Matrix4x4 view = Matrix4x4.CreateTranslation(new Vector3(0f, 0f, -3f));
+        Matrix4x4 view = Matrix4x4.CreateTranslation(new Vector3(0f, 0f, -2f));
         Matrix4x4 projection = MatrixExtensions.CreatePerspectiveFieldOfView(90f * (float)(Math.PI/180f), (float)myDrawImage.MyExtent.width / (float)myDrawImage.MyExtent.height, 10000f, 0.1f);
 
         projection[1, 1] *= -1f;
@@ -70,27 +70,26 @@ public partial class Renderer
         pushConstants.WorldMatrix = view * projection;
         pushConstants.VertexBufferAddress = myMonke.MyMeshBuffers.MyVertexBufferAddress;
 
-        Vulkan.vkCmdPushConstants(cmd.MyVkCommandBuffer, myTrianglePipeline.MyVkLayout, VkShaderStageFlags.Vertex, 0, (uint)sizeof(MeshPushConstants), &pushConstants);
-        Vulkan.vkCmdBindIndexBuffer(cmd.MyVkCommandBuffer, myMonke.MyMeshBuffers.MyIndexBuffer.MyBuffer, 0, VkIndexType.Uint32);
+        cmd.SetPushConstants(pushConstants, myTrianglePipeline.MyVkLayout, VkShaderStageFlags.Vertex);
+
+        cmd.BindIndexBuffer(myMonke.MyMeshBuffers.MyIndexBuffer);
 
         cmd.DrawIndexed(myMonke.MySurfaces[0].Count);
        
         cmd.EndRendering();
     }
 
-    private unsafe void DrawBackground(CommandBuffer cmd)
+    private void DrawBackground(CommandBuffer cmd)
     {
         cmd.BindPipeline(myGradientPipeline);
 
-        Vulkan.vkCmdBindDescriptorSets(cmd.MyVkCommandBuffer, VkPipelineBindPoint.Compute, myGradientPipeline.MyVkLayout, 0, myDrawImageDescriptorSet);
+        cmd.BindDescriptorSet(myGradientPipeline.MyVkLayout, myDrawImageDescriptorSet, VkPipelineBindPoint.Compute);
 
         PushConstants pushConstants = new();
         pushConstants.data1.X = 0f;
 
-        Vulkan.vkCmdPushConstants(cmd.MyVkCommandBuffer, myGradientPipeline.MyVkLayout, VkShaderStageFlags.Compute, 0,
-            (uint)sizeof(PushConstants), &pushConstants);
+        cmd.SetPushConstants(pushConstants, myGradientPipeline.MyVkLayout, VkShaderStageFlags.Compute);
 
-        Vulkan.vkCmdDispatch(cmd.MyVkCommandBuffer, (uint)Math.Ceiling(mySwapchain.MyExtents.width / 16d),
-            (uint)Math.Ceiling(mySwapchain.MyExtents.height / 16d), 1);
+        cmd.DispatchCompute((uint)Math.Ceiling(mySwapchain.MyExtents.width / 16d), (uint)Math.Ceiling(mySwapchain.MyExtents.height / 16d));
     }
 }
