@@ -116,7 +116,7 @@ public partial class Renderer
             .SetCullMode(VkCullModeFlags.None, VkFrontFace.Clockwise)
             .DisableMultisampling()
             .EnableDepthTest()
-            .DisableBlending()
+            .SetBlendMode(BlendMode.Alpha)
             .SetColorAttachmentFormat(myDrawImage.MyImageFormat)
             .SetDepthFormat(VkFormat.D32Sfloat)
             .Build();

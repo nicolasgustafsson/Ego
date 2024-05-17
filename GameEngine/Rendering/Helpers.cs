@@ -4,7 +4,7 @@ using static Vortice.Vulkan.Vulkan;
 
 namespace Rendering;
 
-public static unsafe class Helpers
+internal static unsafe class Helpers
 {
     public static byte* ToPointer(this string text)
     {

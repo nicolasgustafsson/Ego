@@ -94,10 +94,9 @@ public class GraphicsPipeline : Pipeline
             return this;
         }
         
-        public GraphicsPipelineBuilder DisableBlending()
+        public GraphicsPipelineBuilder SetBlendMode(BlendMode aBlendMode)
         {
-            myColorBlendAttachment.colorWriteMask = VkColorComponentFlags.All;
-            myColorBlendAttachment.blendEnable = false;
+            myColorBlendAttachment = aBlendMode.ToVkBlendAttachment();
             return this;
         }
         
