@@ -40,6 +40,7 @@ public partial class Renderer
     private Mesh myMonke => myMeshes[2];
     
     private ulong myFrameNumber = 0;
+    private bool myWantsResize = false;
 
     public Renderer(Window aWindow)
     {

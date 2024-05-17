@@ -20,9 +20,22 @@ public partial class Renderer
         myCurrentFrame.MyRenderFence.Wait();
         myCurrentFrame.MyRenderFence.Reset();
 
+        if (myWantsResize)
+        {
+            Resize();
+            myWantsResize = false;
+        }
+        
         myCurrentFrame.MyDeletionQueue.Flush();
         
-        uint imageIndex = Device.AcquireNextImage(mySwapchain, myCurrentFrame.MyImageAvailableSemaphore);
+        var nextImage = Device.AcquireNextImage(mySwapchain, myCurrentFrame.MyImageAvailableSemaphore);
+        uint imageIndex = nextImage.imageIndex;
+        if (nextImage.result == VkResult.ErrorOutOfDateKHR)
+        {
+            myWantsResize = true;
+            return;
+        }
+        
         VkImage currentSwapchainImage = mySwapchain.MyImages[(int)imageIndex];
 
         CommandBuffer cmd = myCurrentFrame.MyCommandBuffer;
@@ -50,7 +63,10 @@ public partial class Renderer
 
         myDrawQueue.Submit(cmd, myCurrentFrame.MyImageAvailableSemaphore, myCurrentFrame.MyRenderFinishedSemaphore, myCurrentFrame.MyRenderFence);
         
-        myDrawQueue.Present(mySwapchain, myCurrentFrame.MyRenderFinishedSemaphore, imageIndex);
+        VkResult result = myDrawQueue.Present(mySwapchain, myCurrentFrame.MyRenderFinishedSemaphore, imageIndex);
+        
+        if (result == VkResult.ErrorOutOfDateKHR)
+            myWantsResize = true;
         
         myFrameNumber++;
     }

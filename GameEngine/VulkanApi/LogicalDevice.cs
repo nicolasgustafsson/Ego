@@ -26,10 +26,10 @@ public unsafe class LogicalDevice
         vkResetFences(MyVkDevice, aFence).CheckResult();
     }
     
-    public uint AcquireNextImage(Swapchain aSwapchain, Semaphore aImageAvailableSemaphore)
+    public (VkResult result, uint imageIndex) AcquireNextImage(Swapchain aSwapchain, Semaphore aImageAvailableSemaphore)
     {
-        vkAcquireNextImageKHR(MyVkDevice, aSwapchain.MyVkSwapchain, 1_000_000_000, aImageAvailableSemaphore.MyVkSemaphore, VkFence.Null, out uint imageIndex);
-        return imageIndex;
+        VkResult result = vkAcquireNextImageKHR(MyVkDevice, aSwapchain.MyVkSwapchain, 1_000_000_000, aImageAvailableSemaphore.MyVkSemaphore, VkFence.Null, out uint imageIndex);
+        return (result, imageIndex);
     }
 
     public void Destroy()

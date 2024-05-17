@@ -52,6 +52,24 @@ public partial class Renderer
         
         Console.WriteLine("Renderer successfully created!");
     }
+    
+    private void Resize()
+    {
+        Device.WaitUntilIdle();
+        mySwapchain.Destroy();
+        myDrawImage.Destroy(MyMemoryAllocator);
+        myDepthImage.Destroy(MyMemoryAllocator);
+        CreateSwapchain();
+        
+        foreach (var imageView in myImageViews)
+            imageView.Destroy();
+
+        myImageViews.Clear();
+        
+        CreateImageViews();
+        CreateDrawImage();
+        UpdateDrawImageDescriptorSet();
+    }
 
     private void CreateMonke()
     {
@@ -138,12 +156,27 @@ public partial class Renderer
         myGlobalDescriptorAllocator = new();
         myGlobalDescriptorAllocator.InitPool(10, sizes);
 
+        CreateDrawImageDescriptor();
+
+        myCleanupQueue.Add(() =>
+        {
+            vkDestroyDescriptorSetLayout(Device.MyVkDevice, myDrawImageDescriptorLayout);
+            myGlobalDescriptorAllocator.DestroyPool();
+        });
+    }
+
+    private void CreateDrawImageDescriptor()
+    {
         DescriptorLayoutBuilder builder = new();
         builder.AddBinding(0, VkDescriptorType.StorageImage);
         myDrawImageDescriptorLayout = builder.Build(VkShaderStageFlags.Compute | VkShaderStageFlags.Fragment);
-
         myDrawImageDescriptorSet = myGlobalDescriptorAllocator.Allocate(myDrawImageDescriptorLayout);
         
+        UpdateDrawImageDescriptorSet();
+    }
+
+    private unsafe void UpdateDrawImageDescriptorSet()
+    {
         VkDescriptorImageInfo imageInfo = new();
         imageInfo.imageLayout = VkImageLayout.General;
         imageInfo.imageView = myDrawImage.MyImageView.MyVkImageView;
@@ -156,12 +189,6 @@ public partial class Renderer
         drawImageWrite.pImageInfo = &imageInfo;
 
         vkUpdateDescriptorSets(Device.MyVkDevice, 1, &drawImageWrite, 0, null);
-
-        myCleanupQueue.Add(() =>
-        {
-            vkDestroyDescriptorSetLayout(Device.MyVkDevice, myDrawImageDescriptorLayout);
-            myGlobalDescriptorAllocator.DestroyPool();
-        });
     }
 
     private void CreateMemoryAllocator()

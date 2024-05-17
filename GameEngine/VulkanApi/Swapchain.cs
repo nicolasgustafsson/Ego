@@ -10,7 +10,7 @@ public unsafe class Swapchain
 
     public Swapchain(Gpu aGpu, Surface aSurface, VkSurfaceFormatKHR aSurfaceFormat, VkPresentModeKHR aPresentMode)
     {
-        MyExtents = aSurface.GetSwapbufferExtent();
+        MyExtents = aSurface.GetSwapbufferExtent(aGpu);
         MyImageFormat = aSurfaceFormat.format;
 
         var surfaceCapabilities = aSurface.MySurfaceCapabilities;

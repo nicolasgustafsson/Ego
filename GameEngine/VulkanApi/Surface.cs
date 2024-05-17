@@ -58,13 +58,12 @@ public unsafe class Surface
         }
     }
     
-    public VkExtent2D GetSwapbufferExtent()
+    public VkExtent2D GetSwapbufferExtent(Gpu aGpu)
     {
-        if (MySurfaceCapabilities.currentExtent.width != uint.MaxValue)
-        {
-            return MySurfaceCapabilities.currentExtent;
-        }
+        Helpers.SwapChainSupportDetails swapChainSupport = Helpers.QuerySwapChainSupport(aGpu.MyVkPhysicalDevice, MyVkSurface);
 
+        MySurfaceCapabilities = swapChainSupport.Capabilities;
+        
         (int width, int height) size = myWindow.GetFramebufferSize();
 
         VkExtent2D extent;

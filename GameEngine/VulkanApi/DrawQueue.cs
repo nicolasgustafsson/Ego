@@ -11,7 +11,7 @@ public unsafe class DrawQueue : Queue
         VkSemaphoreSubmitInfo signalInfo = GetSemaphoreSubmitInfo(VkPipelineStageFlags2.AllGraphics, aRenderFinishedSemaphore);
 
         VkSubmitInfo2 submitInfo = GetSubmitInfo(&cmdInfo, &waitInfo, &signalInfo);
-        vkQueueSubmit2(MyVkQueue, 1, &submitInfo, aRenderFence.MyVkFence);
+        vkQueueSubmit2(MyVkQueue, 1, &submitInfo, aRenderFence.MyVkFence).CheckResult();
     }
     
     public void Submit(CommandBuffer aCommandBuffer, Fence aRenderFence)
@@ -19,11 +19,11 @@ public unsafe class DrawQueue : Queue
         VkCommandBufferSubmitInfo cmdInfo = GetCommandBufferSubmitInfo(aCommandBuffer);
 
         VkSubmitInfo2 submitInfo = GetSubmitInfo(&cmdInfo, null, null);
-        vkQueueSubmit2(MyVkQueue, 1, &submitInfo, aRenderFence.MyVkFence);
+        vkQueueSubmit2(MyVkQueue, 1, &submitInfo, aRenderFence.MyVkFence).CheckResult();
     }
     
     //Currently the draw queue handles presenting too; this might be changed in the future
-    public void Present(Swapchain aSwapchain, Semaphore aRenderFinishedSemaphore, uint aImageIndex)
+    public VkResult Present(Swapchain aSwapchain, Semaphore aRenderFinishedSemaphore, uint aImageIndex)
     {
         VkSwapchainKHR* swapchainPointer = stackalloc VkSwapchainKHR[] { aSwapchain.MyVkSwapchain };
         VkSemaphore* waitSemaphorePointer = stackalloc VkSemaphore[] { aRenderFinishedSemaphore.MyVkSemaphore };
@@ -35,6 +35,6 @@ public unsafe class DrawQueue : Queue
         presentInfo.waitSemaphoreCount = 1;
         presentInfo.pImageIndices = &aImageIndex;
 
-        vkQueuePresentKHR(MyVkQueue, &presentInfo);
+        return vkQueuePresentKHR(MyVkQueue, &presentInfo);
     }
 }
