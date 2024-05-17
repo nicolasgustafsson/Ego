@@ -1,79 +1,28 @@
-global using Utilities.CommonExtensions;
-namespace Utilities.CommonExtensions;
+using System.Numerics;
 
-public static class ScalarExtensions
+public static partial class Extensions
 {
-    public static uint AtLeast(this uint aValue, uint aMinimum)
+    private static T Max<T>(T aValue, T aMax) where T : IComparisonOperators<T, T, bool>
     {
-        return Math.Max(aValue, aMinimum);
+        return aValue > aMax ? aValue : aMax;
     }
     
-    public static uint AtMost(this uint aValue, uint aMaximum)
+    private static T Min<T>(T aValue, T aMax) where T : IComparisonOperators<T, T, bool>
     {
-        return Math.Min(aValue, aMaximum);
+        return aValue < aMax ? aValue : aMax;
     }
     
-    public static uint Within(this uint aValue, uint aMinimum, uint aMaximum)
+    public static T AtLeast<T>(this T aValue, T aMinimum) where T : IComparisonOperators<T, T, bool>
     {
-        return aValue.AtLeast(aMinimum).AtMost(aMaximum);
+        return Max(aValue, aMinimum);
     }
     
-    public static int AtLeast(this int aValue, int aMinimum)
+    public static T AtMost<T>(this T aValue, T aMaximum) where T : IComparisonOperators<T, T, bool>
     {
-        return Math.Max(aValue, aMinimum);
+        return Min(aValue, aMaximum);
     }
     
-    public static int AtMost(this int aValue, int aMaximum)
-    {
-        return Math.Min(aValue, aMaximum);
-    }
-    
-    public static int Within(this int aValue, int aMinimum, int aMaximum)
-    {
-        return aValue.AtLeast(aMinimum).AtMost(aMaximum);
-    }
-    
-    public static float AtLeast(this float aValue, float aMinimum)
-    {
-        return Math.Max(aValue, aMinimum);
-    }
-    
-    public static float AtMost(this float aValue, float aMaximum)
-    {
-        return Math.Min(aValue, aMaximum);
-    }
-    
-    public static float Within(this float aValue, float aMinimum, float aMaximum)
-    {
-        return aValue.AtLeast(aMinimum).AtMost(aMaximum);
-    }
-    
-    public static double AtLeast(this double aValue, double aMinimum)
-    {
-        return Math.Max(aValue, aMinimum);
-    }
-    
-    public static double AtMost(this double aValue, double aMaximum)
-    {
-        return Math.Min(aValue, aMaximum);
-    }
-    
-    public static double Within(this double aValue, double aMinimum, double aMaximum)
-    {
-        return aValue.AtLeast(aMinimum).AtMost(aMaximum);
-    }
-    
-    public static decimal AtLeast(this decimal aValue, decimal aMinimum)
-    {
-        return Math.Max(aValue, aMinimum);
-    }
-    
-    public static decimal AtMost(this decimal aValue, decimal aMaximum)
-    {
-        return Math.Min(aValue, aMaximum);
-    }
-    
-    public static decimal Within(this decimal aValue, decimal aMinimum, decimal aMaximum)
+    public static T Within<T>(this T aValue, T aMinimum, T aMaximum) where T : IComparisonOperators<T, T, bool>
     {
         return aValue.AtLeast(aMinimum).AtMost(aMaximum);
     }
