@@ -18,7 +18,7 @@ public struct Vertex
     public Vector4 Color;
 }
 
-public unsafe class MeshBuffers
+public unsafe class MeshBuffers : IGpuDestroyable
 {
     public AllocatedBuffer MyIndexBuffer;
     public AllocatedBuffer MyVertexBuffer;
@@ -59,13 +59,13 @@ public unsafe class MeshBuffers
             Vulkan.vkCmdCopyBuffer(cmd.MyVkCommandBuffer, stagingBuffer.MyBuffer, MyIndexBuffer.MyBuffer, 1, &indexCopy);
         });
 
-        stagingBuffer.Destroy(aAllocator);
+        stagingBuffer.Destroy();
     }
     
-    public void Destroy(MemoryAllocator aAllocator)
+    public void Destroy()
     {
-        MyVertexBuffer.Destroy(aAllocator);
-        MyIndexBuffer.Destroy(aAllocator);
+        MyVertexBuffer.Destroy();
+        MyIndexBuffer.Destroy();
     }
 }
 

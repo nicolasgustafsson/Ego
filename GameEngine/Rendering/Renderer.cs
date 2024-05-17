@@ -1,4 +1,8 @@
 ﻿global using static Graphics.LogicalDevice;
+global using static Graphics.Api;
+global using static Graphics.Surface;
+global using static Graphics.MemoryAllocator;
+global using static Graphics.Gpu;
 
 using System.Runtime.InteropServices;
 using Graphics;
@@ -8,9 +12,6 @@ namespace Rendering;
 
 public partial class Renderer
 {
-    private Api myApi = null!;
-    private Surface mySurface = null!;
-    private Gpu myGpu = null!;
     private Swapchain mySwapchain = null!;
     private DrawQueue myDrawQueue = null!;
     private Image myDrawImage = null!;
@@ -29,8 +30,6 @@ public partial class Renderer
     private VkDescriptorSet myDrawImageDescriptorSet;
     private VkDescriptorSetLayout myDrawImageDescriptorLayout;
 
-    public MemoryAllocator MyMemoryAllocator = null!;
-    
     private readonly List<FrameData> myFrameData = new() { };
     private FrameData myCurrentFrame => myFrameData[(int)(myFrameNumber % FrameOverlap)];
 

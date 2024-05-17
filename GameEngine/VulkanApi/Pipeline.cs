@@ -1,6 +1,6 @@
 ﻿namespace Graphics;
 
-public unsafe class Pipeline
+public unsafe class Pipeline : IGpuDestroyable
 {
     public VkPipeline MyVkPipeline;
     public VkPipelineLayout MyVkLayout;

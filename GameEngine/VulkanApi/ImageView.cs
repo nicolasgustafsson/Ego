@@ -1,6 +1,6 @@
 namespace Graphics;
 
-public unsafe class ImageView
+public unsafe class ImageView : IGpuDestroyable
 {
     public VkImageView MyVkImageView;
     

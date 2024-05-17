@@ -1,4 +1,5 @@
-﻿global using static Vortice.Vulkan.Vulkan;
+﻿global using static Graphics.Api;
+global using static Vortice.Vulkan.Vulkan;
 global using Vortice.Vulkan;
 global using Utilities.CommonExtensions;
 using System.Runtime.InteropServices;
@@ -12,8 +13,9 @@ public enum DisplayServer
     Wayland
 }
 
-public unsafe class Api
+public unsafe class Api : IGpuDestroyable
 {
+    public static Api VulkanApi = null!;
     public VkInstance MyVkInstance;
     private VkDebugUtilsMessengerEXT myDebugMessenger = VkDebugUtilsMessengerEXT.Null;
     
@@ -72,6 +74,7 @@ public unsafe class Api
 #if DEBUG
         vkCreateDebugUtilsMessengerEXT(MyVkInstance, &debugUtilsCreateInfo, null, out myDebugMessenger).CheckResult();
 #endif
+        VulkanApi = this;
     }
     
     public void Destroy()
@@ -116,9 +119,9 @@ public unsafe class Api
         return surface;
     }
     
-    public Gpu PickGpu(Surface aSurface)
+    public Gpu PickGpu()
     {
-        Gpu gpu = new(this, aSurface);
+        Gpu gpu = new(this);
 
         return gpu;
     }

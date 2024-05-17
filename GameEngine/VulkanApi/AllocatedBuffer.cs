@@ -1,6 +1,6 @@
 ﻿namespace Graphics;
 
-public unsafe class AllocatedBuffer
+public unsafe class AllocatedBuffer : IGpuDestroyable
 {
     public VkBuffer MyBuffer;
     public VmaAllocation MyAllocation;
@@ -20,9 +20,9 @@ public unsafe class AllocatedBuffer
         Vma.vmaCreateBuffer(aAllocator.myVmaAllocator, &bufferCreateInfo, &allocationInfo, out MyBuffer, out MyAllocation, out MyAllocationInfo).CheckResult();
     }
 
-    public void Destroy(MemoryAllocator aAllocator)
+    public void Destroy()
     {
-        Vma.vmaDestroyBuffer(aAllocator.myVmaAllocator, MyBuffer, MyAllocation);
+        Vma.vmaDestroyBuffer(GlobalAllocator.myVmaAllocator, MyBuffer, MyAllocation);
     }
     
     public ulong GetDeviceAddress()

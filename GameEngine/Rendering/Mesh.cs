@@ -16,16 +16,16 @@ public class Mesh
     public List<GeoSurface> MySurfaces;
     public MeshBuffers MyMeshBuffers;
 
-    private Mesh(string aName, List<GeoSurface> aSurfaces, MeshBuffers aMeshBuffers)
+    private Mesh(string aName, List<GeoSurface> WindowSurfaces, MeshBuffers aMeshBuffers)
     {
         MyName = aName;
-        MySurfaces = aSurfaces;
+        MySurfaces = WindowSurfaces;
         MyMeshBuffers = aMeshBuffers;
     }
     
-    public void Destroy(MemoryAllocator aAllocator)
+    public void Destroy()
     {
-        MyMeshBuffers.Destroy(aAllocator);
+        MyMeshBuffers.Destroy();
     }
     
     public static List<Mesh> LoadGltf(Renderer aRenderer, string aFilePath)
@@ -81,7 +81,7 @@ public class Mesh
                 surfaces.Add(newSurface);
             }
 
-            meshes.Add(new Mesh(mesh.Name, surfaces, new MeshBuffers(aRenderer, aRenderer.MyMemoryAllocator, indices, vertices)));
+            meshes.Add(new Mesh(mesh.Name, surfaces, new MeshBuffers(aRenderer, GlobalAllocator, indices, vertices)));
         }
         
         return meshes;

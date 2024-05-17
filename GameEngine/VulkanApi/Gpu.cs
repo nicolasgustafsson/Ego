@@ -1,15 +1,17 @@
-﻿using System.Runtime.InteropServices;
+﻿global using static Graphics.Gpu;
+using System.Runtime.InteropServices;
 
 namespace Graphics;
 
 public unsafe class Gpu
 {
     public VkPhysicalDevice MyVkPhysicalDevice;
+    public static Gpu GpuInstance = null!;
 
     public uint MyGraphicsFamily;
     public uint MyPresentFamily;
     
-    internal Gpu(Api aApi, Surface aSurface)
+    internal Gpu(Api aApi)
     {
         uint physicalDevicesCount = 0;
         vkEnumeratePhysicalDevices(aApi.MyVkInstance, &physicalDevicesCount, null).CheckResult();
@@ -26,9 +28,9 @@ public unsafe class Gpu
         {
             VkPhysicalDevice physicalDevice = physicalDevices[i];
 
-            (MyGraphicsFamily, MyPresentFamily) = FindQueueFamilies(physicalDevice, aSurface.MyVkSurface);
+            (MyGraphicsFamily, MyPresentFamily) = FindQueueFamilies(physicalDevice, WindowSurface.MyVkSurface);
             
-            if (IsDeviceSuitable(physicalDevice, aSurface) == false)
+            if (IsDeviceSuitable(physicalDevice) == false)
                 continue;
 
             vkGetPhysicalDeviceProperties(physicalDevice, out VkPhysicalDeviceProperties checkProperties);
@@ -45,9 +47,11 @@ public unsafe class Gpu
             }
         }
 
+        GpuInstance = this;
+
     }
     
-    private bool IsDeviceSuitable(VkPhysicalDevice physicalDevice, Surface surface)
+    private bool IsDeviceSuitable(VkPhysicalDevice physicalDevice)
     {
         if (MyGraphicsFamily == VK_QUEUE_FAMILY_IGNORED)
             return false;
@@ -55,10 +59,9 @@ public unsafe class Gpu
         if (MyPresentFamily == VK_QUEUE_FAMILY_IGNORED)
             return false;
 
-        Helpers.SwapChainSupportDetails swapChainSupport = Helpers.QuerySwapChainSupport(physicalDevice, surface.MyVkSurface);
+        Helpers.SwapChainSupportDetails swapChainSupport = Helpers.QuerySwapChainSupport(physicalDevice, WindowSurface.MyVkSurface);
 
-        //uggo
-        surface.MySurfaceCapabilities = swapChainSupport.Capabilities;
+        WindowSurface.MySurfaceCapabilities = swapChainSupport.Capabilities;
         
         return !swapChainSupport.Formats.IsEmpty && !swapChainSupport.PresentModes.IsEmpty;
     }
@@ -107,9 +110,9 @@ public unsafe class Gpu
         Device = logicalDevice;
     }
     
-    public (uint graphicsFamily, uint presentFamily) FindQueueFamilies(Surface aSurface)
+    public (uint graphicsFamily, uint presentFamily) FindQueueFamilies()
     {
-        return FindQueueFamilies(MyVkPhysicalDevice, aSurface.MyVkSurface);
+        return FindQueueFamilies(MyVkPhysicalDevice, WindowSurface.MyVkSurface);
     }
     
     public (uint graphicsFamily, uint presentFamily) FindQueueFamilies(VkSurfaceKHR aSurface)
@@ -117,7 +120,7 @@ public unsafe class Gpu
         return FindQueueFamilies(MyVkPhysicalDevice, aSurface);
     }
     
-    public (uint graphicsFamily, uint presentFamily) FindQueueFamilies(VkPhysicalDevice aDevice, VkSurfaceKHR aSurface)
+    public (uint graphicsFamily, uint presentFamily) FindQueueFamilies(VkPhysicalDevice aDevice, VkSurfaceKHR WindowSurface)
     {
         ReadOnlySpan<VkQueueFamilyProperties> queueFamilies = vkGetPhysicalDeviceQueueFamilyProperties(aDevice);
 
@@ -131,7 +134,7 @@ public unsafe class Gpu
                 graphicsFamily = i;
             }
 
-            vkGetPhysicalDeviceSurfaceSupportKHR(aDevice, i, aSurface, out VkBool32 presentSupport);
+            vkGetPhysicalDeviceSurfaceSupportKHR(aDevice, i, WindowSurface, out VkBool32 presentSupport);
             if (presentSupport)
             {
                 presentFamily = i;
@@ -149,9 +152,9 @@ public unsafe class Gpu
         return (graphicsFamily, presentFamily);
     }
 
-    public VkSurfaceFormatKHR GetSurfaceFormat(Surface aSurface, VkFormat aPreferredFormat, VkColorSpaceKHR aPreferredColorSpace)
+    public VkSurfaceFormatKHR GetSurfaceFormat(VkFormat aPreferredFormat, VkColorSpaceKHR aPreferredColorSpace)
     {
-        ReadOnlySpan<VkSurfaceFormatKHR> formats = vkGetPhysicalDeviceSurfaceFormatsKHR(MyVkPhysicalDevice, aSurface.MyVkSurface);
+        ReadOnlySpan<VkSurfaceFormatKHR> formats = vkGetPhysicalDeviceSurfaceFormatsKHR(MyVkPhysicalDevice, WindowSurface.MyVkSurface);
         
         foreach(VkSurfaceFormatKHR format in formats)
         {
@@ -162,9 +165,9 @@ public unsafe class Gpu
         return formats[0];
     }
 
-    public VkPresentModeKHR GetPresentMode(Surface aSurface, VkPresentModeKHR aPreferredPresentMode)
+    public VkPresentModeKHR GetPresentMode(VkPresentModeKHR aPreferredPresentMode)
     {
-        ReadOnlySpan<VkPresentModeKHR> presentModes = vkGetPhysicalDeviceSurfacePresentModesKHR(MyVkPhysicalDevice, aSurface.MyVkSurface);
+        ReadOnlySpan<VkPresentModeKHR> presentModes = vkGetPhysicalDeviceSurfacePresentModesKHR(MyVkPhysicalDevice, WindowSurface.MyVkSurface);
         
         foreach(VkPresentModeKHR presentMode in presentModes)
         {

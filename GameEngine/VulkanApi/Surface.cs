@@ -1,11 +1,12 @@
-﻿
+﻿global using static Graphics.Surface;
 namespace Graphics;
 
-public unsafe class Surface
+public unsafe class Surface : IGpuDestroyable
 {
     private Window myWindow;
     public VkSurfaceKHR MyVkSurface;
     public VkSurfaceCapabilitiesKHR MySurfaceCapabilities;
+    public static Surface WindowSurface = null!;
 
     internal Surface(Api aApi, Window aWindow)
     {
@@ -56,18 +57,20 @@ public unsafe class Surface
             default:
                 throw new ArgumentOutOfRangeException();
         }
+
+        WindowSurface = this;
     }
     
-    public VkExtent2D GetSwapbufferExtent(Gpu aGpu)
+    public VkExtent2D GetSwapbufferExtent()
     {
-        Helpers.SwapChainSupportDetails swapChainSupport = Helpers.QuerySwapChainSupport(aGpu.MyVkPhysicalDevice, MyVkSurface);
+        Helpers.SwapChainSupportDetails swapChainSupport = Helpers.QuerySwapChainSupport(GpuInstance.MyVkPhysicalDevice, MyVkSurface);
 
         MySurfaceCapabilities = swapChainSupport.Capabilities;
         
         (int width, int height) size = myWindow.GetFramebufferSize();
 
         VkExtent2D extent;
-        extent.width = ((uint)size.width);
+        extent.width = (uint)size.width;
         extent.height = (uint)size.height;
 
         extent.width = extent.width.Within(MySurfaceCapabilities.minImageExtent.width, MySurfaceCapabilities.maxImageExtent.width);
@@ -76,8 +79,8 @@ public unsafe class Surface
         return extent;
     }
     
-    public void Destroy(Api aApi)
+    public void Destroy()
     {
-        vkDestroySurfaceKHR(aApi.MyVkInstance, MyVkSurface);
+        vkDestroySurfaceKHR(VulkanApi.MyVkInstance, MyVkSurface);
     }
 }

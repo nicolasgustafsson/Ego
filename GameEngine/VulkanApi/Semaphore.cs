@@ -1,6 +1,6 @@
 namespace Graphics;
 
-public unsafe class Semaphore
+public unsafe class Semaphore : IGpuDestroyable
 {
     public VkSemaphore MyVkSemaphore;
     public Semaphore()

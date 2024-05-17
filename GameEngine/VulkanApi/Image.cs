@@ -1,6 +1,6 @@
 namespace Graphics;
 
-public unsafe class Image
+public unsafe class Image : IGpuDestroyable
 {
     public VkImage MyVkImage;
     public ImageView MyImageView;
@@ -10,7 +10,7 @@ public unsafe class Image
     
     public VkImageLayout MyCurrentLayout = VkImageLayout.Undefined;
     
-    public Image(MemoryAllocator aAllocator, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent)
+    public Image(VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent)
     {
         MyExtent = aExtent;
         MyImageFormat = aFormat;
@@ -32,16 +32,16 @@ public unsafe class Image
         allocationInfo.usage = VmaMemoryUsage.GpuOnly;
         allocationInfo.requiredFlags = VkMemoryPropertyFlags.DeviceLocal;
         
-        Vma.vmaCreateImage(aAllocator.myVmaAllocator, &createInfo, &allocationInfo, out MyVkImage, out MyAllocation, out VmaAllocationInfo allocInfo).CheckResult();
+        Vma.vmaCreateImage(GlobalAllocator.myVmaAllocator, &createInfo, &allocationInfo, out MyVkImage, out MyAllocation, out VmaAllocationInfo allocInfo).CheckResult();
 
         MyImageView = new(MyVkImage, aFormat, (int)(aUsageFlags & VkImageUsageFlags.DepthStencilAttachment) != 0 ? VkImageAspectFlags.Depth : VkImageAspectFlags.Color);
     }
     
-    public void Destroy(MemoryAllocator aAllocator)
+    public void Destroy()
     {
         MyImageView.Destroy();
 
-        Vma.vmaDestroyImage(aAllocator.myVmaAllocator, MyVkImage, MyAllocation);
+        Vma.vmaDestroyImage(GlobalAllocator.myVmaAllocator, MyVkImage, MyAllocation);
     }
 
     public VkRenderingAttachmentInfo GetAttachmentInfo(VkClearValue? aClear,  VkImageLayout aLayout = VkImageLayout.ColorAttachmentOptimal)

@@ -1,6 +1,6 @@
 namespace Graphics;
 
-public unsafe class Swapchain
+public unsafe class Swapchain : IGpuDestroyable
 {
     public VkSwapchainKHR MyVkSwapchain;
 
@@ -8,12 +8,12 @@ public unsafe class Swapchain
     public VkExtent2D MyExtents;
     public readonly List<VkImage> MyImages;
 
-    public Swapchain(Gpu aGpu, Surface aSurface, VkSurfaceFormatKHR aSurfaceFormat, VkPresentModeKHR aPresentMode)
+    public Swapchain(VkSurfaceFormatKHR WindowSurfaceFormat, VkPresentModeKHR aPresentMode)
     {
-        MyExtents = aSurface.GetSwapbufferExtent(aGpu);
-        MyImageFormat = aSurfaceFormat.format;
+        MyExtents = WindowSurface.GetSwapbufferExtent();
+        MyImageFormat = WindowSurfaceFormat.format;
 
-        var surfaceCapabilities = aSurface.MySurfaceCapabilities;
+        var surfaceCapabilities = WindowSurface.MySurfaceCapabilities;
         
         uint imageCount = (surfaceCapabilities.minImageCount + 1);
         if (surfaceCapabilities.maxImageCount > 0)
@@ -21,14 +21,14 @@ public unsafe class Swapchain
 
         VkSwapchainCreateInfoKHR createInfo = new();
         createInfo.minImageCount = imageCount;
-        createInfo.imageFormat = aSurfaceFormat.format;
-        createInfo.imageColorSpace = aSurfaceFormat.colorSpace;
+        createInfo.imageFormat = WindowSurfaceFormat.format;
+        createInfo.imageColorSpace = WindowSurfaceFormat.colorSpace;
         createInfo.presentMode = aPresentMode;
         createInfo.imageExtent = MyExtents;
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage = VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst;
 
-        var families = aGpu.FindQueueFamilies(aSurface.MyVkSurface);
+        var families = GpuInstance.FindQueueFamilies(WindowSurface.MyVkSurface);
         bool differentFamiliesForPresentingAndRastering = families.presentFamily != families.graphicsFamily;
         
         createInfo.imageSharingMode = differentFamiliesForPresentingAndRastering ? VkSharingMode.Concurrent : VkSharingMode.Exclusive;
@@ -36,7 +36,7 @@ public unsafe class Swapchain
         createInfo.compositeAlpha = VkCompositeAlphaFlagsKHR.Opaque;
         createInfo.clipped = true;
         createInfo.oldSwapchain = VkSwapchainKHR.Null;
-        createInfo.surface = aSurface.MyVkSurface;
+        createInfo.surface = WindowSurface.MyVkSurface;
 
         vkCreateSwapchainKHR(Device.MyVkDevice, &createInfo, null, out MyVkSwapchain).CheckResult();
         

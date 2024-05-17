@@ -1,6 +1,6 @@
 namespace Graphics;
 
-public unsafe class Fence
+public unsafe class Fence : IGpuDestroyable
 {
     public VkFence MyVkFence;
     public Fence()

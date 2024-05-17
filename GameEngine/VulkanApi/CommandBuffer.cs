@@ -1,7 +1,7 @@
 namespace Graphics;
 
 //Currently only one buffer per pool, this might change in the future
-public unsafe class CommandBuffer
+public unsafe class CommandBuffer : IGpuDestroyable
 {
     public VkCommandPool MyVkCommandPool;
     public VkCommandBuffer MyVkCommandBuffer;

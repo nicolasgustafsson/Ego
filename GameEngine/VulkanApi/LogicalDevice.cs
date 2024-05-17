@@ -1,7 +1,7 @@
 ﻿global using static Graphics.LogicalDevice;
 namespace Graphics;
 
-public unsafe class LogicalDevice
+public unsafe class LogicalDevice : IGpuDestroyable
 {
     public static LogicalDevice Device;
     public VkDevice MyVkDevice;

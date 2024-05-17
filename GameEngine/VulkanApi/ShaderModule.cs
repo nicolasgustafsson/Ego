@@ -1,6 +1,6 @@
 ﻿namespace Graphics;
 
-public unsafe class ShaderModule
+public unsafe class ShaderModule : IGpuDestroyable
 {
     public VkShaderModule MyModule;
     

@@ -57,8 +57,8 @@ public partial class Renderer
     {
         Device.WaitUntilIdle();
         mySwapchain.Destroy();
-        myDrawImage.Destroy(MyMemoryAllocator);
-        myDepthImage.Destroy(MyMemoryAllocator);
+        myDrawImage.Destroy();
+        myDepthImage.Destroy();
         CreateSwapchain();
         
         foreach (var imageView in myImageViews)
@@ -78,7 +78,7 @@ public partial class Renderer
         {
             foreach(var mesh in myMeshes)
             {
-                mesh.Destroy(MyMemoryAllocator);
+                mesh.Destroy();
             }
         });
     }
@@ -138,11 +138,11 @@ public partial class Renderer
 
     private void CreateDrawImage()
     {
-         myDrawImage = new Image(MyMemoryAllocator, VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
-         myCleanupQueue.Add(() => { myDrawImage.Destroy(MyMemoryAllocator); });
+         myDrawImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
+         myCleanupQueue.Add(() => { myDrawImage.Destroy(); });
          
-         myDepthImage = new Image(MyMemoryAllocator, VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
-         myCleanupQueue.Add(() => { myDepthImage.Destroy(MyMemoryAllocator); });
+         myDepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
+         myCleanupQueue.Add(() => { myDepthImage.Destroy(); });
     }
 
     private unsafe void InitializeDescriptors()
@@ -193,36 +193,36 @@ public partial class Renderer
 
     private void CreateMemoryAllocator()
     {
-        MyMemoryAllocator = new MemoryAllocator(myGpu, myApi);
-        myCleanupQueue.Add(() => MyMemoryAllocator.Destroy());
+        new MemoryAllocator();
+        myCleanupQueue.Add(() => GlobalAllocator.Destroy());
     }
 
     private void PrintAllExtensions()
     {
-        myApi.PrintAllAvailableInstanceExtensions();
-        myGpu.PrintAllAvailableDeviceExtensions();
+        VulkanApi.PrintAllAvailableInstanceExtensions();
+        GpuInstance.PrintAllAvailableDeviceExtensions();
     }
 
     private void PickGpu()
     {
-        myGpu = myApi.PickGpu(mySurface);
+        GpuInstance = VulkanApi.PickGpu();
     }
 
     private void CreateDrawQueue()
     {
-        myDrawQueue = new DrawQueue(myGpu);
+        myDrawQueue = new DrawQueue(GpuInstance);
     }
 
     private void CreateApi(Window aWindow)
     {
-        myApi = new(aWindow, Defaults.InstanceExtensions);
-        myCleanupQueue.Add(() => myApi.Destroy());
+        VulkanApi = new(aWindow, Defaults.InstanceExtensions);
+        myCleanupQueue.Add(() => VulkanApi.Destroy());
     }
 
     private void CreateSurface(Window aWindow)
     {
-        mySurface = myApi.CreateSurface(aWindow);
-        myCleanupQueue.Add(() => mySurface.Destroy(myApi));
+        VulkanApi.CreateSurface(aWindow);
+        myCleanupQueue.Add(() => WindowSurface.Destroy());
     }
 
     private void CreateImageViews()
@@ -240,7 +240,7 @@ public partial class Renderer
 
     private void CreateDevice()
     {
-        myGpu.CreateDevice(Defaults.DeviceExtensions);
+        GpuInstance.CreateDevice(Defaults.DeviceExtensions);
         myCleanupQueue.Add(() => Device.Destroy());
     }
 
@@ -269,10 +269,10 @@ public partial class Renderer
 
     private void CreateSwapchain()
     {
-        VkSurfaceFormatKHR surfaceFormat = myGpu.GetSurfaceFormat(mySurface, PreferredFormat, PreferredColorSpace);
-        VkPresentModeKHR presentMode = myGpu.GetPresentMode(mySurface, PreferredPresentMode);
+        VkSurfaceFormatKHR surfaceFormat = GpuInstance.GetSurfaceFormat(PreferredFormat, PreferredColorSpace);
+        VkPresentModeKHR presentMode = GpuInstance.GetPresentMode(PreferredPresentMode);
 
-        mySwapchain = new Swapchain(myGpu, mySurface, surfaceFormat, presentMode);
+        mySwapchain = new Swapchain(surfaceFormat, presentMode);
         myCleanupQueue.Add(() => mySwapchain.Destroy());
     }
     
