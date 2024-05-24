@@ -3,7 +3,7 @@ using Vortice.ShaderCompiler;
 
 namespace Graphics;
 
-public unsafe class DescriptorAllocator
+public unsafe class DescriptorAllocator : IGpuDestroyable
 {
     public class PoolSizeRatio
     {
@@ -30,7 +30,7 @@ public unsafe class DescriptorAllocator
         vkResetDescriptorPool(Device.MyVkDevice, MyPool, VkDescriptorPoolResetFlags.None);
     }
     
-    public void DestroyPool()
+    public void Destroy()
     {
         vkDestroyDescriptorPool(Device.MyVkDevice, MyPool, null);
     }

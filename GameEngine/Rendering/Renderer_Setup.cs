@@ -56,16 +56,17 @@ public partial class Renderer
     private void Resize()
     {
         Device.WaitUntilIdle();
-        mySwapchain.Destroy();
-        myDrawImage.Destroy();
-        myDepthImage.Destroy();
-        CreateSwapchain();
+
+        myCleanupQueue.RunDeletor(mySwapchain);
+        myCleanupQueue.RunDeletor(myDrawImage);
+        myCleanupQueue.RunDeletor(myDepthImage);
         
         foreach (var imageView in myImageViews)
-            imageView.Destroy();
+            myCleanupQueue.RunDeletor(imageView);
 
         myImageViews.Clear();
         
+        CreateSwapchain();
         CreateImageViews();
         CreateDrawImage();
         UpdateDrawImageDescriptorSet();
@@ -74,13 +75,7 @@ public partial class Renderer
     private void CreateMonke()
     {
         myMeshes = Mesh.LoadGltf(this, "Models/basicmesh.glb").ToArray();
-        myCleanupQueue.Add(() =>
-        {
-            foreach(var mesh in myMeshes)
-            {
-                mesh.Destroy();
-            }
-        });
+        myCleanupQueue.Add(myMeshes.ToList());
     }
 
     private void CreateImGui(Window aWindow)
@@ -92,8 +87,8 @@ public partial class Renderer
     {
         myImmediateFence = new();
         myImmediateCommandBuffer = new(myDrawQueue);
-        myCleanupQueue.Add(() => myImmediateFence.Destroy());
-        myCleanupQueue.Add(() => myImmediateCommandBuffer.Destroy());
+        myCleanupQueue.Add(myImmediateFence);
+        myCleanupQueue.Add(myImmediateCommandBuffer);
     }
 
     private void InitializePipelines()
@@ -120,29 +115,23 @@ public partial class Renderer
             .SetColorAttachmentFormat(myDrawImage.MyImageFormat)
             .SetDepthFormat(VkFormat.D32Sfloat)
             .Build();
-        
-        myCleanupQueue.Add(() =>
-        {
-            myTrianglePipeline.Destroy();
-        });
+
+        myCleanupQueue.Add(myTrianglePipeline);
     }
 
     private void InitializeBackgroundPipelines()
     {
         myGradientPipeline = ComputePipeline.StartBuild().SetComputeShader("Shaders/comp.spv").AddLayout(myDrawImageDescriptorLayout).AddPushConstant<PushConstants>().Build();
-        myCleanupQueue.Add(() =>
-        {
-            myGradientPipeline.Destroy();
-        });
+        myCleanupQueue.Add(myGradientPipeline);
     }
 
     private void CreateDrawImage()
     {
          myDrawImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
-         myCleanupQueue.Add(() => { myDrawImage.Destroy(); });
+         myCleanupQueue.Add(myDrawImage);
          
          myDepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
-         myCleanupQueue.Add(() => { myDepthImage.Destroy(); });
+         myCleanupQueue.Add(myDepthImage);
     }
 
     private unsafe void InitializeDescriptors()
@@ -161,8 +150,9 @@ public partial class Renderer
         myCleanupQueue.Add(() =>
         {
             vkDestroyDescriptorSetLayout(Device.MyVkDevice, myDrawImageDescriptorLayout);
-            myGlobalDescriptorAllocator.DestroyPool();
         });
+
+        myCleanupQueue.Add(myGlobalDescriptorAllocator);
     }
 
     private void CreateDrawImageDescriptor()
@@ -194,7 +184,7 @@ public partial class Renderer
     private void CreateMemoryAllocator()
     {
         new MemoryAllocator();
-        myCleanupQueue.Add(() => GlobalAllocator.Destroy());
+        myCleanupQueue.Add(GlobalAllocator);
     }
 
     private void PrintAllExtensions()
@@ -215,33 +205,27 @@ public partial class Renderer
 
     private void CreateApi(Window aWindow)
     {
-        VulkanApi = new(aWindow, Defaults.InstanceExtensions);
-        myCleanupQueue.Add(() => VulkanApi.Destroy());
+        new Api(aWindow, Defaults.InstanceExtensions);
+        myCleanupQueue.Add(VulkanApi);
     }
 
     private void CreateSurface(Window aWindow)
     {
         VulkanApi.CreateSurface(aWindow);
-        myCleanupQueue.Add(() => WindowSurface.Destroy());
+        myCleanupQueue.Add(WindowSurface);
     }
 
     private void CreateImageViews()
     {
         myImageViews = mySwapchain.CreateImageViews();
 
-        myCleanupQueue.Add(() =>
-        {
-            foreach (var imageView in myImageViews)
-                imageView.Destroy();
-
-            myImageViews.Clear();
-        });
+        myCleanupQueue.Add(myImageViews);
     }
 
     private void CreateDevice()
     {
         GpuInstance.CreateDevice(Defaults.DeviceExtensions);
-        myCleanupQueue.Add(() => Device.Destroy());
+        myCleanupQueue.Add(Device);
     }
 
     private void CreateFrameData()
@@ -258,13 +242,7 @@ public partial class Renderer
             myFrameData.Add(newFrame);
         }
 
-        myCleanupQueue.Add(() =>
-        {
-            foreach (FrameData frameData in myFrameData)
-                frameData.Destroy();
-
-            myFrameData.Clear();
-        });
+        myCleanupQueue.Add(myFrameData);
     }
 
     private void CreateSwapchain()
@@ -273,7 +251,7 @@ public partial class Renderer
         VkPresentModeKHR presentMode = GpuInstance.GetPresentMode(PreferredPresentMode);
 
         mySwapchain = new Swapchain(surfaceFormat, presentMode);
-        myCleanupQueue.Add(() => mySwapchain.Destroy());
+        myCleanupQueue.Add(mySwapchain);
     }
     
     public void Cleanup()

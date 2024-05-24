@@ -10,7 +10,7 @@ public struct GeoSurface
     public UInt32 Count;
 }
 
-public class Mesh
+public class Mesh : IGpuDestroyable
 {
     public string MyName;
     public List<GeoSurface> MySurfaces;

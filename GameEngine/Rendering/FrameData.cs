@@ -4,7 +4,7 @@ using Semaphore = Graphics.Semaphore;
 
 namespace Rendering;
 
-public class FrameData
+public class FrameData : IGpuDestroyable
 {
     public CommandBuffer MyCommandBuffer = null!;
     
