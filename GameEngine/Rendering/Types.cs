@@ -20,8 +20,8 @@ public struct Vertex
 
 public unsafe class MeshBuffers : IGpuDestroyable
 {
-    public AllocatedBuffer MyIndexBuffer;
-    public AllocatedBuffer MyVertexBuffer;
+    public AllocatedRawBuffer MyIndexRawBuffer;
+    public AllocatedRawBuffer MyVertexRawBuffer;
     public VkDeviceAddress MyVertexBufferAddress;
     
     public MeshBuffers(Renderer aRenderer, MemoryAllocator aAllocator, List<uint> aIndices, List<Vertex> aVertices)
@@ -29,15 +29,15 @@ public unsafe class MeshBuffers : IGpuDestroyable
         ulong vertexBufferSize = (ulong)sizeof(Vertex) * (ulong)aVertices.Count;
         ulong indexBufferSize = (ulong)sizeof(uint) * (ulong)aIndices.Count;
 
-        MyVertexBuffer = new AllocatedBuffer(aAllocator, vertexBufferSize, VkBufferUsageFlags.StorageBuffer | VkBufferUsageFlags.TransferDst | VkBufferUsageFlags.ShaderDeviceAddress, VmaMemoryUsage.GpuOnly);
+        MyVertexRawBuffer = new AllocatedRawBuffer( vertexBufferSize, VkBufferUsageFlags.StorageBuffer | VkBufferUsageFlags.TransferDst | VkBufferUsageFlags.ShaderDeviceAddress, VmaMemoryUsage.GpuOnly);
 
-        MyVertexBufferAddress = MyVertexBuffer.GetDeviceAddress();
+        MyVertexBufferAddress = MyVertexRawBuffer.GetDeviceAddress();
 
-        MyIndexBuffer = new AllocatedBuffer(aAllocator, indexBufferSize, VkBufferUsageFlags.IndexBuffer | VkBufferUsageFlags.TransferDst, VmaMemoryUsage.GpuOnly);
+        MyIndexRawBuffer = new AllocatedRawBuffer(indexBufferSize, VkBufferUsageFlags.IndexBuffer | VkBufferUsageFlags.TransferDst, VmaMemoryUsage.GpuOnly);
 
-        AllocatedBuffer stagingBuffer = new(aAllocator, vertexBufferSize + indexBufferSize, VkBufferUsageFlags.TransferSrc, VmaMemoryUsage.CpuOnly);
+        AllocatedRawBuffer stagingRawBuffer = new(vertexBufferSize + indexBufferSize, VkBufferUsageFlags.TransferSrc, VmaMemoryUsage.CpuOnly);
 
-        byte* mappedData = (byte*)stagingBuffer.MyAllocationInfo.pMappedData;
+        byte* mappedData = (byte*)stagingRawBuffer.MyAllocationInfo.pMappedData;
         Span<Vertex> destinationVertex = new(mappedData, aVertices.Count);
         Span<uint> destinationIndex = new Span<uint>(mappedData + vertexBufferSize, (int)indexBufferSize);
 
@@ -50,22 +50,22 @@ public unsafe class MeshBuffers : IGpuDestroyable
             vertexCopy.dstOffset = 0;
             vertexCopy.srcOffset = 0;
             vertexCopy.size = vertexBufferSize;
-            Vulkan.vkCmdCopyBuffer(cmd.MyVkCommandBuffer, stagingBuffer.MyBuffer, MyVertexBuffer.MyBuffer, 1, &vertexCopy);
+            Vulkan.vkCmdCopyBuffer(cmd.MyVkCommandBuffer, stagingRawBuffer.MyBuffer, MyVertexRawBuffer.MyBuffer, 1, &vertexCopy);
             
             VkBufferCopy indexCopy = new();
             indexCopy.dstOffset = 0;
             indexCopy.srcOffset = vertexBufferSize;
             indexCopy.size = indexBufferSize;
-            Vulkan.vkCmdCopyBuffer(cmd.MyVkCommandBuffer, stagingBuffer.MyBuffer, MyIndexBuffer.MyBuffer, 1, &indexCopy);
+            Vulkan.vkCmdCopyBuffer(cmd.MyVkCommandBuffer, stagingRawBuffer.MyBuffer, MyIndexRawBuffer.MyBuffer, 1, &indexCopy);
         });
 
-        stagingBuffer.Destroy();
+        stagingRawBuffer.Destroy();
     }
     
     public void Destroy()
     {
-        MyVertexBuffer.Destroy();
-        MyIndexBuffer.Destroy();
+        MyVertexRawBuffer.Destroy();
+        MyIndexRawBuffer.Destroy();
     }
 }
 

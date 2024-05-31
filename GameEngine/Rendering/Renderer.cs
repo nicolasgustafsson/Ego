@@ -10,7 +10,7 @@ using Vortice.Vulkan;
 
 namespace Rendering;
 
-public partial class Renderer
+public partial class Renderer : IGpuImmediateSubmit
 {
     private Swapchain mySwapchain = null!;
     private DrawQueue myDrawQueue = null!;
@@ -37,6 +37,14 @@ public partial class Renderer
 
     private Mesh[] myMeshes = null!;
     private Mesh myMonke => myMeshes[2];
+
+    private Image myBlackImage = null!;
+    private Image myGreyImage = null!;
+    private Image myWhiteImage = null!;
+    private Image myCheckerBoardImage = null!;
+
+    private SceneData mySceneData = new SceneData();
+    private VkDescriptorSetLayout mySceneDataLayout;
     
     private ulong myFrameNumber = 0;
     private bool myWantsResize = false;

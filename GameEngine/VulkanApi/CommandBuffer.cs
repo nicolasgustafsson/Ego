@@ -136,9 +136,9 @@ public unsafe class CommandBuffer : IGpuDestroyable
         vkCmdBindPipeline(MyVkCommandBuffer, aPipeline.MyBindPoint, aPipeline.MyVkPipeline);
     }
     
-    public void BindIndexBuffer(AllocatedBuffer aIndexBuffer)
+    public void BindIndexBuffer(AllocatedRawBuffer aIndexRawBuffer)
     {
-        vkCmdBindIndexBuffer(MyVkCommandBuffer, aIndexBuffer.MyBuffer, 0, VkIndexType.Uint32);
+        vkCmdBindIndexBuffer(MyVkCommandBuffer, aIndexRawBuffer.MyBuffer, 0, VkIndexType.Uint32);
     }
     
     public void BindDescriptorSet(VkPipelineLayout aLayout, VkDescriptorSet aDescriptorSet, VkPipelineBindPoint aBindPoint)

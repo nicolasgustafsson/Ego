@@ -1,4 +1,5 @@
 global using Utilities.CommonExtensions;
+using System.Drawing;
 using Vortice.Vulkan;
 using static Vortice.Vulkan.Vulkan;
 using System.Runtime.InteropServices;
@@ -38,6 +39,8 @@ public partial class Renderer
         
         CreateDrawImage();
 
+        CreateDefaultImages();
+
         CreateImmediateCommandBuffer();
         
         CreateFrameData();
@@ -52,7 +55,33 @@ public partial class Renderer
         
         Console.WriteLine("Renderer successfully created!");
     }
-    
+
+    private void CreateDefaultImages()
+    {
+        Color white = Color.White;
+        int whitePacked = white.ToArgb();
+        Color black = Color.Black;
+        int blackPacked = black.ToArgb();
+        Color grey = Color.Gray;
+        int grayPacked = grey.ToArgb();
+        Color magenta = Color.Magenta;
+        int magentaPacked = magenta.ToArgb();
+
+        int[] checkerboard = new int[16 * 16];
+        
+        for(int x = 0; x < 16; x++)
+        {
+            for (int y = 0; y < 16; y++)
+            {
+                checkerboard[y*16 + x] = (((x % 2) ^ (y % 2)) == 0) ? magentaPacked : blackPacked;
+            }
+        }
+
+        myCheckerBoardImage = new Image(VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(16, 16, 1), false);
+
+        myCleanupQueue.Add(myCheckerBoardImage);
+    }
+
     private void Resize()
     {
         Device.WaitUntilIdle();
@@ -127,10 +156,10 @@ public partial class Renderer
 
     private void CreateDrawImage()
     {
-         myDrawImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
+         myDrawImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1), false);
          myCleanupQueue.Add(myDrawImage);
          
-         myDepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1));
+         myDepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1), false);
          myCleanupQueue.Add(myDepthImage);
     }
 
@@ -153,6 +182,14 @@ public partial class Renderer
         });
 
         myCleanupQueue.Add(myGlobalDescriptorAllocator);
+        
+        DescriptorLayoutBuilder builder = new();
+        builder.AddBinding(0, VkDescriptorType.UniformBuffer);
+        mySceneDataLayout = builder.Build(VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment);
+        myCleanupQueue.Add(() =>
+        {
+            vkDestroyDescriptorSetLayout(Device.MyVkDevice, mySceneDataLayout);
+        });
     }
 
     private void CreateDrawImageDescriptor()
@@ -165,20 +202,11 @@ public partial class Renderer
         UpdateDrawImageDescriptorSet();
     }
 
-    private unsafe void UpdateDrawImageDescriptorSet()
+    private void UpdateDrawImageDescriptorSet()
     {
-        VkDescriptorImageInfo imageInfo = new();
-        imageInfo.imageLayout = VkImageLayout.General;
-        imageInfo.imageView = myDrawImage.MyImageView.MyVkImageView;
-
-        VkWriteDescriptorSet drawImageWrite = new();
-        drawImageWrite.dstBinding = 0;
-        drawImageWrite.dstSet = myDrawImageDescriptorSet;
-        drawImageWrite.descriptorCount = 1;
-        drawImageWrite.descriptorType = VkDescriptorType.StorageImage;
-        drawImageWrite.pImageInfo = &imageInfo;
-
-        vkUpdateDescriptorSets(Device.MyVkDevice, 1, &drawImageWrite, 0, null);
+        DescriptorWriter writer = new();
+        writer.WriteImage(0, myDrawImage.MyImageView, VkSampler.Null, VkImageLayout.General, VkDescriptorType.StorageImage);
+        writer.UpdateSet(myDrawImageDescriptorSet);
     }
 
     private void CreateMemoryAllocator()
@@ -238,6 +266,15 @@ public partial class Renderer
             newFrame.MyRenderFinishedSemaphore = new();
             newFrame.MyImageAvailableSemaphore = new();
             newFrame.MyRenderFence = new();
+            
+            List<DescriptorAllocatorGrowable.PoolSizeRatio> sizes = new List<DescriptorAllocatorGrowable.PoolSizeRatio>
+            {
+                new() { Ratio = 3f, Type = VkDescriptorType.StorageImage},
+                new() { Ratio = 3f, Type = VkDescriptorType.StorageBuffer},
+                new() { Ratio = 3f, Type = VkDescriptorType.UniformBuffer},
+                new() { Ratio = 4f, Type = VkDescriptorType.CombinedImageSampler},
+            };
+            newFrame.MyFrameDescriptors.InitPool(1000, sizes);
 
             myFrameData.Add(newFrame);
         }

@@ -17,6 +17,6 @@ public class ImGuiContext
         io.Fonts.AddFontDefault();
         io.Fonts.GetTexDataAsRGBA32(out nint pixels, out var width, out var height);
 
-        myFontTexture = new Image(VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled | VkImageUsageFlags.TransferDst, new VkExtent3D(width, height, 0));
+        myFontTexture = new Image(VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled | VkImageUsageFlags.TransferDst, new VkExtent3D(width, height, 0), false);
     }
 }

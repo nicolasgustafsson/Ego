@@ -15,6 +15,7 @@
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="ImGui.NET" Version="1.90.5.1" />
+      <PackageReference Include="Magick.NET-Q8-x64" Version="13.9.0" />
       <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0031" />
       <PackageReference Include="SharpGLTF.Toolkit" Version="1.0.0-alpha0031" />
       <PackageReference Include="Vortice.ShaderCompiler" Version="1.7.3" />
@@ -38,6 +39,51 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="Models\basicmesh.glb">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\monkeyHD.glb">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\house.glb">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\Shared\T_Bevel_N.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\Shared\T_Bevel_N_FlipY.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\Shared\T_Bumpy_N.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\Shared\T_Bumpy_N_FlipY.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\Shared\T_InletBorder_AO.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\Shared\T_InletBorder_N.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\Shared\T_InletBorder_N_FlipY.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\Shared\T_InletCenter_AO.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\Shared\T_InletCenter_N.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\Shared\T_InletCenter_N_FlipY.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\Shared\T_Stud_N.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\Shared\T_Stud_N_FlipY.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Models\house2.glb">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

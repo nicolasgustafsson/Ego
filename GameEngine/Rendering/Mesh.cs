@@ -1,6 +1,8 @@
 using Graphics;
+using ImageMagick;
 using SharpGLTF.Memory;
 using SharpGLTF.Schema2;
+using Image = Graphics.Image;
 
 namespace Rendering;
 
@@ -82,8 +84,8 @@ public class Mesh : IGpuDestroyable
             }
 
             meshes.Add(new Mesh(mesh.Name, surfaces, new MeshBuffers(aRenderer, GlobalAllocator, indices, vertices)));
+            
         }
-        
         return meshes;
     }
 }

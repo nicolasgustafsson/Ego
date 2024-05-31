@@ -4,7 +4,7 @@ public unsafe class ImageView : IGpuDestroyable
 {
     public VkImageView MyVkImageView;
     
-    public ImageView(VkImage aImage, VkFormat aFormat, VkImageAspectFlags aAspectFlags)
+    public ImageView(VkImage aImage, VkFormat aFormat, VkImageAspectFlags aAspectFlags, uint aMipLevels = 1)
     {
         VkImageViewCreateInfo createInfo = new();
 
@@ -15,7 +15,7 @@ public unsafe class ImageView : IGpuDestroyable
         createInfo.viewType = VkImageViewType.Image2D;
         createInfo.subresourceRange.aspectMask = aAspectFlags;
         createInfo.subresourceRange.baseMipLevel = 0;
-        createInfo.subresourceRange.levelCount = 1;
+        createInfo.subresourceRange.levelCount = aMipLevels;
         createInfo.subresourceRange.baseArrayLayer = 0;
         createInfo.subresourceRange.layerCount = 1;
 

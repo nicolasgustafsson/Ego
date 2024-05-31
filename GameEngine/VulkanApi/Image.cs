@@ -10,7 +10,7 @@ public unsafe class Image : IGpuDestroyable
     
     public VkImageLayout MyCurrentLayout = VkImageLayout.Undefined;
     
-    public Image(VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent)
+    public Image(VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps)
     {
         MyExtent = aExtent;
         MyImageFormat = aFormat;
@@ -19,22 +19,54 @@ public unsafe class Image : IGpuDestroyable
         createInfo.imageType = VkImageType.Image2D;
         createInfo.format = aFormat;
         createInfo.extent = aExtent;
-        
         createInfo.mipLevels = 1;
+        
+        if (aMipMaps)
+            createInfo.mipLevels = (uint)Math.Floor(Math.Log2(Math.Max(aExtent.width, aExtent.height))) + 1;
+        
         createInfo.arrayLayers = 1;
         
         createInfo.samples = VkSampleCountFlags.Count1;
         
         createInfo.tiling = VkImageTiling.Optimal;
         createInfo.usage = aUsageFlags;
-        
-        VmaAllocationCreateInfo allocationInfo = new();
-        allocationInfo.usage = VmaMemoryUsage.GpuOnly;
-        allocationInfo.requiredFlags = VkMemoryPropertyFlags.DeviceLocal;
-        
-        Vma.vmaCreateImage(GlobalAllocator.myVmaAllocator, &createInfo, &allocationInfo, out MyVkImage, out MyAllocation, out VmaAllocationInfo allocInfo).CheckResult();
 
-        MyImageView = new(MyVkImage, aFormat, (int)(aUsageFlags & VkImageUsageFlags.DepthStencilAttachment) != 0 ? VkImageAspectFlags.Depth : VkImageAspectFlags.Color);
+        VmaAllocationCreateInfo allocCreateInfo = new();
+        allocCreateInfo.usage = VmaMemoryUsage.GpuOnly;
+        allocCreateInfo.requiredFlags = VkMemoryPropertyFlags.DeviceLocal;
+        
+        Vma.vmaCreateImage(GlobalAllocator.myVmaAllocator, &createInfo, &allocCreateInfo, out MyVkImage, out MyAllocation, out VmaAllocationInfo allocInfo).CheckResult();
+
+        MyImageView = new(MyVkImage, aFormat, (int)(aUsageFlags & VkImageUsageFlags.DepthStencilAttachment) != 0 ? VkImageAspectFlags.Depth : VkImageAspectFlags.Color, createInfo.mipLevels);
+    }
+    
+    public Image(IGpuImmediateSubmit aSubmit, byte* aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps) : this(aFormat, aUsageFlags, aExtent, aMipMaps)
+    {
+        ulong dataSize = aExtent.width * aExtent.height * aExtent.depth * 4;
+
+        AllocatedRawBuffer staging = new(dataSize, VkBufferUsageFlags.TransferSrc, VmaMemoryUsage.CpuToGpu);
+
+        aSubmit.ImmediateSubmit(cmd =>
+        {
+            cmd.TransitionImage(this, VkImageLayout.TransferDstOptimal);
+
+            VkBufferImageCopy copyRegion = new();
+            copyRegion.bufferOffset = 0;
+            copyRegion.bufferRowLength = 0;
+            copyRegion.bufferImageHeight = 0;
+
+            copyRegion.imageSubresource.aspectMask = VkImageAspectFlags.Color;
+            copyRegion.imageSubresource.mipLevel = 0;
+            copyRegion.imageSubresource.baseArrayLayer = 0;
+            copyRegion.imageSubresource.layerCount = 1;
+            copyRegion.imageExtent = aExtent;
+
+            vkCmdCopyBufferToImage(cmd.MyVkCommandBuffer, staging.MyBuffer, MyVkImage, VkImageLayout.TransferDstOptimal, 1, &copyRegion);
+
+            cmd.TransitionImage(this, VkImageLayout.ReadOnlyOptimal);
+        });
+
+        staging.Destroy();
     }
     
     public void Destroy()

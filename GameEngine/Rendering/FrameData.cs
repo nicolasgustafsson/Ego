@@ -1,4 +1,5 @@
-﻿using Graphics;
+﻿using System.Runtime.InteropServices;
+using Graphics;
 using Vortice.Vulkan;
 using Semaphore = Graphics.Semaphore;
 
@@ -14,12 +15,16 @@ public class FrameData : IGpuDestroyable
     public Fence MyRenderFence = null!;
 
     public DeletionQueue MyDeletionQueue = new();
+
+    public DescriptorAllocatorGrowable MyFrameDescriptors = new();
     
     public void Destroy()
     {
+        MyDeletionQueue.Flush();
         MyCommandBuffer.Destroy();
         MyImageAvailableSemaphore.Destroy();
         MyRenderFinishedSemaphore.Destroy();
         MyRenderFence.Destroy();
+        MyFrameDescriptors.Destroy();
     }
 }

@@ -24,7 +24,7 @@ public unsafe class DescriptorAllocatorGrowable
         mySetsPerPool = aSets;
     }
     
-    public void ClearDescriptors()
+    public void ClearPools()
     {
         foreach(var pool in myReadyPools)
         {

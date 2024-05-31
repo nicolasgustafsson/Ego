@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using SharpGLTF.Schema2;
 
 namespace Rendering;
 using Vortice.Vulkan;
@@ -27,6 +28,7 @@ public partial class Renderer
         }
         
         myCurrentFrame.MyDeletionQueue.Flush();
+        myCurrentFrame.MyFrameDescriptors.ClearPools();
         
         var nextImage = Device.AcquireNextImage(mySwapchain, myCurrentFrame.MyImageAvailableSemaphore);
         uint imageIndex = nextImage.imageIndex;
@@ -71,8 +73,16 @@ public partial class Renderer
         myFrameNumber++;
     }
 
-    private void DrawGeometry(CommandBuffer cmd)
+    private unsafe void DrawGeometry(CommandBuffer cmd)
     {
+        AllocatedBuffer<SceneData> sceneDataBuffer = new(VkBufferUsageFlags.UniformBuffer, VmaMemoryUsage.CpuToGpu);
+        myCurrentFrame.MyDeletionQueue.Add(sceneDataBuffer);
+        sceneDataBuffer.SetWriteData(mySceneData);
+        VkDescriptorSet globalDescriptor = myCurrentFrame.MyFrameDescriptors.Allocate(mySceneDataLayout);
+        DescriptorWriter writer = new();
+        writer.WriteBuffer(0, sceneDataBuffer.MyBuffer, (ulong)sizeof(SceneData), 0, VkDescriptorType.UniformBuffer);
+        writer.UpdateSet(globalDescriptor);
+        
         cmd.BeginRendering(myDrawImage, myDepthImage);
 
         cmd.BindPipeline(myTrianglePipeline);
@@ -88,7 +98,7 @@ public partial class Renderer
 
         cmd.SetPushConstants(pushConstants, myTrianglePipeline.MyVkLayout, VkShaderStageFlags.Vertex);
 
-        cmd.BindIndexBuffer(myMonke.MyMeshBuffers.MyIndexBuffer);
+        cmd.BindIndexBuffer(myMonke.MyMeshBuffers.MyIndexRawBuffer);
 
         cmd.DrawIndexed(myMonke.MySurfaces[0].Count);
        
