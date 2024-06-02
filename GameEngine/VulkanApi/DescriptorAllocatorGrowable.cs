@@ -1,10 +1,8 @@
-using System.Numerics;
-using System.Threading.Channels;
 using Vortice.ShaderCompiler;
 
 namespace Graphics;
 
-public unsafe class DescriptorAllocatorGrowable
+public unsafe class DescriptorAllocatorGrowable : IGpuDestroyable
 {
     public const uint MaxPoolSize = 4092;
     

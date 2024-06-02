@@ -8,7 +8,6 @@ using Vortice.Vulkan;
 
 namespace Graphics;
 
-[StructLayout(LayoutKind.Sequential, Pack = 4)]
 public struct Vertex
 {
     public Vector3 Position;
@@ -69,7 +68,6 @@ public unsafe class MeshBuffers : IGpuDestroyable
     }
 }
 
-[StructLayout(LayoutKind.Sequential, Pack = 4)]
 public struct MeshPushConstants
 {
     public Matrix4x4 WorldMatrix;

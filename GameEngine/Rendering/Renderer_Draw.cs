@@ -5,7 +5,6 @@ namespace Rendering;
 using Vortice.Vulkan;
 using Graphics;
 
-[StructLayout(LayoutKind.Sequential, Pack = 4)]
 struct PushConstants
 {
     public Vector4 data1;
@@ -79,14 +78,27 @@ public partial class Renderer
         myCurrentFrame.MyDeletionQueue.Add(sceneDataBuffer);
         sceneDataBuffer.SetWriteData(mySceneData);
         VkDescriptorSet globalDescriptor = myCurrentFrame.MyFrameDescriptors.Allocate(mySceneDataLayout);
-        DescriptorWriter writer = new();
-        writer.WriteBuffer(0, sceneDataBuffer.MyBuffer, (ulong)sizeof(SceneData), 0, VkDescriptorType.UniformBuffer);
-        writer.UpdateSet(globalDescriptor);
+        
+        {
+            DescriptorWriter writer = new();
+            writer.WriteBuffer(0, sceneDataBuffer.MyBuffer, (ulong)sizeof(SceneData), 0, VkDescriptorType.UniformBuffer);
+            writer.UpdateSet(globalDescriptor);
+        }
         
         cmd.BeginRendering(myDrawImage, myDepthImage);
 
         cmd.BindPipeline(myTrianglePipeline);
 
+        VkDescriptorSet descriptorSet = myCurrentFrame.MyFrameDescriptors.Allocate(mySingleTextureLayout);
+
+        {
+            DescriptorWriter writer = new();
+            writer.WriteImage(0, myCheckerBoardImage.MyImageView, myDefaultNearestSampler, VkImageLayout.ShaderReadOnlyOptimal, VkDescriptorType.CombinedImageSampler);
+            writer.UpdateSet(descriptorSet);
+        }
+
+        cmd.BindDescriptorSet(myTrianglePipeline.MyVkLayout, descriptorSet, VkPipelineBindPoint.Graphics); 
+        
         Matrix4x4 view = Matrix4x4.CreateTranslation(new Vector3(0f, 0f, -2f));
         Matrix4x4 projection = MatrixExtensions.CreatePerspectiveFieldOfView(90f * (float)(Math.PI/180f), (float)myDrawImage.MyExtent.width / (float)myDrawImage.MyExtent.height, 10000f, 0.1f);
 

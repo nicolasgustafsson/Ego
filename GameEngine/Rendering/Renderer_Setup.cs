@@ -4,6 +4,7 @@ using Vortice.Vulkan;
 using static Vortice.Vulkan.Vulkan;
 using System.Runtime.InteropServices;
 using Graphics;
+using Vortice.ShaderCompiler;
 
 namespace Rendering;
 
@@ -39,12 +40,12 @@ public partial class Renderer
         
         CreateDrawImage();
 
-        CreateDefaultImages();
-
         CreateImmediateCommandBuffer();
         
         CreateFrameData();
 
+        CreateDefaultImages();
+        
         InitializeDescriptors();
 
         InitializePipelines();
@@ -56,14 +57,14 @@ public partial class Renderer
         Console.WriteLine("Renderer successfully created!");
     }
 
-    private void CreateDefaultImages()
+    private unsafe void CreateDefaultImages()
     {
         Color white = Color.White;
         int whitePacked = white.ToArgb();
         Color black = Color.Black;
         int blackPacked = black.ToArgb();
         Color grey = Color.Gray;
-        int grayPacked = grey.ToArgb();
+        int greyPacked = grey.ToArgb();
         Color magenta = Color.Magenta;
         int magentaPacked = magenta.ToArgb();
 
@@ -77,9 +78,20 @@ public partial class Renderer
             }
         }
 
-        myCheckerBoardImage = new Image(VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(16, 16, 1), false);
+        myWhiteImage = new Image(this, (byte*)&whitePacked, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(1, 1, 1), false);
+        myBlackImage = new Image(this, (byte*)&blackPacked, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(1, 1, 1), false);
+        myGreyImage = new Image(this, (byte*)&greyPacked, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(1, 1, 1), false);
+        myCheckerBoardImage = new Image(this, (byte*)checkerboard.AsSpan().GetPointerUnsafe(), VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(16, 16, 1), false);
 
+        myDefaultLinearSampler = new(VkFilter.Linear);
+        myDefaultNearestSampler = new(VkFilter.Nearest);
+        
+        myCleanupQueue.Add(myWhiteImage);
+        myCleanupQueue.Add(myBlackImage);
+        myCleanupQueue.Add(myGreyImage);
         myCleanupQueue.Add(myCheckerBoardImage);
+        myCleanupQueue.Add(myDefaultLinearSampler);
+        myCleanupQueue.Add(myDefaultNearestSampler);
     }
 
     private void Resize()
@@ -132,7 +144,7 @@ public partial class Renderer
         myTrianglePipeline = GraphicsPipeline
             .StartBuild()
             .AddPushConstant<MeshPushConstants>(VkShaderStageFlags.Vertex)
-            .AddLayout(myDrawImageDescriptorLayout)
+            .AddLayout(mySingleTextureLayout)
             .SetVertexShader("Shaders/vert.spv")
             .SetFragmentShader("Shaders/frag.spv")
             .SetTopology(VkPrimitiveTopology.TriangleList)
@@ -165,7 +177,7 @@ public partial class Renderer
 
     private unsafe void InitializeDescriptors()
     {
-        List<DescriptorAllocator.PoolSizeRatio> sizes = new List<DescriptorAllocator.PoolSizeRatio>
+        List<DescriptorAllocatorGrowable.PoolSizeRatio> sizes = new List<DescriptorAllocatorGrowable.PoolSizeRatio>
         {
             new() { Ratio = 1f, Type = VkDescriptorType.StorageImage},
             new() { Ratio = 1f, Type = VkDescriptorType.CombinedImageSampler},
@@ -180,16 +192,30 @@ public partial class Renderer
         {
             vkDestroyDescriptorSetLayout(Device.MyVkDevice, myDrawImageDescriptorLayout);
         });
+        
+        {
+            DescriptorLayoutBuilder builder = new();
+            builder.AddBinding(0, VkDescriptorType.CombinedImageSampler);
+            mySingleTextureLayout = builder.Build(VkShaderStageFlags.Fragment);
+
+            myCleanupQueue.Add(() =>
+            {
+                vkDestroyDescriptorSetLayout(Device.MyVkDevice, mySingleTextureLayout);
+            });
+        }
 
         myCleanupQueue.Add(myGlobalDescriptorAllocator);
         
-        DescriptorLayoutBuilder builder = new();
-        builder.AddBinding(0, VkDescriptorType.UniformBuffer);
-        mySceneDataLayout = builder.Build(VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment);
-        myCleanupQueue.Add(() =>
         {
-            vkDestroyDescriptorSetLayout(Device.MyVkDevice, mySceneDataLayout);
-        });
+            DescriptorLayoutBuilder builder = new();
+            builder.AddBinding(0, VkDescriptorType.UniformBuffer);
+            mySceneDataLayout = builder.Build(VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment);
+            myCleanupQueue.Add(() =>
+            {
+                vkDestroyDescriptorSetLayout(Device.MyVkDevice, mySceneDataLayout);
+            });
+        }
+        
     }
 
     private void CreateDrawImageDescriptor()
@@ -205,7 +231,7 @@ public partial class Renderer
     private void UpdateDrawImageDescriptorSet()
     {
         DescriptorWriter writer = new();
-        writer.WriteImage(0, myDrawImage.MyImageView, VkSampler.Null, VkImageLayout.General, VkDescriptorType.StorageImage);
+        writer.WriteImage(0, myDrawImage.MyImageView, null, VkImageLayout.General, VkDescriptorType.StorageImage);
         writer.UpdateSet(myDrawImageDescriptorSet);
     }
 

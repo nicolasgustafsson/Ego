@@ -4,7 +4,6 @@ global using static Graphics.Surface;
 global using static Graphics.MemoryAllocator;
 global using static Graphics.Gpu;
 
-using System.Runtime.InteropServices;
 using Graphics;
 using Vortice.Vulkan;
 
@@ -16,7 +15,7 @@ public partial class Renderer : IGpuImmediateSubmit
     private DrawQueue myDrawQueue = null!;
     private Image myDrawImage = null!;
     private Image myDepthImage = null!;
-    private DescriptorAllocator myGlobalDescriptorAllocator = new();
+    private DescriptorAllocatorGrowable myGlobalDescriptorAllocator = new();
     
     private ComputePipeline myGradientPipeline = null!;
     private GraphicsPipeline myTrianglePipeline = null!;
@@ -30,6 +29,8 @@ public partial class Renderer : IGpuImmediateSubmit
     private VkDescriptorSet myDrawImageDescriptorSet;
     private VkDescriptorSetLayout myDrawImageDescriptorLayout;
 
+    private VkDescriptorSetLayout mySingleTextureLayout;
+
     private readonly List<FrameData> myFrameData = new() { };
     private FrameData myCurrentFrame => myFrameData[(int)(myFrameNumber % FrameOverlap)];
 
@@ -42,6 +43,9 @@ public partial class Renderer : IGpuImmediateSubmit
     private Image myGreyImage = null!;
     private Image myWhiteImage = null!;
     private Image myCheckerBoardImage = null!;
+
+    private Sampler myDefaultNearestSampler = null!;
+    private Sampler myDefaultLinearSampler = null!;
 
     private SceneData mySceneData = new SceneData();
     private VkDescriptorSetLayout mySceneDataLayout;

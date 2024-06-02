@@ -2,8 +2,6 @@ using Vortice.ShaderCompiler;
 
 namespace Graphics;
 
-
-
 public unsafe class DescriptorWriter
 {
     private struct DescriptorWrite(VkWriteDescriptorSet write, DescriptorWrite.WriteType type, int index)
@@ -23,10 +21,10 @@ public unsafe class DescriptorWriter
     private List<VkDescriptorBufferInfo> myBufferInfos = new();
     private List<DescriptorWrite> myWrites = new();
     
-    public void WriteImage(uint aBinding, ImageView aImageView, VkSampler aSampler, VkImageLayout aImageLayout, VkDescriptorType aType)
+    public void WriteImage(uint aBinding, ImageView aImageView, Sampler? aSampler, VkImageLayout aImageLayout, VkDescriptorType aType)
     {
         VkDescriptorImageInfo imageInfo = new();
-        imageInfo.sampler = aSampler;
+        imageInfo.sampler = aSampler?.MyVkSampler ?? VkSampler.Null;
         imageInfo.imageView = aImageView.MyVkImageView;
         imageInfo.imageLayout = aImageLayout;
 

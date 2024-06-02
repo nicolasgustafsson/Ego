@@ -38,7 +38,7 @@ public class DeletionQueue
             {
                 deletor.Destroy();
             }
-            catch (AccessViolationException e)
+            catch (AccessViolationException _)
             {
             }
         }

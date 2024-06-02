@@ -2,7 +2,6 @@ using System.Runtime.InteropServices;
 
 namespace Rendering;
 
-[StructLayout(LayoutKind.Sequential, Pack = 4)]
 public struct SceneData
 {
     public Matrix4x4 View;

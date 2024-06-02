@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace Graphics;
 
 public unsafe class Image : IGpuDestroyable
@@ -40,11 +42,13 @@ public unsafe class Image : IGpuDestroyable
         MyImageView = new(MyVkImage, aFormat, (int)(aUsageFlags & VkImageUsageFlags.DepthStencilAttachment) != 0 ? VkImageAspectFlags.Depth : VkImageAspectFlags.Color, createInfo.mipLevels);
     }
     
-    public Image(IGpuImmediateSubmit aSubmit, byte* aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps) : this(aFormat, aUsageFlags, aExtent, aMipMaps)
+    public Image(IGpuImmediateSubmit aSubmit, byte* aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps) : this(aFormat, aUsageFlags | VkImageUsageFlags.TransferDst, aExtent, aMipMaps)
     {
         ulong dataSize = aExtent.width * aExtent.height * aExtent.depth * 4;
 
         AllocatedRawBuffer staging = new(dataSize, VkBufferUsageFlags.TransferSrc, VmaMemoryUsage.CpuToGpu);
+
+        Buffer.MemoryCopy(aData, staging.MyAllocationInfo.pMappedData, dataSize, dataSize);
 
         aSubmit.ImmediateSubmit(cmd =>
         {
