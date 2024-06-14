@@ -136,9 +136,9 @@ public unsafe class CommandBuffer : IGpuDestroyable
         vkCmdBindPipeline(MyVkCommandBuffer, aPipeline.MyBindPoint, aPipeline.MyVkPipeline);
     }
     
-    public void BindIndexBuffer(AllocatedRawBuffer aIndexRawBuffer)
+    public void BindIndexBuffer(AllocatedRawBuffer aIndexRawBuffer, VkIndexType aIndexType = VkIndexType.Uint32)
     {
-        vkCmdBindIndexBuffer(MyVkCommandBuffer, aIndexRawBuffer.MyBuffer, 0, VkIndexType.Uint32);
+        vkCmdBindIndexBuffer(MyVkCommandBuffer, aIndexRawBuffer.MyBuffer, 0, aIndexType);
     }
     
     public void BindDescriptorSet(VkPipelineLayout aLayout, VkDescriptorSet aDescriptorSet, VkPipelineBindPoint aBindPoint)
@@ -155,6 +155,11 @@ public unsafe class CommandBuffer : IGpuDestroyable
     public void DrawIndexed(uint aIndexCount)
     {
         vkCmdDrawIndexed(MyVkCommandBuffer, (uint)aIndexCount, 1, 0, 0, 0);
+    }
+    
+    public void DrawIndexed(uint aIndexCount, uint aInstanceCount, uint aFirstIndex, int aVertexOffset, uint aFirstInstance)
+    {
+        vkCmdDrawIndexed(MyVkCommandBuffer, (uint)aIndexCount, instanceCount: aInstanceCount, firstIndex: aFirstIndex, vertexOffset: aVertexOffset, firstInstance: aFirstInstance);
     }
     
     public void BeginRendering(Image aDrawImage, Image aDepthImage)

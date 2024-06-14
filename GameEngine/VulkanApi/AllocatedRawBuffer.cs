@@ -46,7 +46,7 @@ public unsafe class AllocatedRawBuffer : IGpuDestroyable
 
 public unsafe class AllocatedBuffer<T> : AllocatedRawBuffer where T : unmanaged
 {
-    public AllocatedBuffer(VkBufferUsageFlags aBufferUsageFlags, VmaMemoryUsage aMemoryUsage) : base((ulong)sizeof(T), aBufferUsageFlags, aMemoryUsage)
+    public AllocatedBuffer(VkBufferUsageFlags aBufferUsageFlags, VmaMemoryUsage aMemoryUsage, uint aElementCount = 1) : base((ulong)sizeof(T) * aElementCount, aBufferUsageFlags, aMemoryUsage)
     {
         
     }
@@ -56,5 +56,13 @@ public unsafe class AllocatedBuffer<T> : AllocatedRawBuffer where T : unmanaged
         byte* mappedData = (byte*)MyAllocationInfo.pMappedData;
         Span<T> destination = new(mappedData, sizeof(T));
         destination[0] = aValue;
+    }
+    
+    public void SetWriteData(Span<T> aValue, ulong aOffset = 0)
+    {
+        byte* mappedData = (byte*)MyAllocationInfo.pMappedData;
+        Span<T> destination = new(mappedData + aOffset, aValue.Length);
+
+        aValue.CopyTo(destination);
     }
 }

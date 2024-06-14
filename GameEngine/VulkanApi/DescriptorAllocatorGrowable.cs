@@ -10,6 +10,16 @@ public unsafe class DescriptorAllocatorGrowable : IGpuDestroyable
     {
         public VkDescriptorType Type;
         public float Ratio;
+
+        public PoolSizeRatio()
+        {
+        }
+
+        public PoolSizeRatio(float ratio, VkDescriptorType type)
+        {
+            Ratio = ratio;
+            Type = type;
+        }
     }
 
     private List<PoolSizeRatio> myRatios = new();
@@ -20,6 +30,7 @@ public unsafe class DescriptorAllocatorGrowable : IGpuDestroyable
     public void InitPool(uint aSets, List<PoolSizeRatio> aRatios)
     {
         mySetsPerPool = aSets;
+        myRatios = aRatios;
     }
     
     public void ClearPools()

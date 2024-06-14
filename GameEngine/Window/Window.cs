@@ -67,6 +67,13 @@ public class Window
 
         return (width, height);
     }
+    
+    public (int width, int height) GetWindowSize()
+    {
+        Glfw.GetWindowSize(myNativeWindow, out int width, out int height);
+
+        return (width, height);
+    }
 
     public void Close()
     {

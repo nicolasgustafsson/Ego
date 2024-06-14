@@ -20,6 +20,8 @@ public class GraphicsPipeline : Pipeline
         private VkPipelineDepthStencilStateCreateInfo myDepthStencilState = new();
         private VkPipelineRenderingCreateInfo myRenderingInfo = new();
         private VkFormat myColorAttachmentFormat = new();
+        private List<VkVertexInputBindingDescription>? myVertexBindings = null;
+        private List<VkVertexInputAttributeDescription>? myVertexAttributes = null;
 
         public GraphicsPipelineBuilder AddLayout(VkDescriptorSetLayout aLayout)
         {
@@ -97,6 +99,22 @@ public class GraphicsPipeline : Pipeline
         public GraphicsPipelineBuilder SetBlendMode(BlendMode aBlendMode)
         {
             myColorBlendAttachment = aBlendMode.ToVkBlendAttachment();
+            return this;
+        }
+        
+        public GraphicsPipelineBuilder SetVertexBinding(uint aStride, uint aBinding)
+        {
+            myVertexBindings ??= new();
+            myVertexBindings.Add(new(stride: aStride, VkVertexInputRate.Vertex, aBinding));
+
+            return this;
+        }
+        
+        public GraphicsPipelineBuilder SetVertexAttribute(uint aLocation, uint aBinding, VkFormat aFormat)
+        {
+            myVertexAttributes ??= new();
+            myVertexAttributes.Add(new VkVertexInputAttributeDescription(aLocation, aFormat, aBinding));
+
             return this;
         }
         
@@ -195,7 +213,18 @@ public class GraphicsPipeline : Pipeline
                 blendStateCreateInfo.pAttachments = colorBlendAttachmentP;
 
             VkPipelineVertexInputStateCreateInfo vertexInputInfo = new();
-
+            
+            if (myVertexBindings != null)
+            {
+                vertexInputInfo.pVertexBindingDescriptions = myVertexBindings.AsSpan().GetPointerUnsafe();
+                vertexInputInfo.vertexBindingDescriptionCount = (uint)myVertexBindings.Count;
+            }
+            else if (myVertexAttributes != null)
+            {
+                vertexInputInfo.pVertexAttributeDescriptions = myVertexAttributes.AsSpan().GetPointerUnsafe();
+                vertexInputInfo.vertexAttributeDescriptionCount = (uint)myVertexAttributes.Count;
+            }
+            
             VkGraphicsPipelineCreateInfo pipelineCreateInfo = new();
             
             fixed(VkPipelineRenderingCreateInfo* renderInfoP = &myRenderingInfo)

@@ -53,6 +53,10 @@ public partial class Renderer
 
         DrawGeometry(cmd);
 
+        cmd.BeginRendering(myDrawImage, myDepthImage);
+        myImGuiContext.Render(cmd);
+        cmd.EndRendering();
+
         cmd.TransitionImage(myDrawImage, VkImageLayout.TransferSrcOptimal);
         cmd.TransitionImage(currentSwapchainImage, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal);
 

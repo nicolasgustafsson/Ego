@@ -14,6 +14,10 @@ public unsafe class Image : IGpuDestroyable
     
     public Image(VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps)
     {
+        if (aExtent.depth == 0)
+        {
+            Console.WriteLine("Depth should not be 0!");
+        }
         MyExtent = aExtent;
         MyImageFormat = aFormat;
         

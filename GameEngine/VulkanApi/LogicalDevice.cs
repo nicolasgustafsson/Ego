@@ -18,7 +18,7 @@ public unsafe class LogicalDevice : IGpuDestroyable
     
     public void WaitForFence(VkFence aFence)
     {
-        vkWaitForFences(MyVkDevice, aFence, true, 1_000_000_000).CheckResult();
+        vkWaitForFences(MyVkDevice, aFence, true, 300_000_000).CheckResult();
     }
     
     public void ResetFence(VkFence aFence)
