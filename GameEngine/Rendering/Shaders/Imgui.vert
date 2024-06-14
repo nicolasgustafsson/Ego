@@ -9,7 +9,7 @@ struct Vertex
     vec2 position;
     float uv_x;
     float uv_y;
-    uint color;
+    vec4 color;
 };
 
 layout(buffer_reference, std430) readonly buffer VertexBuffer
@@ -30,8 +30,8 @@ void main()
     Vertex v = PushConstants.vertexBuffer.vertices[gl_VertexIndex];
 
     //output data
-    gl_Position = vec4(v.position, 0, 1);
-    outColor = vec4(1.f, 1.f, 1.f, 1.f);//v.color;
+    gl_Position = vec4(v.position * PushConstants.scale + PushConstants.translate, 0, 1);
+    outColor = v.color;
     outUV.x = v.uv_x;
     outUV.y = v.uv_y;
 }

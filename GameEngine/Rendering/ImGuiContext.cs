@@ -1,5 +1,7 @@
-﻿using Graphics;
+﻿using System.Drawing;
+using Graphics;
 using ImGuiNET;
+using Utilities.Interop;
 using Vortice.Vulkan;
 
 namespace Rendering;
@@ -14,7 +16,7 @@ public class ImGuiContext : IGpuDestroyable
     private GraphicsPipeline myPipeline;
     private Window myWindow;
 
-    private List<AllocatedBuffer<ImDrawVert>> myOldVBuffers = new();
+    private List<AllocatedBuffer<ImDrawVertCorrected>> myOldVBuffers = new();
     private List<AllocatedBuffer<ushort>> myOldIBuffers = new();
     private VkDescriptorSetLayout myVertexBufferLayout;
     private VkDescriptorSetLayout myIndexBufferLayout;
@@ -149,6 +151,13 @@ public class ImGuiContext : IGpuDestroyable
         public Vector2 Translate;
         public VkDeviceAddress VertexBuffer;
     }
+    
+    struct ImDrawVertCorrected
+    {
+        public Vector2 Position;
+        public Vector2 UV;
+        public Vector4 Color;
+    }
 
     private unsafe void RenderDrawData(CommandBuffer cmd, ImDrawDataPtr aDrawDataPtr)
     {
@@ -170,7 +179,7 @@ public class ImGuiContext : IGpuDestroyable
             return;
 
         AllocatedBuffer<ushort> indexBuffer = new(VkBufferUsageFlags.IndexBuffer, VmaMemoryUsage.CpuToGpu, (uint)aDrawDataPtr.TotalIdxCount);
-        AllocatedBuffer<ImDrawVert> vertexBuffer = new(VkBufferUsageFlags.StorageBuffer | VkBufferUsageFlags.ShaderDeviceAddress, VmaMemoryUsage.CpuToGpu, (uint)aDrawDataPtr.TotalVtxCount);
+        AllocatedBuffer<ImDrawVertCorrected> vertexBuffer = new(VkBufferUsageFlags.StorageBuffer | VkBufferUsageFlags.ShaderDeviceAddress, VmaMemoryUsage.CpuToGpu, (uint)aDrawDataPtr.TotalVtxCount);
 
         ulong vtxOffset = 0;
         ulong idxOffset = 0;
@@ -182,9 +191,20 @@ public class ImGuiContext : IGpuDestroyable
             ulong idxChunkSize = (ulong) cmdList.IdxBuffer.Size * sizeof(ushort);
 
             Span<ImDrawVert> vertices = new Span<ImDrawVert>(cmdList.VtxBuffer.Data.ToPointer(), cmdList.VtxBuffer.Size);
+
+            List<ImDrawVertCorrected> corrected = new(vertices.Length);
+            
+            foreach(ImDrawVert vert in vertices)
+            {
+                Color color = Color.FromArgb((int)vert.col);
+                corrected.Add(new() { Position = vert.pos, UV = vert.uv, Color = new Vector4(color.B / 255f, color.G / 255f, color.R / 255f, color.A / 255f) });
+            }
+            
+            Span<ImDrawVertCorrected> verticesReal = corrected.AsSpan();
+            
             Span<ushort> indices = new Span<ushort>(cmdList.IdxBuffer.Data.ToPointer(), cmdList.IdxBuffer.Size);
 
-            vertexBuffer.SetWriteData(vertices, vtxOffset);
+            vertexBuffer.SetWriteData(verticesReal, vtxOffset);
             indexBuffer.SetWriteData(indices, idxOffset);
 
             /*{
