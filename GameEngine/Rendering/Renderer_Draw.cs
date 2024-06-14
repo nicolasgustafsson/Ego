@@ -89,7 +89,7 @@ public partial class Renderer
             writer.UpdateSet(globalDescriptor);
         }
         
-        cmd.BeginRendering(myDrawImage, myDepthImage);
+        cmd.BeginRendering(myDrawImage, myDepthImage); 
 
         cmd.BindPipeline(myTrianglePipeline);
 

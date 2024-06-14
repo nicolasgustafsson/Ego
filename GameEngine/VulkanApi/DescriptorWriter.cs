@@ -18,7 +18,7 @@ public unsafe class DescriptorWriter
     }
     
     private List<VkDescriptorImageInfo> myImageInfos = new();
-    private List<VkDescriptorBufferInfo> myBufferInfos = new();
+    private List<VkDescriptorBufferInfo> myBufferInfos = new(); 
     private List<DescriptorWrite> myWrites = new();
     
     public void WriteImage(uint aBinding, ImageView aImageView, Sampler? aSampler, VkImageLayout aImageLayout, VkDescriptorType aType)

@@ -28,7 +28,7 @@ public unsafe class AllocatedRawBuffer : IGpuDestroyable
     public ulong GetDeviceAddress()
     {
         VkBufferDeviceAddressInfo deviceAddressInfo = new();
-        deviceAddressInfo.buffer = MyBuffer;
+        deviceAddressInfo.buffer = MyBuffer; 
 
         return vkGetBufferDeviceAddress(Device.MyVkDevice, &deviceAddressInfo);
     }

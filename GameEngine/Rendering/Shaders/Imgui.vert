@@ -6,10 +6,10 @@ layout (location = 1) out vec2 outUV;
 
 struct Vertex 
 {
-    vec4 color;
     vec2 position;
     float uv_x;
     float uv_y;
+    uint color;
 };
 
 layout(buffer_reference, std430) readonly buffer VertexBuffer
@@ -31,7 +31,7 @@ void main()
 
     //output data
     gl_Position = vec4(v.position * PushConstants.scale + PushConstants.translate, 0, 1);
-    outColor = v.color;
+    outColor = vec4(1.f, 1.f, 1.f, 1.f);//v.color;
     outUV.x = v.uv_x;
     outUV.y = v.uv_y;
 }

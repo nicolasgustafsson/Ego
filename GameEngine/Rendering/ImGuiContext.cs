@@ -187,20 +187,20 @@ public class ImGuiContext : IGpuDestroyable
             vertexBuffer.SetWriteData(vertices, vtxOffset);
             indexBuffer.SetWriteData(indices, idxOffset);
 
-            {
+            /*{
                 DescriptorWriter writer = new();
                 writer.WriteBuffer(0, vertexBuffer.MyBuffer, (ulong)sizeof(ImDrawVert) * (ulong)cmdList.VtxBuffer.Size, vtxOffset, VkDescriptorType.StorageBuffer);
                 writer.UpdateSet(myVertexDescriptor);
-            }
+            }*/
             
             vtxOffset += vtxChunkSize;
             idxOffset += idxChunkSize;
             
-            {
+            /*{
                 DescriptorWriter writer = new();
                 writer.WriteBuffer(0, indexBuffer.MyBuffer, (ulong)sizeof(SceneData), 0, VkDescriptorType.StorageBuffer);
                 writer.UpdateSet(myIndexDescriptor);
-            }
+            }*/
             
         }
         
