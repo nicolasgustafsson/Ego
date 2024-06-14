@@ -20,8 +20,6 @@ public class ImGuiContext : IGpuDestroyable
     private List<AllocatedBuffer<ushort>> myOldIBuffers = new();
     private VkDescriptorSetLayout myVertexBufferLayout;
     private VkDescriptorSetLayout myIndexBufferLayout;
-    private VkDescriptorSet myVertexDescriptor;
-    private VkDescriptorSet myIndexDescriptor;
 
     public unsafe ImGuiContext(Renderer aRenderer, Window aWindow)
     {
@@ -38,20 +36,6 @@ public class ImGuiContext : IGpuDestroyable
         myFontTexture = new Image(aRenderer, (byte*)pixels.ToPointer(), VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled | VkImageUsageFlags.TransferDst, new VkExtent3D(width, height, 1), false);
         myDescriptorAllocator = new DescriptorAllocatorGrowable();
         myDescriptorAllocator.InitPool(100, [new(ratio: 1000, type: VkDescriptorType.CombinedImageSampler)]);
-
-        {
-            DescriptorLayoutBuilder builder = new();
-            builder.AddBinding(0, VkDescriptorType.StorageBuffer);
-            myVertexBufferLayout = builder.Build(VkShaderStageFlags.Vertex);
-            myVertexDescriptor = myDescriptorAllocator.Allocate(myVertexBufferLayout);
-        }
-        
-        {
-            DescriptorLayoutBuilder builder = new();
-            builder.AddBinding(0, VkDescriptorType.StorageBuffer);
-            myIndexBufferLayout = builder.Build(VkShaderStageFlags.Vertex);
-            myIndexDescriptor = myDescriptorAllocator.Allocate(myIndexBufferLayout);
-        }
         
         mySampler = new(VkFilter.Linear);
 
@@ -130,11 +114,48 @@ public class ImGuiContext : IGpuDestroyable
         io.DeltaTime = deltaTime;
     } 
     
+    private void UpdateImGuiInput()
+    {
+        var io = ImGui.GetIO();
+        io.MousePos = myWindow.GetCursorPosition();
+
+        io.MouseDown[0] = myWindow.IsMouseButtonDown(MouseButton.Left);
+        io.MouseDown[1] = myWindow.IsMouseButtonDown(MouseButton.Right);
+        io.MouseDown[2] = myWindow.IsMouseButtonDown(MouseButton.Middle);
+
+
+/*
+        var mouseState = .Mice[0].CaptureState();
+        var keyboardState = _input.Keyboards[0];
+        
+        var wheel = mouseState.GetScrollWheels()[0];
+        io.MouseWheel = wheel.Y;
+        io.MouseWheelH = wheel.X;
+
+        _allKeys ??= (Key[]?) Enum.GetValues(typeof(Key));
+        foreach (var key in _allKeys!)
+        {
+            if (key == Key.Unknown) continue;
+            io.KeysDown[(int)key] = keyboardState.IsKeyPressed(key);
+        }
+
+        foreach (var c in _pressedChars) io.AddInputCharacter(c);
+        _pressedChars.Clear();
+
+        io.KeyCtrl = keyboardState.IsKeyPressed(Key.ControlLeft) || keyboardState.IsKeyPressed(Key.ControlRight);
+        io.KeyAlt = keyboardState.IsKeyPressed(Key.AltLeft) || keyboardState.IsKeyPressed(Key.AltRight);
+        io.KeyShift = keyboardState.IsKeyPressed(Key.ShiftLeft) || keyboardState.IsKeyPressed(Key.ShiftRight);
+        io.KeySuper = keyboardState.IsKeyPressed(Key.SuperLeft) || keyboardState.IsKeyPressed(Key.SuperRight);*/
+    } 
+    
     public void Render(CommandBuffer cmd)
     {
+
+        UpdateImGuiInput();
         ImGui.NewFrame();
+        ImGui.ShowDemoWindow();
         ImGui.ShowAboutWindow();
-        //ImGui.Begin("");
+        //ImGui.Begin("sss");
         //ImGui.Text("Hello world!");
         //ImGui.End();
         
@@ -159,6 +180,7 @@ public class ImGuiContext : IGpuDestroyable
         public Vector4 Color;
     }
 
+    List<ImDrawVertCorrected> corrected = new();
     private unsafe void RenderDrawData(CommandBuffer cmd, ImDrawDataPtr aDrawDataPtr)
     {
         
@@ -187,12 +209,13 @@ public class ImGuiContext : IGpuDestroyable
         for(int i = 0; i < aDrawDataPtr.CmdListsCount; i++)
         {
             ref var cmdList = ref aDrawDataPtr.CmdLists[i];
-            ulong vtxChunkSize = (ulong) cmdList.VtxBuffer.Size * (ulong) sizeof(ImDrawVert);
+            ulong vtxChunkSize = (ulong) cmdList.VtxBuffer.Size * (ulong) sizeof(ImDrawVertCorrected);
             ulong idxChunkSize = (ulong) cmdList.IdxBuffer.Size * sizeof(ushort);
 
             Span<ImDrawVert> vertices = new Span<ImDrawVert>(cmdList.VtxBuffer.Data.ToPointer(), cmdList.VtxBuffer.Size);
+            corrected.Clear();
+            corrected.EnsureCapacity(vertices.Length);
 
-            List<ImDrawVertCorrected> corrected = new(vertices.Length);
             
             foreach(ImDrawVert vert in vertices)
             {
@@ -207,21 +230,8 @@ public class ImGuiContext : IGpuDestroyable
             vertexBuffer.SetWriteData(verticesReal, vtxOffset);
             indexBuffer.SetWriteData(indices, idxOffset);
 
-            /*{
-                DescriptorWriter writer = new();
-                writer.WriteBuffer(0, vertexBuffer.MyBuffer, (ulong)sizeof(ImDrawVert) * (ulong)cmdList.VtxBuffer.Size, vtxOffset, VkDescriptorType.StorageBuffer);
-                writer.UpdateSet(myVertexDescriptor);
-            }*/
-            
             vtxOffset += vtxChunkSize;
             idxOffset += idxChunkSize;
-            
-            /*{
-                DescriptorWriter writer = new();
-                writer.WriteBuffer(0, indexBuffer.MyBuffer, (ulong)sizeof(SceneData), 0, VkDescriptorType.StorageBuffer);
-                writer.UpdateSet(myIndexDescriptor);
-            }*/
-            
         }
         
 

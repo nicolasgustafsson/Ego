@@ -1,7 +1,23 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using GLFW;
+
+public enum MouseButton
+{
+    Button1 = 0,
+    Left = 0,
+    Button2 = 1,
+    Right = 1,
+    Button3 = 2,
+    Middle = 2,
+    Button4 = 3,
+    Button5 = 4,
+    Button6 = 5,
+    Button7 = 6,
+    Button8 = 7,
+}
 
 public class Window
 {
@@ -44,6 +60,18 @@ public class Window
     public void Update()
     {
         Glfw.PollEvents();
+    }
+    
+    public Vector2 GetCursorPosition()
+    {
+        Glfw.GetCursorPosition(myNativeWindow, out double x, out double y);
+
+        return new((float)x, (float)y);
+    }
+    
+    public bool IsMouseButtonDown(MouseButton aMouseButton)
+    {
+        return Glfw.GetMouseButton(myNativeWindow, (GLFW.MouseButton)aMouseButton) == InputState.Press;
     }
     
     private static void GlfwError(ErrorCode code, IntPtr message)
