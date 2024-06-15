@@ -24,11 +24,13 @@ public class ImGuiContext : IGpuDestroyable
     public unsafe ImGuiContext(Renderer aRenderer, Window aWindow)
     {
         myWindow = aWindow;
+        
         var context = ImGui.CreateContext();
         ImGui.SetCurrentContext(context);
 
         var io = ImGui.GetIO();
-        
+
+        io.ConfigFlags = ImGuiConfigFlags.DockingEnable | ImGuiConfigFlags.ViewportsEnable;
         io.Fonts.AddFontDefault();
         
         io.Fonts.GetTexDataAsRGBA32(out nint pixels, out var width, out var height);
@@ -117,17 +119,19 @@ public class ImGuiContext : IGpuDestroyable
     private void UpdateImGuiInput()
     {
         var io = ImGui.GetIO();
+
         io.MousePos = myWindow.GetCursorPosition();
 
         io.MouseDown[0] = myWindow.IsMouseButtonDown(MouseButton.Left);
         io.MouseDown[1] = myWindow.IsMouseButtonDown(MouseButton.Right);
         io.MouseDown[2] = myWindow.IsMouseButtonDown(MouseButton.Middle);
 
+        io.KeyShift = myWindow.IsKeyboardKeyDown(KeyboardKey.LeftShift) || myWindow.IsKeyboardKeyDown(KeyboardKey.RightShift);
 
 /*
         var mouseState = .Mice[0].CaptureState();
         var keyboardState = _input.Keyboards[0];
-        
+
         var wheel = mouseState.GetScrollWheels()[0];
         io.MouseWheel = wheel.Y;
         io.MouseWheelH = wheel.X;
@@ -216,7 +220,6 @@ public class ImGuiContext : IGpuDestroyable
             corrected.Clear();
             corrected.EnsureCapacity(vertices.Length);
 
-            
             foreach(ImDrawVert vert in vertices)
             {
                 Color color = Color.FromArgb((int)vert.col);

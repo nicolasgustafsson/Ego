@@ -4,27 +4,20 @@ using System.Runtime.InteropServices;
 using System.Text;
 using GLFW;
 
-public enum MouseButton
-{
-    Button1 = 0,
-    Left = 0,
-    Button2 = 1,
-    Right = 1,
-    Button3 = 2,
-    Middle = 2,
-    Button4 = 3,
-    Button5 = 4,
-    Button6 = 5,
-    Button7 = 6,
-    Button8 = 7,
-}
-
 public class Window
 {
     private static readonly ErrorCallback errorCallback = GlfwError;
+    private static readonly MouseCallback mouseScrollCallback = MouseCallback;
+    private static readonly MouseButtonCallback mouseButtonCallback = MouseCallback;
+    private static readonly KeyCallback keyCallback = KeyCallback;
+    
     private readonly NativeWindow myNativeWindow;
     public bool WantsToClose = false;
     private bool myAllowClosing = false;
+
+    public static Action<Vector2>? EMouseScrolled;
+    public static Action<MouseButton, InputState>? EMouseButton;
+    public static Action<KeyboardKey, InputState>? EKeyboardKey;
 
     public bool IsClosing => myNativeWindow.IsClosing;
     public bool IsClosed => myNativeWindow.IsClosed;
@@ -55,8 +48,27 @@ public class Window
                 args.Cancel = false;
             }
         };
+        
+        Glfw.SetScrollCallback(myNativeWindow, mouseScrollCallback);
+        Glfw.SetMouseButtonCallback(myNativeWindow, mouseButtonCallback);
+        Glfw.SetKeyCallback(myNativeWindow, keyCallback);
     }
-    
+
+    private static void KeyCallback(IntPtr aWindow, GLFW.Keys aKey, int aScancode, GLFW.InputState aState, ModifierKeys aMods)
+    {
+        EKeyboardKey?.Invoke((KeyboardKey)aKey, (InputState)aState);
+    }
+
+    private static void MouseCallback(IntPtr aWindow, GLFW.MouseButton aButton, GLFW.InputState aState, ModifierKeys aModifiers)
+    {
+        EMouseButton?.Invoke((MouseButton)aButton, (InputState)aState);
+    }
+
+    private static void MouseCallback(IntPtr aWindow, double aX, double aY)
+    {
+        EMouseScrolled?.Invoke(new((float)aX, (float)aY));
+    }
+
     public void Update()
     {
         Glfw.PollEvents();
@@ -71,9 +83,14 @@ public class Window
     
     public bool IsMouseButtonDown(MouseButton aMouseButton)
     {
-        return Glfw.GetMouseButton(myNativeWindow, (GLFW.MouseButton)aMouseButton) == InputState.Press;
+        return Glfw.GetMouseButton(myNativeWindow, (GLFW.MouseButton)aMouseButton) == GLFW.InputState.Press;
     }
     
+    
+    public bool IsKeyboardKeyDown(KeyboardKey aKey)
+    {
+        return Glfw.GetKey(myNativeWindow, (GLFW.Keys)aKey) == GLFW.InputState.Press;
+    }
     private static void GlfwError(ErrorCode code, IntPtr message)
     {
         Console.WriteLine(PtrToStringUTF8(message));

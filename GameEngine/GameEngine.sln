@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloTriangle", "HelloTrian
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rendering", "Rendering\Rendering.csproj", "{8D6E440C-035C-4F65-B3CF-BCF1BA395428}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Window", "Window/Window.csproj", "{F270CBA8-80A8-490A-8390-7A0129840704}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Platform", "Platform\Platform.csproj", "{F270CBA8-80A8-490A-8390-7A0129840704}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utilities", "Utilities/Utilities.csproj", "{8C6D5AC5-8925-47FB-BDB6-2B48662B7ABE}"
 EndProject

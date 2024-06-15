@@ -9,7 +9,7 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
     <ItemGroup>
-      <ProjectReference Include="../Window/Window.csproj" />
+      <ProjectReference Include="..\Platform\Platform.csproj" />
       <ProjectReference Include="..\Utilities\Utilities.csproj" />
       <ProjectReference Include="..\VulkanApi\VulkanApi.csproj" />
     </ItemGroup>

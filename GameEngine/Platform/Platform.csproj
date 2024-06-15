@@ -5,6 +5,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <WarningsAsErrors>Nullable</WarningsAsErrors>
+        <AssemblyName>Platform</AssemblyName>
+        <RootNamespace>Platform</RootNamespace>
+        <PackageId>Platform</PackageId>
+        <Company>Platform</Company>
+        <Product>Platform</Product>
     </PropertyGroup>
 
     <ItemGroup>
