@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using Graphics;
 using ImGuiNET;
 using Utilities.Interop;
@@ -21,8 +22,11 @@ public class ImGuiContext : IGpuDestroyable
     private VkDescriptorSetLayout myVertexBufferLayout;
     private VkDescriptorSetLayout myIndexBufferLayout;
 
+    private Stopwatch myStopwatch = new();
+
     public unsafe ImGuiContext(Renderer aRenderer, Window aWindow)
     {
+        myStopwatch.Start();
         myWindow = aWindow;
         
         var context = ImGui.CreateContext();
@@ -72,12 +76,59 @@ public class ImGuiContext : IGpuDestroyable
 
         SetKeyMappings();
         SetFrameData();
+        
+        Window.EKeyboardKey += KeyDown;
+        Window.ECharInput += CharInput;
+        Window.EMouseScrolled += MouseScroll;
+        Window.EMouseButton += MouseButton;
+        Window.EMousePosition += MousePosition;
     }
-    
+
+    private void MousePosition(Vector2 aNewPosition)
+    {
+        var io = ImGui.GetIO();
+        io.AddMousePosEvent(aNewPosition.X, aNewPosition.Y);
+    }
+
+    private void MouseButton(MouseButton aMouseButton, InputState aInputState)
+    {
+        var io = ImGui.GetIO();
+        if (aInputState == InputState.Repeat)
+            return;
+        
+        io.AddMouseButtonEvent((int)aMouseButton.AsImGuiMouseButton(), aInputState == InputState.Press);
+    }
+
+    private void MouseScroll(Vector2 aScroll)
+    {
+        var io = ImGui.GetIO();
+
+        io.AddMouseWheelEvent(aScroll.X, aScroll.Y);
+    }
+
+    void CharInput(uint aCharInput)
+    {
+        var io = ImGui.GetIO();
+        
+        io.AddInputCharacter(aCharInput);
+    }
+
+    private void KeyDown(KeyboardKey aKey, InputState aInputState)
+    {
+        if (aInputState == InputState.Repeat)
+            return;
+        
+        var io = ImGui.GetIO();
+        
+        io.AddKeyEvent(aKey.AsImGuiKey(), aInputState == InputState.Press);
+        
+    }
+
     private void SetKeyMappings()
     {
         /*
         var io = ImGui.GetIO();
+        
         io.KeyMap[(int)ImGuiKey.Tab] = (int)Key.Tab;
         io.KeyMap[(int)ImGuiKey.LeftArrow] = (int)Key.Left;
         io.KeyMap[(int)ImGuiKey.RightArrow] = (int)Key.Right;
@@ -101,7 +152,7 @@ public class ImGuiContext : IGpuDestroyable
     
     //private void OnKeyChar(IKeyboard kb, char @char) => _pressedChars.Add(@char);
     
-    private void SetFrameData(float deltaTime = 1f/60f)
+    private void SetFrameData()
     {
         var io = ImGui.GetIO();
 
@@ -113,7 +164,8 @@ public class ImGuiContext : IGpuDestroyable
             io.DisplayFramebufferScale = new Vector2(framebufferSize.X / (float) windowSize.X,
                 framebufferSize.Y / (float) windowSize.Y);
         
-        io.DeltaTime = deltaTime;
+        io.DeltaTime = (float)myStopwatch.Elapsed.TotalSeconds;
+        myStopwatch.Restart();
     } 
     
     private void UpdateImGuiInput()
@@ -121,12 +173,7 @@ public class ImGuiContext : IGpuDestroyable
         var io = ImGui.GetIO();
 
         io.MousePos = myWindow.GetCursorPosition();
-
-        io.MouseDown[0] = myWindow.IsMouseButtonDown(MouseButton.Left);
-        io.MouseDown[1] = myWindow.IsMouseButtonDown(MouseButton.Right);
-        io.MouseDown[2] = myWindow.IsMouseButtonDown(MouseButton.Middle);
-
-        io.KeyShift = myWindow.IsKeyboardKeyDown(KeyboardKey.LeftShift) || myWindow.IsKeyboardKeyDown(KeyboardKey.RightShift);
+        /*
 
 /*
         var mouseState = .Mice[0].CaptureState();
@@ -154,7 +201,7 @@ public class ImGuiContext : IGpuDestroyable
     
     public void Render(CommandBuffer cmd)
     {
-
+        SetFrameData();
         UpdateImGuiInput();
         ImGui.NewFrame();
         ImGui.ShowDemoWindow();
@@ -287,12 +334,12 @@ public class ImGuiContext : IGpuDestroyable
                     if (clipRect.X < 0.0f) clipRect.X = 0.0f;
                     if (clipRect.Y < 0.0f) clipRect.Y = 0.0f;
 
-                    //var scissor = Rect2D(
-                    //                         new Offset2D((int) clipRect.X, (int) clipRect.Y),
-                    //                         new Extent2D((uint) (clipRect.Z - clipRect.X),
-                    //                                      (uint) (clipRect.W - clipRect.Y))
-                    //                        );
-                    //cmd.SetScissor(scissor);
+                    var scissor = new VkRect2D(
+                                             new VkOffset2D((int) clipRect.X, (int) clipRect.Y),
+                                             new VkExtent2D((uint) (clipRect.Z - clipRect.X),
+                                                          (uint) (clipRect.W - clipRect.Y))
+                                            );
+                    cmd.SetScissor(scissor);
 
                     cmd.DrawIndexed(cmdItem.ElemCount, 1, cmdItem.IdxOffset + (uint) indexOffset,
                                     (int) cmdItem.VtxOffset + vertexOffset, 0);

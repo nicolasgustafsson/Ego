@@ -7,17 +7,21 @@ using GLFW;
 public class Window
 {
     private static readonly ErrorCallback errorCallback = GlfwError;
-    private static readonly MouseCallback mouseScrollCallback = MouseCallback;
-    private static readonly MouseButtonCallback mouseButtonCallback = MouseCallback;
+    private static readonly MouseCallback mouseScrollCallback = MouseScrollCallback;
+    private static readonly MouseButtonCallback mouseButtonCallback = MouseButtonCallback;
     private static readonly KeyCallback keyCallback = KeyCallback;
-    
+    private static readonly CharCallback charCallback = CharCallback;
+    private static readonly MouseCallback mousePosCallback = MousePositionCallback;
+
     private readonly NativeWindow myNativeWindow;
     public bool WantsToClose = false;
     private bool myAllowClosing = false;
 
     public static Action<Vector2>? EMouseScrolled;
+    public static Action<Vector2>? EMousePosition;
     public static Action<MouseButton, InputState>? EMouseButton;
     public static Action<KeyboardKey, InputState>? EKeyboardKey;
+    public static Action<uint>? ECharInput;
 
     public bool IsClosing => myNativeWindow.IsClosing;
     public bool IsClosed => myNativeWindow.IsClosed;
@@ -51,7 +55,9 @@ public class Window
         
         Glfw.SetScrollCallback(myNativeWindow, mouseScrollCallback);
         Glfw.SetMouseButtonCallback(myNativeWindow, mouseButtonCallback);
+        Glfw.SetCursorPositionCallback(myNativeWindow, mousePosCallback);
         Glfw.SetKeyCallback(myNativeWindow, keyCallback);
+        Glfw.SetCharCallback(myNativeWindow, charCallback);
     }
 
     private static void KeyCallback(IntPtr aWindow, GLFW.Keys aKey, int aScancode, GLFW.InputState aState, ModifierKeys aMods)
@@ -59,14 +65,24 @@ public class Window
         EKeyboardKey?.Invoke((KeyboardKey)aKey, (InputState)aState);
     }
 
-    private static void MouseCallback(IntPtr aWindow, GLFW.MouseButton aButton, GLFW.InputState aState, ModifierKeys aModifiers)
+    private static void MouseButtonCallback(IntPtr aWindow, GLFW.MouseButton aButton, GLFW.InputState aState, ModifierKeys aModifiers)
     {
         EMouseButton?.Invoke((MouseButton)aButton, (InputState)aState);
     }
 
-    private static void MouseCallback(IntPtr aWindow, double aX, double aY)
+    private static void MouseScrollCallback(IntPtr aWindow, double aX, double aY)
     {
         EMouseScrolled?.Invoke(new((float)aX, (float)aY));
+    }
+
+    private static void MousePositionCallback(IntPtr window, double x, double y)
+    {
+        EMousePosition?.Invoke(new((float)x, (float)y));
+    }
+    
+    private static void CharCallback(IntPtr aWindow, uint aCodePoint)
+    {
+        ECharInput?.Invoke(aCodePoint);
     }
 
     public void Update()

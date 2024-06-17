@@ -157,6 +157,11 @@ public unsafe class CommandBuffer : IGpuDestroyable
         vkCmdDrawIndexed(MyVkCommandBuffer, (uint)aIndexCount, 1, 0, 0, 0);
     }
     
+    public void SetScissor(VkRect2D aRect)
+    {
+        vkCmdSetScissor(MyVkCommandBuffer, aRect);
+    }
+    
     public void DrawIndexed(uint aIndexCount, uint aInstanceCount, uint aFirstIndex, int aVertexOffset, uint aFirstInstance)
     {
         vkCmdDrawIndexed(MyVkCommandBuffer, (uint)aIndexCount, instanceCount: aInstanceCount, firstIndex: aFirstIndex, vertexOffset: aVertexOffset, firstInstance: aFirstInstance);
