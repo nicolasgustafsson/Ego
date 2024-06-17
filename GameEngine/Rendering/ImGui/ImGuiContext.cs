@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using Graphics;
 using ImGuiNET;
 using Utilities.Interop;
@@ -21,6 +22,17 @@ public class ImGuiContext : IGpuDestroyable
     private List<AllocatedBuffer<ushort>> myOldIBuffers = new();
     private VkDescriptorSetLayout myVertexBufferLayout;
     private VkDescriptorSetLayout myIndexBufferLayout;
+    private readonly Platform_CreateWindow _createWindow;
+    private readonly Platform_DestroyWindow _destroyWindow;
+    private readonly Platform_GetWindowPos _getWindowPos;
+    private readonly Platform_ShowWindow _showWindow;
+    private readonly Platform_SetWindowPos _setWindowPos;
+    private readonly Platform_SetWindowSize _setWindowSize;
+    private readonly Platform_GetWindowSize _getWindowSize;
+    private readonly Platform_SetWindowFocus _setWindowFocus;
+    private readonly Platform_GetWindowFocus _getWindowFocus;
+    private readonly Platform_GetWindowMinimized _getWindowMinimized;
+    private readonly Platform_SetWindowTitle _setWindowTitle; 
 
     private Stopwatch myStopwatch = new();
 
@@ -82,6 +94,34 @@ public class ImGuiContext : IGpuDestroyable
         Window.EMouseScrolled += MouseScroll;
         Window.EMouseButton += MouseButton;
         Window.EMousePosition += MousePosition;
+
+        ImGuiPlatformIOPtr platformIo = ImGui.GetPlatformIO();
+
+        _createWindow = CreateWindow;
+        _destroyWindow = DestroyWindow;
+        _getWindowPos = GetWindowPos;
+        _showWindow = ShowWindow;
+        _setWindowPos = SetWindowPos;
+        _setWindowSize = SetWindowSize;
+        _getWindowSize = GetWindowSize;
+        _setWindowFocus = SetWindowFocus;
+        _getWindowFocus = GetWindowFocus;
+        _getWindowMinimized = GetWindowMinimized;
+        _setWindowTitle = SetWindowTitle;
+        io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
+        io.BackendFlags |= ImGuiBackendFlags.HasSetMousePos;
+        io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
+        io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports; 
+
+        platformIo.Platform_CreateWindow = Marshal.GetFunctionPointerForDelegate(_createWindow);
+        platformIo.Platform_DestroyWindow = Marshal.GetFunctionPointerForDelegate(_destroyWindow);
+        platformIo.Platform_ShowWindow = Marshal.GetFunctionPointerForDelegate(_showWindow);
+        platformIo.Platform_SetWindowPos = Marshal.GetFunctionPointerForDelegate(_setWindowPos);
+        platformIo.Platform_SetWindowSize = Marshal.GetFunctionPointerForDelegate(_setWindowSize);
+        platformIo.Platform_SetWindowFocus = Marshal.GetFunctionPointerForDelegate(_setWindowFocus);
+        platformIo.Platform_GetWindowFocus = Marshal.GetFunctionPointerForDelegate(_getWindowFocus);
+        platformIo.Platform_GetWindowMinimized = Marshal.GetFunctionPointerForDelegate(_getWindowMinimized);
+        platformIo.Platform_SetWindowTitle = Marshal.GetFunctionPointerForDelegate(_setWindowTitle);
     }
 
     private void MousePosition(Vector2 aNewPosition)
@@ -197,6 +237,103 @@ public class ImGuiContext : IGpuDestroyable
         io.KeyAlt = keyboardState.IsKeyPressed(Key.AltLeft) || keyboardState.IsKeyPressed(Key.AltRight);
         io.KeyShift = keyboardState.IsKeyPressed(Key.ShiftLeft) || keyboardState.IsKeyPressed(Key.ShiftRight);
         io.KeySuper = keyboardState.IsKeyPressed(Key.SuperLeft) || keyboardState.IsKeyPressed(Key.SuperRight);*/
+    } 
+   
+    private void CreateWindow(ImGuiViewportPtr vp)
+    {
+        Console.WriteLine("woah");
+        //VeldridImGuiWindow window = new VeldridImGuiWindow(_gd, vp);
+    }
+
+    private void DestroyWindow(ImGuiViewportPtr vp)
+    {
+        if (vp.PlatformUserData != IntPtr.Zero)
+        {
+            //VeldridImGuiWindow window = (VeldridImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target;
+            //window.Dispose();
+
+            vp.PlatformUserData = IntPtr.Zero;
+        }
+    }
+
+    private void ShowWindow(ImGuiViewportPtr vp)
+    {
+        /*
+        VeldridImGuiWindow window = (VeldridImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target;
+        Sdl2Native.SDL_ShowWindow(window.Window.SdlWindowHandle);*/
+    }
+
+    private unsafe void GetWindowPos(ImGuiViewportPtr vp, Vector2* outPos)
+    {
+        /*
+        VeldridImGuiWindow window = (VeldridImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target;
+        *outPos = new Vector2(window.Window.Bounds.X, window.Window.Bounds.Y);*/
+    }
+
+    private void SetWindowPos(ImGuiViewportPtr vp, Vector2 pos)
+    {
+        /*
+        VeldridImGuiWindow window = (VeldridImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target;
+        window.Window.X = (int)pos.X;
+        window.Window.Y = (int)pos.Y;*/
+    }
+
+    private void SetWindowSize(ImGuiViewportPtr vp, Vector2 size)
+    {
+        /*
+        VeldridImGuiWindow window = (VeldridImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target;
+        Sdl2Native.SDL_SetWindowSize(window.Window.SdlWindowHandle, (int)size.X, (int)size.Y);*/
+    }
+
+    private unsafe void GetWindowSize(ImGuiViewportPtr vp, Vector2* outSize)
+    {
+        /*
+        VeldridImGuiWindow window = (VeldridImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target;
+        Rectangle bounds = window.Window.Bounds;
+        *outSize = new Vector2(bounds.Width, bounds.Height);*/
+    } 
+   
+    private void SetWindowFocus(ImGuiViewportPtr vp)
+    {
+        /*
+        if (p_sdl_RaiseWindow == null)
+        {
+            p_sdl_RaiseWindow = Sdl2Native.LoadFunction<SDL_RaiseWindow_t>("SDL_RaiseWindow");
+        }
+
+        VeldridImGuiWindow window = (VeldridImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target;
+        p_sdl_RaiseWindow(window.Window.SdlWindowHandle);*/
+    }
+
+    private byte GetWindowFocus(ImGuiViewportPtr vp)
+    {
+        /*
+        VeldridImGuiWindow window = (VeldridImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target;
+        SDL_WindowFlags flags = Sdl2Native.SDL_GetWindowFlags(window.Window.SdlWindowHandle);
+        return (flags & SDL_WindowFlags.InputFocus) != 0 ? (byte)1 : (byte)0;*/
+        return (byte)1;
+    }
+
+    private byte GetWindowMinimized(ImGuiViewportPtr vp)
+    {
+        /*
+        VeldridImGuiWindow window = (VeldridImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target;
+        SDL_WindowFlags flags = Sdl2Native.SDL_GetWindowFlags(window.Window.SdlWindowHandle);*/
+        //return (flags & SDL_WindowFlags.Minimized) != 0 ? (byte)1 : (byte)0;
+        return (byte)0;
+    }
+
+    private unsafe void SetWindowTitle(ImGuiViewportPtr vp, IntPtr title)
+    {
+        /*
+        VeldridImGuiWindow window = (VeldridImGuiWindow)GCHandle.FromIntPtr(vp.PlatformUserData).Target;
+        byte* titlePtr = (byte*)title;
+        int count = 0;
+        while (titlePtr[count] != 0)
+        {
+            count += 1;
+        }
+        window.Window.Title = System.Text.Encoding.ASCII.GetString(titlePtr, count);*/
     } 
     
     public void Render(CommandBuffer cmd)
