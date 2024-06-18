@@ -54,7 +54,7 @@ public partial class Renderer
         DrawGeometry(cmd);
 
         cmd.BeginRendering(myDrawImage, myDepthImage);
-        myImGuiContext.Render(cmd);
+        MyImGuiContext.Render(cmd);
         cmd.EndRendering();
 
         cmd.TransitionImage(myDrawImage, VkImageLayout.TransferSrcOptimal);

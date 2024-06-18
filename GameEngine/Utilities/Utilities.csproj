@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <WarningsAsErrors>Nullable</WarningsAsErrors>
+        <Configurations>Debug;Release;DebugNoBuild</Configurations>
     </PropertyGroup>
 
 </Project>

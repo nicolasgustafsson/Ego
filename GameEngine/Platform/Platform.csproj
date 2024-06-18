@@ -10,10 +10,11 @@
         <PackageId>Platform</PackageId>
         <Company>Platform</Company>
         <Product>Platform</Product>
+        <Configurations>Debug;Release;DebugNoBuild</Configurations>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="glfw-net" Version="3.3.1" PrivateAssets="compile"/>
+      <PackageReference Include="glfw-net" Version="3.3.1" PrivateAssets="compile" />
     </ItemGroup>
 
 </Project>

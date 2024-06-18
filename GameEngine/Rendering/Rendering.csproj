@@ -7,15 +7,16 @@
         <AssemblyName>Rendering</AssemblyName>
         <RootNamespace>Rendering</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Configurations>Debug;Release;DebugNoBuild</Configurations>
     </PropertyGroup>
     <ItemGroup>
+      <ProjectReference Include="..\..\ImguiDotNet\src\ImGui.NET\ImGui.NET.csproj" />
+      <ProjectReference Include="..\..\ImguiDotNet\src\ImPlot.NET\ImPlot.NET.csproj" />
       <ProjectReference Include="..\Platform\Platform.csproj" />
       <ProjectReference Include="..\Utilities\Utilities.csproj" />
       <ProjectReference Include="..\VulkanApi\VulkanApi.csproj" />
     </ItemGroup>
     <ItemGroup>
-      <PackageReference Include="ImGui.NET" Version="1.90.8.1" />
-      <PackageReference Include="ImGui.NET.SourceBuild" Version="1.90.8" />
       <PackageReference Include="Magick.NET-Q8-x64" Version="13.9.0" />
       <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0031" />
       <PackageReference Include="SharpGLTF.Toolkit" Version="1.0.0-alpha0031" />

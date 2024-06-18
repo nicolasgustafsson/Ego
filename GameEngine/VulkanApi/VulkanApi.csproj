@@ -6,6 +6,7 @@
         <Nullable>enable</Nullable>
         <RootNamespace>Graphics</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Configurations>Debug;Release;DebugNoBuild</Configurations>
     </PropertyGroup>
 
     <ItemGroup>

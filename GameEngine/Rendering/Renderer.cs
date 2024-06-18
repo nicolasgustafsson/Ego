@@ -5,6 +5,8 @@ global using static Graphics.MemoryAllocator;
 global using static Graphics.Gpu;
 
 using Graphics;
+using ImGuiNET;
+using ImPlotNET;
 using Vortice.Vulkan;
 
 namespace Rendering;
@@ -20,7 +22,7 @@ public partial class Renderer : IGpuImmediateSubmit
     private ComputePipeline myGradientPipeline = null!;
     private GraphicsPipeline myTrianglePipeline = null!;
 
-    private ImGuiContext myImGuiContext = null!;
+    public ImGuiContext MyImGuiContext = null!;
 
     private Fence myImmediateFence = null!;
     private CommandBuffer myImmediateCommandBuffer = null!;
@@ -73,5 +75,11 @@ public partial class Renderer : IGpuImmediateSubmit
     public void Draw()
     {
         DrawInternal();
+    }
+
+    public void Debug()
+    {
+        ImGui.ShowDemoWindow();
+        //ImPlot.ShowDemoWindow();
     }
 }

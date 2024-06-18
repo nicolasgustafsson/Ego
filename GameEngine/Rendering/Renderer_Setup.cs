@@ -121,8 +121,8 @@ public partial class Renderer
 
     private void CreateImGui(Window aWindow)
     {
-        myImGuiContext = new(this, aWindow);
-        myCleanupQueue.Add(myImGuiContext);
+        MyImGuiContext = new(this, aWindow);
+        myCleanupQueue.Add(MyImGuiContext);
     }
 
     private void CreateImmediateCommandBuffer()

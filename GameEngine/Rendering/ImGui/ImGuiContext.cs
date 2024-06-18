@@ -110,9 +110,10 @@ public class ImGuiContext : IGpuDestroyable
         _setWindowTitle = SetWindowTitle;
         io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
         io.BackendFlags |= ImGuiBackendFlags.HasSetMousePos;
-        io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
-        io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports; 
-
+        //io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
+        //io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports; 
+        
+        
         platformIo.Platform_CreateWindow = Marshal.GetFunctionPointerForDelegate(_createWindow);
         platformIo.Platform_DestroyWindow = Marshal.GetFunctionPointerForDelegate(_destroyWindow);
         platformIo.Platform_ShowWindow = Marshal.GetFunctionPointerForDelegate(_showWindow);
@@ -336,21 +337,23 @@ public class ImGuiContext : IGpuDestroyable
         window.Window.Title = System.Text.Encoding.ASCII.GetString(titlePtr, count);*/
     } 
     
-    public void Render(CommandBuffer cmd)
+    public void Begin()
     {
         SetFrameData();
         UpdateImGuiInput();
-        ImGui.NewFrame();
-        ImGui.ShowDemoWindow();
-        ImGui.ShowAboutWindow();
-        //ImGui.Begin("sss");
-        //ImGui.Text("Hello world!");
-        //ImGui.End();
-        
-        
-        ImGui.EndFrame();
-        ImGui.Render();
 
+        ImGui.NewFrame();
+    }
+    
+    public void End()
+    {
+        ImGui.EndFrame();
+
+        ImGui.Render();
+    }
+    
+    public void Render(CommandBuffer cmd)
+    {
         RenderDrawData(cmd, ImGui.GetDrawData());
     }
     

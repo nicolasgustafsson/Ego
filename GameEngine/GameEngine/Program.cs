@@ -18,6 +18,12 @@ public static class Program
         while (!window.WantsToClose)
         {
             stopwatch.Restart();
+            renderer.MyImGuiContext.Begin();
+
+            renderer.Debug();
+            
+            renderer.MyImGuiContext.End();
+            
             renderer.Draw();
             window.Update();
             //Console.WriteLine($"FPS: {1d / stopwatch.Elapsed.TotalSeconds}");
