@@ -1,3 +1,6 @@
 [submodule "ImguiDotNet"]
 	path = ImguiDotNet
 	url = https://github.com/ImGuiNET/ImGui.NET.git
+[submodule "ImGui.NET-nativebuild"]
+	path = ImGui.NET-nativebuild
+	url = https://github.com/nicolasgustafsson/ImGui.NET-nativebuild/tree/master
