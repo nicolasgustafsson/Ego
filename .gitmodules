@@ -1,1 +1,7 @@
 
+[submodule "ImGuiDotNET"]
+	path = ImGuiDotNET
+	url = https://github.com/nicolasgustafsson/ImGui.NET
+[submodule "ImGuiDotNET-nativebuild"]
+	path = ImGuiDotNET-nativebuild
+	url = https://github.com/nicolasgustafsson/ImGui.NET-nativebuild
