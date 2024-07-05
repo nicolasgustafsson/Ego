@@ -33,6 +33,8 @@ public class Window
 
     public IntPtr WaylandDisplay => GLFW.Native.GetWaylandDisplay();
     public IntPtr WaylandWindow => GLFW.Native.GetWaylandWindow(myNativeWindow);
+    public bool Minimized => myNativeWindow.Minimized;
+    public bool IsFocused => myNativeWindow.IsFocused;
 
     public Window(string aName, System.Numerics.Vector2 aWindowSize)
     {
@@ -135,6 +137,22 @@ public class Window
 
         return (width, height);
     }
+    
+    public void SetWindowPosition(int x, int y)
+    {
+        Glfw.SetWindowPosition(myNativeWindow, x, y);
+    }
+    
+    public void SetWindowSize(int width, int height)
+    {
+        Glfw.SetWindowSize(myNativeWindow, width, height);
+    }
+    
+    public (int x, int y) GetWindowPosition()
+    {
+        Glfw.GetWindowPosition(myNativeWindow, out int x, out int y);
+        return (x, y);
+    }
 
     public void Close()
     {
@@ -143,5 +161,26 @@ public class Window
         //myNativeWindow.SwapBuffers();
         //Glfw.PollEvents();
         //myNativeWindow.Close();
+    }
+    
+    
+    public void SetCursor(Cursor aCursor)
+    {
+        Glfw.SetCursor(myNativeWindow, aCursor);
+    }
+
+    public void Show()
+    {
+        Glfw.ShowWindow(myNativeWindow);
+    }
+
+    public void FocusWindow()
+    {
+        Glfw.FocusWindow(myNativeWindow);
+    }
+
+    public void SetTitle(string aTitle)
+    {
+        myNativeWindow.Title = aTitle;
     }
 }

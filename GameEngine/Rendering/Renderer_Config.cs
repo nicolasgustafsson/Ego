@@ -13,5 +13,5 @@ public partial class Renderer
     //how many frames we are able to handle at once. Change to 3 to make it triple buffer maybe?
     private const int FrameOverlap = 2;
 
-    private readonly bool PrintExtensions = true;
+    private readonly bool PrintExtensions = false;
 }

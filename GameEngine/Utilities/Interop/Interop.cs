@@ -1,4 +1,6 @@
-﻿namespace Utilities.Interop;
+﻿using System.Runtime.InteropServices;
+
+namespace Utilities.Interop;
 
 public static class Interop
 { 
@@ -7,5 +9,10 @@ public static class Interop
         Span<T> sizes = System.Runtime.InteropServices.CollectionsMarshal.AsSpan(aList);
 
         return sizes;
+    }
+    
+    public static GCHandle Pin(this object aObject)
+    {
+        return GCHandle.Alloc(aObject, GCHandleType.Pinned);
     }
 }
