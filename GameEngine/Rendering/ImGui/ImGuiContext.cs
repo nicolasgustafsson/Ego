@@ -10,6 +10,11 @@ namespace Rendering;
 
 public class ImGuiContext : IGpuDestroyable
 {
+    class PlatformUserData
+    {
+        public GLFW.Cursor Cursor;
+    }
+    
     private Image myFontTexture;
     private DescriptorAllocatorGrowable myDescriptorAllocator;
     private VkDescriptorSetLayout myLayout;
@@ -35,6 +40,7 @@ public class ImGuiContext : IGpuDestroyable
     private readonly Platform_SetWindowTitle _setWindowTitle; 
 
     private Stopwatch myStopwatch = new();
+    private PlatformUserData myPlatformUserData = new();
 
     public unsafe ImGuiContext(Renderer aRenderer, Window aWindow)
     {
@@ -86,7 +92,6 @@ public class ImGuiContext : IGpuDestroyable
             .SetDepthFormat(VkFormat.D32Sfloat)
             .Build();
 
-        SetKeyMappings();
         SetFrameData();
         
         Window.EKeyboardKey += KeyDown;
@@ -123,6 +128,12 @@ public class ImGuiContext : IGpuDestroyable
         platformIo.Platform_GetWindowFocus = Marshal.GetFunctionPointerForDelegate(_getWindowFocus);
         platformIo.Platform_GetWindowMinimized = Marshal.GetFunctionPointerForDelegate(_getWindowMinimized);
         platformIo.Platform_SetWindowTitle = Marshal.GetFunctionPointerForDelegate(_setWindowTitle);
+
+        io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
+        io.BackendFlags |= ImGuiBackendFlags.HasSetMousePos;
+
+        GCHandle handle = GCHandle.Alloc(myPlatformUserData, GCHandleType.Pinned);
+        io.BackendPlatformUserData = handle.AddrOfPinnedObject();
     }
 
     private void MousePosition(Vector2 aNewPosition)
@@ -164,34 +175,6 @@ public class ImGuiContext : IGpuDestroyable
         io.AddKeyEvent(aKey.AsImGuiKey(), aInputState == InputState.Press);
         
     }
-
-    private void SetKeyMappings()
-    {
-        /*
-        var io = ImGui.GetIO();
-        
-        io.KeyMap[(int)ImGuiKey.Tab] = (int)Key.Tab;
-        io.KeyMap[(int)ImGuiKey.LeftArrow] = (int)Key.Left;
-        io.KeyMap[(int)ImGuiKey.RightArrow] = (int)Key.Right;
-        io.KeyMap[(int)ImGuiKey.UpArrow] = (int)Key.Up;
-        io.KeyMap[(int)ImGuiKey.DownArrow] = (int)Key.Down;
-        io.KeyMap[(int)ImGuiKey.PageUp] = (int)Key.PageUp;
-        io.KeyMap[(int)ImGuiKey.PageDown] = (int)Key.PageDown;
-        io.KeyMap[(int)ImGuiKey.Home] = (int)Key.Home;
-        io.KeyMap[(int)ImGuiKey.End] = (int)Key.End;
-        io.KeyMap[(int)ImGuiKey.Delete] = (int)Key.Delete;
-        io.KeyMap[(int)ImGuiKey.Backspace] = (int)Key.Backspace;
-        io.KeyMap[(int)ImGuiKey.Enter] = (int)Key.Enter;
-        io.KeyMap[(int)ImGuiKey.Escape] = (int)Key.Escape;
-        io.KeyMap[(int)ImGuiKey.A] = (int)Key.A;
-        io.KeyMap[(int)ImGuiKey.C] = (int)Key.C;
-        io.KeyMap[(int)ImGuiKey.V] = (int)Key.V;
-        io.KeyMap[(int)ImGuiKey.X] = (int)Key.X;
-        io.KeyMap[(int)ImGuiKey.Y] = (int)Key.Y;
-        io.KeyMap[(int)ImGuiKey.Z] = (int)Key.Z;*/
-    }
-    
-    //private void OnKeyChar(IKeyboard kb, char @char) => _pressedChars.Add(@char);
     
     private void SetFrameData()
     {
@@ -214,30 +197,6 @@ public class ImGuiContext : IGpuDestroyable
         var io = ImGui.GetIO();
 
         io.MousePos = myWindow.GetCursorPosition();
-        /*
-
-/*
-        var mouseState = .Mice[0].CaptureState();
-        var keyboardState = _input.Keyboards[0];
-
-        var wheel = mouseState.GetScrollWheels()[0];
-        io.MouseWheel = wheel.Y;
-        io.MouseWheelH = wheel.X;
-
-        _allKeys ??= (Key[]?) Enum.GetValues(typeof(Key));
-        foreach (var key in _allKeys!)
-        {
-            if (key == Key.Unknown) continue;
-            io.KeysDown[(int)key] = keyboardState.IsKeyPressed(key);
-        }
-
-        foreach (var c in _pressedChars) io.AddInputCharacter(c);
-        _pressedChars.Clear();
-
-        io.KeyCtrl = keyboardState.IsKeyPressed(Key.ControlLeft) || keyboardState.IsKeyPressed(Key.ControlRight);
-        io.KeyAlt = keyboardState.IsKeyPressed(Key.AltLeft) || keyboardState.IsKeyPressed(Key.AltRight);
-        io.KeyShift = keyboardState.IsKeyPressed(Key.ShiftLeft) || keyboardState.IsKeyPressed(Key.ShiftRight);
-        io.KeySuper = keyboardState.IsKeyPressed(Key.SuperLeft) || keyboardState.IsKeyPressed(Key.SuperRight);*/
     } 
    
     private void CreateWindow(ImGuiViewportPtr vp)
