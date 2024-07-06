@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using GLFW;
 
 public static class Program
 {
@@ -15,7 +16,7 @@ public static class Program
         renderer = new(window);
 
         Stopwatch stopwatch = new();
-        while (!window.WantsToClose)
+        while (!window.IsClosing)
         {
             stopwatch.Restart();
             renderer.MyImGuiContext.Begin();

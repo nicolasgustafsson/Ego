@@ -122,11 +122,11 @@ public class ImGuiContext : IGpuDestroyable
 
         SetFrameData();
         
-        Window.EKeyboardKey += KeyDown;
-        Window.ECharInput += CharInput;
-        Window.EMouseScrolled += MouseScroll;
-        Window.EMouseButton += MouseButton;
-        Window.EMousePosition += MousePosition;
+        aMainWindow.EKeyboardKey += KeyDown;
+        aMainWindow.ECharInput += CharInput;
+        aMainWindow.EMouseScrolled += MouseScroll;
+        aMainWindow.EMouseButton += MouseButton;
+        aMainWindow.EMousePosition += MousePosition;
 
         ImGuiPlatformIOPtr platformIo = ImGui.GetPlatformIO();
 
@@ -187,14 +187,17 @@ public class ImGuiContext : IGpuDestroyable
         return guid;
     }
 
-    private void MousePosition(Vector2 aNewPosition)
+    private void MousePosition(Window aWindow, Vector2 aNewPosition)
     {
         var io = ImGui.GetIO();
+        var windowPosition = aWindow.GetWindowPosition();
+        
+        aNewPosition += new Vector2(windowPosition.x, windowPosition.y);
         
         io.AddMousePosEvent(aNewPosition.X, aNewPosition.Y);
     }
 
-    private void MouseButton(MouseButton aMouseButton, InputState aInputState)
+    private void MouseButton(Window aWindow, MouseButton aMouseButton, InputState aInputState)
     {
         var io = ImGui.GetIO();
         if (aInputState == InputState.Repeat)
@@ -203,21 +206,21 @@ public class ImGuiContext : IGpuDestroyable
         io.AddMouseButtonEvent((int)aMouseButton.AsImGuiMouseButton(), aInputState == InputState.Press);
     }
 
-    private void MouseScroll(Vector2 aScroll)
+    private void MouseScroll(Window aWindow, Vector2 aScroll)
     {
         var io = ImGui.GetIO();
 
         io.AddMouseWheelEvent(aScroll.X, aScroll.Y);
     }
 
-    void CharInput(uint aCharInput)
+    void CharInput(Window aWindow, uint aCharInput)
     {
         var io = ImGui.GetIO();
         
         io.AddInputCharacter(aCharInput);
     }
 
-    private void KeyDown(KeyboardKey aKey, InputState aInputState)
+    private void KeyDown(Window aWindow, KeyboardKey aKey, InputState aInputState)
     {
         if (aInputState == InputState.Repeat)
             return;
@@ -242,13 +245,6 @@ public class ImGuiContext : IGpuDestroyable
         
         io.DeltaTime = (float)myStopwatch.Elapsed.TotalSeconds;
         myStopwatch.Restart();
-    } 
-    
-    private void UpdateImGuiInput()
-    {
-        var io = ImGui.GetIO();
-
-        io.MousePos = myMainWindow.GetCursorPosition();
     } 
     
     private unsafe void UpdateMonitors()
@@ -282,6 +278,12 @@ public class ImGuiContext : IGpuDestroyable
     {
         Console.WriteLine("woah");
 
+        Glfw.WindowHint(Hint.Visible, false);
+        Glfw.WindowHint(Hint.Floating, false);
+        Glfw.WindowHint(Hint.FocusOnShow, false);
+        Glfw.WindowHint(Hint.Decorated, ((int)(vp.Flags & ImGuiViewportFlags.NoDecoration) == 0));
+        Glfw.WindowHint(Hint.Floating, ((int)(vp.Flags & ImGuiViewportFlags.TopMost) == 1));
+        
         var window = new Window("Test", new Vector2(200, 200));
 
         var guid = CreateNewWindowUserData(window);
@@ -289,6 +291,12 @@ public class ImGuiContext : IGpuDestroyable
         myAdditionalWindows.Add(window);
 
         vp.PlatformUserData = GCHandle.ToIntPtr(guid.Pin());
+        
+        window.EKeyboardKey += KeyDown;
+        window.ECharInput += CharInput;
+        window.EMouseScrolled += MouseScroll;
+        window.EMouseButton += MouseButton;
+        window.EMousePosition += MousePosition;
     }
 
     private void DestroyWindow(ImGuiViewportPtr vp)
@@ -296,7 +304,6 @@ public class ImGuiContext : IGpuDestroyable
         if (vp.PlatformUserData != IntPtr.Zero)
         {
             var data = GetWindowUserDataFromViewport(vp);
-            data.Window.Close();
             data.Window.Close();
             var handle = GCHandle.FromIntPtr(vp.PlatformUserData);
             myWindowUserDatas.Remove((Guid)(handle.Target!));
@@ -419,7 +426,6 @@ public class ImGuiContext : IGpuDestroyable
     public void Begin()
     {
         SetFrameData();
-        UpdateImGuiInput();
 
         UpdateMouseCursor();
         ImGui.NewFrame();
@@ -456,7 +462,6 @@ public class ImGuiContext : IGpuDestroyable
     List<ImDrawVertCorrected> corrected = new();
     private unsafe void RenderDrawData(CommandBuffer cmd, ImDrawDataPtr aDrawDataPtr)
     {
-        
         if (myOldIBuffers.Count > 5)
         {
             myOldIBuffers[0].Destroy();

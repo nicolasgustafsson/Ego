@@ -14,14 +14,14 @@ public class Window
     private static readonly MouseCallback mousePosCallback = MousePositionCallback;
 
     private readonly NativeWindow myNativeWindow;
-    public bool WantsToClose = false;
-    private bool myAllowClosing = false;
 
-    public static Action<Vector2>? EMouseScrolled;
-    public static Action<Vector2>? EMousePosition;
-    public static Action<MouseButton, InputState>? EMouseButton;
-    public static Action<KeyboardKey, InputState>? EKeyboardKey;
-    public static Action<uint>? ECharInput;
+    public Action<Window, Vector2>? EMouseScrolled;
+    public Action<Window, Vector2>? EMousePosition;
+    public Action<Window, MouseButton, InputState>? EMouseButton;
+    public Action<Window, KeyboardKey, InputState>? EKeyboardKey;
+    public Action<Window, uint>? ECharInput;
+
+    private static Dictionary<IntPtr, Window> Windows = new();
 
     public bool IsClosing => myNativeWindow.IsClosing;
     public bool IsClosed => myNativeWindow.IsClosed;
@@ -41,50 +41,44 @@ public class Window
         Glfw.WindowHint(Hint.ClientApi, ClientApi.None);
         Glfw.SetErrorCallback(errorCallback);
         myNativeWindow = new((int)aWindowSize.X, (int)aWindowSize.Y, aName);
-
-        myNativeWindow.Closing += (sender, args) =>
-        {
-            if (!myAllowClosing)
-            {
-                args.Cancel = true;
-                WantsToClose = true;
-            }
-            else
-            {
-                args.Cancel = false;
-            }
-        };
         
         Glfw.SetScrollCallback(myNativeWindow, mouseScrollCallback);
         Glfw.SetMouseButtonCallback(myNativeWindow, mouseButtonCallback);
         Glfw.SetCursorPositionCallback(myNativeWindow, mousePosCallback);
         Glfw.SetKeyCallback(myNativeWindow, keyCallback);
         Glfw.SetCharCallback(myNativeWindow, charCallback);
+
+        Windows.Add(myNativeWindow.Handle, this);
     }
 
     private static void KeyCallback(IntPtr aWindow, GLFW.Keys aKey, int aScancode, GLFW.InputState aState, ModifierKeys aMods)
     {
-        EKeyboardKey?.Invoke((KeyboardKey)aKey, (InputState)aState);
+        var window = Windows[aWindow];
+        window.EKeyboardKey?.Invoke(window, (KeyboardKey)aKey, (InputState)aState);
     }
 
     private static void MouseButtonCallback(IntPtr aWindow, GLFW.MouseButton aButton, GLFW.InputState aState, ModifierKeys aModifiers)
     {
-        EMouseButton?.Invoke((MouseButton)aButton, (InputState)aState);
+        var window = Windows[aWindow];
+        Windows[aWindow].EMouseButton?.Invoke(window, (MouseButton)aButton, (InputState)aState);
     }
 
     private static void MouseScrollCallback(IntPtr aWindow, double aX, double aY)
     {
-        EMouseScrolled?.Invoke(new((float)aX, (float)aY));
+        var window = Windows[aWindow];
+        Windows[aWindow].EMouseScrolled?.Invoke(window, new((float)aX, (float)aY));
     }
 
-    private static void MousePositionCallback(IntPtr window, double x, double y)
+    private static void MousePositionCallback(IntPtr aWindow, double x, double y)
     {
-        EMousePosition?.Invoke(new((float)x, (float)y));
+        var window = Windows[aWindow];
+        Windows[aWindow].EMousePosition?.Invoke(window, new((float)x, (float)y));
     }
     
     private static void CharCallback(IntPtr aWindow, uint aCodePoint)
     {
-        ECharInput?.Invoke(aCodePoint);
+        var window = Windows[aWindow];
+        Windows[aWindow].ECharInput?.Invoke(window, aCodePoint);
     }
 
     public void Update()
@@ -103,7 +97,6 @@ public class Window
     {
         return Glfw.GetMouseButton(myNativeWindow, (GLFW.MouseButton)aMouseButton) == GLFW.InputState.Press;
     }
-    
     
     public bool IsKeyboardKeyDown(KeyboardKey aKey)
     {
@@ -156,13 +149,9 @@ public class Window
 
     public void Close()
     {
-        myAllowClosing = true;
-
-        //myNativeWindow.SwapBuffers();
-        //Glfw.PollEvents();
-        //myNativeWindow.Close();
+        myNativeWindow.Close();
+        Windows.Remove(myNativeWindow.Handle);
     }
-    
     
     public void SetCursor(Cursor aCursor)
     {
