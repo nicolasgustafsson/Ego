@@ -30,11 +30,23 @@ public class ImGuiContext : IGpuDestroyable
     class WindowUserData
     {
         public Window Window;
+        public Surface? Surface = null;
+        public Swapchain? Swapchain = null;
+        public List<ImageView>? ImageViews = null;
+        public DrawQueue? DrawQueue = null;
 
         public WindowUserData(Window aWindow)
         {
             Window = aWindow;
         }
+
+        public Image? DrawImage { get; set; }
+        public Image? DepthImage { get; set; }
+        public List<FrameData>? FrameData { get; set; }
+
+        public int FrameNumber = 0;
+        public FrameData CurrentFrame => FrameData![(int)(FrameNumber % 3)];
+        public bool WantsResize = false;
     }
     
     private Image myFontTexture;
@@ -276,15 +288,13 @@ public class ImGuiContext : IGpuDestroyable
    
     private void CreateWindow(ImGuiViewportPtr vp)
     {
-        Console.WriteLine("woah");
-
         Glfw.WindowHint(Hint.Visible, false);
         Glfw.WindowHint(Hint.Floating, false);
         Glfw.WindowHint(Hint.FocusOnShow, false);
         Glfw.WindowHint(Hint.Decorated, ((int)(vp.Flags & ImGuiViewportFlags.NoDecoration) == 0));
         Glfw.WindowHint(Hint.Floating, ((int)(vp.Flags & ImGuiViewportFlags.TopMost) == 1));
         
-        var window = new Window("Test", new Vector2(200, 200));
+        var window = new Window("Irrelevant", new Vector2(200, 200));
 
         var guid = CreateNewWindowUserData(window);
 
@@ -297,6 +307,55 @@ public class ImGuiContext : IGpuDestroyable
         window.EMouseScrolled += MouseScroll;
         window.EMouseButton += MouseButton;
         window.EMousePosition += MousePosition;
+
+        var userData = myWindowUserDatas[guid];
+        userData.Surface = VulkanApi.CreateSurface(window);
+        VkSurfaceFormatKHR surfaceFormat = GpuInstance.GetSurfaceFormat(VkFormat.B8G8R8A8Unorm, VkColorSpaceKHR.SrgbNonLinear);
+        VkPresentModeKHR presentMode = GpuInstance.GetPresentMode(VkPresentModeKHR.FifoRelaxed);
+
+        userData.Swapchain = new Swapchain(surfaceFormat, presentMode);
+        userData.ImageViews = userData.Swapchain.CreateImageViews();
+        userData.DrawQueue = new DrawQueue();
+
+        userData.DrawImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(userData.Swapchain.MyExtents.width, userData.Swapchain.MyExtents.height, 1), false);
+        userData.DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(userData.Swapchain.MyExtents.width, userData.Swapchain.MyExtents.height, 1), false);
+
+        userData.FrameData = new();
+        
+        for(int i = 0; i < 3; i++)
+        {
+            FrameData newFrame = new();
+
+            newFrame.MyCommandBuffer = new CommandBuffer(userData.DrawQueue);
+            newFrame.MyRenderFinishedSemaphore = new();
+            newFrame.MyImageAvailableSemaphore = new();
+            newFrame.MyRenderFence = new();
+
+            userData.FrameData.Add(newFrame);
+        }
+    }
+    
+    private void ResizeWindow(WindowUserData aUserData)
+    {
+        Device.WaitUntilIdle();
+
+        aUserData.Swapchain!.Destroy();
+        aUserData.DrawImage!.Destroy();
+        aUserData.DepthImage!.Destroy();
+
+        foreach (var imageView in aUserData.ImageViews!)
+            imageView.Destroy();
+        
+        aUserData.ImageViews.Clear();
+
+        VkSurfaceFormatKHR surfaceFormat = GpuInstance.GetSurfaceFormat(VkFormat.B8G8R8A8Unorm, VkColorSpaceKHR.SrgbNonLinear);
+        VkPresentModeKHR presentMode = GpuInstance.GetPresentMode(VkPresentModeKHR.FifoRelaxed);
+        aUserData.Swapchain = new Swapchain(surfaceFormat, presentMode);
+        aUserData.ImageViews = aUserData.Swapchain.CreateImageViews();
+        aUserData.DrawQueue = new DrawQueue();
+
+        aUserData.DrawImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(aUserData.Swapchain.MyExtents.width, aUserData.Swapchain.MyExtents.height, 1), false);
+        aUserData.DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(aUserData.Swapchain.MyExtents.width, aUserData.Swapchain.MyExtents.height, 1), false);
     }
 
     private void DestroyWindow(ImGuiViewportPtr vp)
@@ -309,6 +368,16 @@ public class ImGuiContext : IGpuDestroyable
             myWindowUserDatas.Remove((Guid)(handle.Target!));
             handle.Free();
             vp.PlatformUserData = IntPtr.Zero;
+            
+            data.Swapchain?.Destroy();
+            data.Surface?.Destroy();
+            
+            if (data.ImageViews != null)
+                foreach (var imageView in data.ImageViews)
+                    imageView.Destroy();
+
+            data.DrawImage?.Destroy();
+            data.DepthImage?.Destroy();
         }
     }
     
@@ -595,5 +664,86 @@ public class ImGuiContext : IGpuDestroyable
             buffer.Destroy();
         foreach (var buffer in myOldIBuffers)
             buffer.Destroy();
+        
+        foreach (var data in myWindowUserDatas.Values)
+        {
+            data.Swapchain?.Destroy();
+            data.Surface?.Destroy();
+            
+            if (data.ImageViews != null)
+                foreach (var imageView in data.ImageViews)
+                    imageView.Destroy();
+
+            data.DrawImage?.Destroy();
+            data.DepthImage?.Destroy();
+        }
+    }
+
+    public unsafe void RenderOtherWindows()
+    {
+        var platformIo = ImGui.GetPlatformIO();
+        
+        for(int i = 0; i < platformIo.Viewports.Size; i++)
+        {
+            var viewport = platformIo.Viewports[i];
+
+            if (viewport.NativePtr == ImGui.GetMainViewport().NativePtr)
+                continue;
+            
+            var viewportData = GetWindowUserDataFromViewport(viewport);
+
+            Device.WaitUntilIdle();
+            
+            viewportData.CurrentFrame.MyRenderFence.Wait();
+            viewportData.CurrentFrame.MyRenderFence.Reset();
+            
+            if (viewportData.WantsResize)
+            {
+                ResizeWindow(viewportData);
+                viewportData.WantsResize = false;
+            }
+            
+            viewportData.CurrentFrame.MyDeletionQueue.Flush();
+            viewportData.CurrentFrame.MyFrameDescriptors.ClearPools();
+            
+            var nextImage = Device.AcquireNextImage(viewportData.Swapchain!, viewportData.CurrentFrame.MyImageAvailableSemaphore);
+            uint imageIndex = nextImage.imageIndex;
+            if (nextImage.result == VkResult.ErrorOutOfDateKHR)
+            {
+                viewportData.WantsResize = true;
+                return;
+            }
+            
+            VkImage currentSwapchainImage = viewportData.Swapchain!.MyImages[(int)imageIndex];
+            
+            CommandBuffer cmd = viewportData.CurrentFrame.MyCommandBuffer;
+
+            cmd.Reset();
+            cmd.BeginRecording();
+
+            cmd.TransitionImage(viewportData.DrawImage!, VkImageLayout.General);
+            cmd.TransitionImage(viewportData.DepthImage!, VkImageLayout.DepthAttachmentOptimal);
+            
+            cmd.BeginRendering(viewportData.DrawImage!, viewportData.DepthImage!);
+            RenderDrawData(cmd, viewport.DrawData);
+            cmd.EndRendering();
+            cmd.TransitionImage(viewportData.DrawImage!, VkImageLayout.TransferSrcOptimal);
+            cmd.TransitionImage(currentSwapchainImage, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal);
+
+            cmd.Blit(viewportData.DrawImage!, currentSwapchainImage, viewportData.Swapchain.MyExtents);
+            
+            cmd.TransitionImage(currentSwapchainImage, VkImageLayout.TransferDstOptimal, VkImageLayout.PresentSrcKHR);
+
+            cmd.EndRecording();
+            
+            viewportData.DrawQueue!.Submit(cmd, viewportData.CurrentFrame.MyImageAvailableSemaphore, viewportData.CurrentFrame.MyRenderFinishedSemaphore, viewportData.CurrentFrame.MyRenderFence);
+            
+            VkResult result = viewportData.DrawQueue.Present(viewportData.Swapchain, viewportData.CurrentFrame.MyRenderFinishedSemaphore, imageIndex);
+            
+            if (result == VkResult.ErrorOutOfDateKHR)
+                viewportData.WantsResize = true;
+            
+            viewportData.FrameNumber++;
+        }
     }
 }
