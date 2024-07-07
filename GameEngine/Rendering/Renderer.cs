@@ -44,7 +44,7 @@ public partial class Renderer : IGpuImmediateSubmit
     private Image myBlackImage = null!;
     private Image myGreyImage = null!;
     private Image myWhiteImage = null!;
-    private Image myCheckerBoardImage = null!;
+    public Image myCheckerBoardImage = null!;
 
     private Sampler myDefaultNearestSampler = null!;
     private Sampler myDefaultLinearSampler = null!;

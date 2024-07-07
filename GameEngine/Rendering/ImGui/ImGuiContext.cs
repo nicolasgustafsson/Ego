@@ -52,7 +52,9 @@ public class ImGuiContext : IGpuDestroyable
     private Image myFontTexture;
     private DescriptorAllocatorGrowable myDescriptorAllocator;
     private VkDescriptorSetLayout myLayout;
-    private VkDescriptorSet myDescriptorSet;
+
+    //We don't ever actually remove descriptors - this could be a problem in the future
+    private Dictionary<nint, VkDescriptorSet> myImageDescriptors = new();
     private Sampler mySampler;
     private GraphicsPipeline myPipeline;
     private Window myMainWindow;
@@ -103,17 +105,9 @@ public class ImGuiContext : IGpuDestroyable
         layoutBuilder.AddBinding(0, VkDescriptorType.CombinedImageSampler);
         myLayout = layoutBuilder.Build(VkShaderStageFlags.Fragment);
 
-        myDescriptorSet = myDescriptorAllocator.Allocate(myLayout);
-        
-        {
-            DescriptorWriter writer = new();
-            writer.WriteImage(0, myFontTexture.MyImageView, mySampler, VkImageLayout.ShaderReadOnlyOptimal, VkDescriptorType.CombinedImageSampler);
-            writer.UpdateSet(myDescriptorSet);
-        }
+        AddTexture(myFontTexture);
 
-        
-        //io.Fonts.SetTexID((nint)myDescriptorSet.Handle);
-        io.Fonts.SetTexID((nint)myDescriptorSet.Handle);
+        io.Fonts.SetTexID(myFontTexture.GetHandle());
         
         myPipeline = new GraphicsPipeline.GraphicsPipelineBuilder()
             .AddPushConstant(new VkPushConstantRange { offset = 0, size = sizeof(float) * 4 + sizeof(VkDeviceAddress), stageFlags = VkShaderStageFlags.Vertex })
@@ -184,6 +178,35 @@ public class ImGuiContext : IGpuDestroyable
         UpdateMonitors();
 
         mainViewPort.PlatformUserData = GCHandle.ToIntPtr(CreateNewWindowUserData(aMainWindow).Pin());
+    }
+    
+    private VkDescriptorSet AddTexture(Image aImage)
+    {
+        var newDescriptorSet = myDescriptorAllocator.Allocate(myLayout);
+        
+        {
+            DescriptorWriter writer = new();
+            writer.WriteImage(0, aImage.MyImageView, mySampler, VkImageLayout.ShaderReadOnlyOptimal, VkDescriptorType.CombinedImageSampler);
+            writer.UpdateSet(newDescriptorSet);
+        }
+        myImageDescriptors.Add(aImage.GetHandle(), newDescriptorSet);
+
+        return newDescriptorSet;
+    }
+    
+    private VkDescriptorSet GetOrAddDescriptor(nint aImage)
+    {
+        return GetOrAddDescriptor(ImageRegistry.PointersToImages[aImage]);
+    }
+    
+    private VkDescriptorSet GetOrAddDescriptor(Image aImage)
+    {
+        if (myImageDescriptors.TryGetValue(aImage.GetHandle(), out var descriptorSet))
+        {
+            return descriptorSet;
+        }
+
+        return AddTexture(aImage);
     }
     
     private System.Guid CreateNewWindowUserData(Window aWindow)
@@ -576,7 +599,6 @@ public class ImGuiContext : IGpuDestroyable
         
 
         cmd.BindPipeline(myPipeline);
-        cmd.BindDescriptorSet(myPipeline.MyVkLayout, myDescriptorSet, VkPipelineBindPoint.Graphics);
 
         cmd.BindIndexBuffer(indexBuffer, VkIndexType.Uint16);
 
@@ -607,7 +629,7 @@ public class ImGuiContext : IGpuDestroyable
             for (var i = 0; i < cmdList.CmdBuffer.Size; i++)
             {
                 var cmdItem = cmdList.CmdBuffer[i];
-                cmd.BindDescriptorSet(myPipeline.MyVkLayout, myDescriptorSet, VkPipelineBindPoint.Graphics);
+                cmd.BindDescriptorSet(myPipeline.MyVkLayout, GetOrAddDescriptor(cmdItem.TextureId), VkPipelineBindPoint.Graphics);
 
                 var clipRect = new Vector4
                 {

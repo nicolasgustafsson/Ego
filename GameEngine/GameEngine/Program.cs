@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using GLFW;
+using ImGuiNET;
 
 public static class Program
 {
@@ -21,6 +22,12 @@ public static class Program
             stopwatch.Restart();
             renderer.MyImGuiContext.Begin();
 
+            ImGui.Begin("Test");
+            ImGuiEx.Image(renderer.myCheckerBoardImage, new Vector2(160, 160));
+            ImGui.End();
+
+            ImGui.DockSpaceOverViewport(0, null, ImGuiDockNodeFlags.PassthruCentralNode);
+            
             renderer.Debug();
             
             renderer.MyImGuiContext.End();

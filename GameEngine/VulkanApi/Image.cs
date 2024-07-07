@@ -1,4 +1,5 @@
 using System.Numerics;
+using Rendering;
 
 namespace Graphics;
 
@@ -11,6 +12,11 @@ public unsafe class Image : IGpuDestroyable
     public VkFormat MyImageFormat;
     
     public VkImageLayout MyCurrentLayout = VkImageLayout.Undefined;
+    
+    public nint GetHandle()
+    {
+        return (nint)MyVkImage.Handle;
+    }
     
     public Image(VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps)
     {
@@ -44,6 +50,8 @@ public unsafe class Image : IGpuDestroyable
         Vma.vmaCreateImage(GlobalAllocator.myVmaAllocator, &createInfo, &allocCreateInfo, out MyVkImage, out MyAllocation, out VmaAllocationInfo allocInfo).CheckResult();
 
         MyImageView = new(MyVkImage, aFormat, (int)(aUsageFlags & VkImageUsageFlags.DepthStencilAttachment) != 0 ? VkImageAspectFlags.Depth : VkImageAspectFlags.Color, createInfo.mipLevels);
+
+        ImageRegistry.PointersToImages.Add((nint)MyVkImage.Handle, this);
     }
     
     public Image(IGpuImmediateSubmit aSubmit, byte* aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps) : this(aFormat, aUsageFlags | VkImageUsageFlags.TransferDst, aExtent, aMipMaps)
