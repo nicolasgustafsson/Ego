@@ -520,9 +520,7 @@ public class ImGuiContext : IGpuDestroyable
     public void End()
     {
         ImGui.EndFrame();
-
         ImGui.Render();
-
         ImGui.UpdatePlatformWindows();
     }
     

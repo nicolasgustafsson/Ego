@@ -20,25 +20,28 @@ public static class Program
         while (!window.IsClosing)
         {
             stopwatch.Restart();
-            renderer.MyImGuiContext.Begin();
-
-            ImGui.Begin("Test");
-            ImGuiEx.Image(renderer.myCheckerBoardImage, new Vector2(160, 160));
-            ImGui.End();
-
-            ImGui.DockSpaceOverViewport(0, null, ImGuiDockNodeFlags.PassthruCentralNode);
             
-            renderer.Debug();
-            
-            renderer.MyImGuiContext.End();
+            Debug(renderer);
             
             renderer.Draw();
             window.Update();
-            //Console.WriteLine($"FPS: {1d / stopwatch.Elapsed.TotalSeconds}");
+            Console.WriteLine($"FPS: {1d / stopwatch.Elapsed.TotalSeconds}");
         }
 
         renderer.Cleanup();
 
         window.Close();
+    }
+    
+    private static void Debug(Rendering.Renderer aRenderer)
+    {
+        aRenderer.MyImGuiContext.Begin();
+        
+        ImGui.DockSpaceOverViewport(0, null, ImGuiDockNodeFlags.PassthruCentralNode);
+        aRenderer.Debug();
+
+        ImGui.ShowDemoWindow();
+        
+        aRenderer.MyImGuiContext.End();
     }
 }

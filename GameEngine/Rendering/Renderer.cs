@@ -79,8 +79,5 @@ public partial class Renderer : IGpuImmediateSubmit
 
     public void Debug()
     {
-        ImGui.ShowDemoWindow();
-        ImGui.ShowAboutWindow();
-        //ImPlot.ShowDemoWindow();
     }
 }
