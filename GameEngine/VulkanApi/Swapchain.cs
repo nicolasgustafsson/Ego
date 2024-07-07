@@ -8,12 +8,12 @@ public unsafe class Swapchain : IGpuDestroyable
     public VkExtent2D MyExtents;
     public readonly List<VkImage> MyImages;
 
-    public Swapchain(VkSurfaceFormatKHR WindowSurfaceFormat, VkPresentModeKHR aPresentMode)
+    public Swapchain(VkSurfaceFormatKHR WindowSurfaceFormat, VkPresentModeKHR aPresentMode, VkExtent2D aExtents, Surface aSurface)
     {
-        MyExtents = WindowSurface.GetSwapbufferExtent();
+        MyExtents = aExtents;
         MyImageFormat = WindowSurfaceFormat.format;
 
-        var surfaceCapabilities = WindowSurface.MySurfaceCapabilities;
+        var surfaceCapabilities = aSurface.MySurfaceCapabilities;
         
         uint imageCount = (surfaceCapabilities.minImageCount + 1);
         if (surfaceCapabilities.maxImageCount > 0)
@@ -28,7 +28,7 @@ public unsafe class Swapchain : IGpuDestroyable
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage = VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst;
 
-        var families = GpuInstance.FindQueueFamilies(WindowSurface.MyVkSurface);
+        var families = GpuInstance.FindQueueFamilies(aSurface.MyVkSurface);
         bool differentFamiliesForPresentingAndRastering = families.presentFamily != families.graphicsFamily;
         
         createInfo.imageSharingMode = differentFamiliesForPresentingAndRastering ? VkSharingMode.Concurrent : VkSharingMode.Exclusive;
@@ -36,7 +36,7 @@ public unsafe class Swapchain : IGpuDestroyable
         createInfo.compositeAlpha = VkCompositeAlphaFlagsKHR.Opaque;
         createInfo.clipped = true;
         createInfo.oldSwapchain = VkSwapchainKHR.Null;
-        createInfo.surface = WindowSurface.MyVkSurface;
+        createInfo.surface = aSurface.MyVkSurface;
 
         vkCreateSwapchainKHR(Device.MyVkDevice, &createInfo, null, out MyVkSwapchain).CheckResult();
         

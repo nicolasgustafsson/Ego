@@ -45,7 +45,7 @@ public class ImGuiContext : IGpuDestroyable
         public List<FrameData>? FrameData { get; set; }
 
         public int FrameNumber = 0;
-        public FrameData CurrentFrame => FrameData![(int)(FrameNumber % 3)];
+        public FrameData CurrentFrame => FrameData![(int)(FrameNumber % 2)];
         public bool WantsResize = false;
     }
     
@@ -75,10 +75,6 @@ public class ImGuiContext : IGpuDestroyable
     private readonly Platform_GetWindowMinimized _getWindowMinimized;
     private readonly Platform_SetWindowTitle _setWindowTitle; 
     
-    public unsafe delegate void Platform_CreateVkSurface(ImGuiViewportPtr vp, UInt64 aVkInstance, IntPtr aAllocator, UInt64* outSurface);
-    
-    private readonly Platform_CreateVkSurface _createVkSurface; 
-
     private Stopwatch myStopwatch = new();
     private PlatformUserData myPlatformUserData = new();
 
@@ -153,7 +149,6 @@ public class ImGuiContext : IGpuDestroyable
         _getWindowFocus = GetWindowFocus;
         _getWindowMinimized = GetWindowMinimized;
         _setWindowTitle = SetWindowTitle;
-        _createVkSurface = CreateVkSurface;
         io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
         io.BackendFlags |= ImGuiBackendFlags.HasSetMousePos;
         io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
@@ -168,7 +163,6 @@ public class ImGuiContext : IGpuDestroyable
         platformIo.Platform_GetWindowFocus = Marshal.GetFunctionPointerForDelegate(_getWindowFocus);
         platformIo.Platform_GetWindowMinimized = Marshal.GetFunctionPointerForDelegate(_getWindowMinimized);
         platformIo.Platform_GetWindowMinimized = Marshal.GetFunctionPointerForDelegate(_getWindowMinimized);
-        platformIo.Platform_CreateVkSurface = Marshal.GetFunctionPointerForDelegate(_createVkSurface);
         platformIo.Platform_SetWindowTitle = Marshal.GetFunctionPointerForDelegate(_setWindowTitle);
         
         //I'm not sure why this is needed, but otherwise we get garbage parameters. Copied from the sample program(docking branch)
@@ -308,12 +302,13 @@ public class ImGuiContext : IGpuDestroyable
         window.EMouseButton += MouseButton;
         window.EMousePosition += MousePosition;
 
+        Device.WaitUntilIdle();
         var userData = myWindowUserDatas[guid];
         userData.Surface = VulkanApi.CreateSurface(window);
         VkSurfaceFormatKHR surfaceFormat = GpuInstance.GetSurfaceFormat(VkFormat.B8G8R8A8Unorm, VkColorSpaceKHR.SrgbNonLinear);
         VkPresentModeKHR presentMode = GpuInstance.GetPresentMode(VkPresentModeKHR.FifoRelaxed);
 
-        userData.Swapchain = new Swapchain(surfaceFormat, presentMode);
+        userData.Swapchain = new Swapchain(surfaceFormat, presentMode, userData.Surface.GetSwapbufferExtent(), userData.Surface);
         userData.ImageViews = userData.Swapchain.CreateImageViews();
         userData.DrawQueue = new DrawQueue();
 
@@ -322,7 +317,7 @@ public class ImGuiContext : IGpuDestroyable
 
         userData.FrameData = new();
         
-        for(int i = 0; i < 3; i++)
+        for(int i = 0; i < 2; i++)
         {
             FrameData newFrame = new();
 
@@ -349,8 +344,8 @@ public class ImGuiContext : IGpuDestroyable
         aUserData.ImageViews.Clear();
 
         VkSurfaceFormatKHR surfaceFormat = GpuInstance.GetSurfaceFormat(VkFormat.B8G8R8A8Unorm, VkColorSpaceKHR.SrgbNonLinear);
-        VkPresentModeKHR presentMode = GpuInstance.GetPresentMode(VkPresentModeKHR.FifoRelaxed);
-        aUserData.Swapchain = new Swapchain(surfaceFormat, presentMode);
+        VkPresentModeKHR presentMode = GpuInstance.GetPresentMode(VkPresentModeKHR.Mailbox);
+        aUserData.Swapchain = new Swapchain(surfaceFormat, presentMode, aUserData.Surface!.GetSwapbufferExtent(), aUserData.Surface!);
         aUserData.ImageViews = aUserData.Swapchain.CreateImageViews();
         aUserData.DrawQueue = new DrawQueue();
 
@@ -369,6 +364,7 @@ public class ImGuiContext : IGpuDestroyable
             handle.Free();
             vp.PlatformUserData = IntPtr.Zero;
             
+            Device.WaitUntilIdle();
             data.Swapchain?.Destroy();
             data.Surface?.Destroy();
             
@@ -378,6 +374,9 @@ public class ImGuiContext : IGpuDestroyable
 
             data.DrawImage?.Destroy();
             data.DepthImage?.Destroy();
+            if (data.FrameData != null)
+                foreach (var frameData in data.FrameData)
+                    frameData.Destroy();
         }
     }
     
@@ -455,11 +454,6 @@ public class ImGuiContext : IGpuDestroyable
             count += 1;
         }
         data.Window.SetTitle(System.Text.Encoding.ASCII.GetString(titlePtr, count));
-    }
-
-    private unsafe void CreateVkSurface(ImGuiViewportPtr vp, UInt64 aVkInstance, IntPtr aAllocator, UInt64* outSurface)
-    {
-        Console.WriteLine("yippie");
     }
     
     private void UpdateMouseCursor()
@@ -676,6 +670,9 @@ public class ImGuiContext : IGpuDestroyable
 
             data.DrawImage?.Destroy();
             data.DepthImage?.Destroy();
+            if (data.FrameData != null)
+                foreach (var frameData in data.FrameData)
+                    frameData.Destroy();
         }
     }
 
@@ -711,7 +708,8 @@ public class ImGuiContext : IGpuDestroyable
             if (nextImage.result == VkResult.ErrorOutOfDateKHR)
             {
                 viewportData.WantsResize = true;
-                return;
+                i--;
+                continue;
             }
             
             VkImage currentSwapchainImage = viewportData.Swapchain!.MyImages[(int)imageIndex];

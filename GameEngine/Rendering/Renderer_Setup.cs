@@ -255,7 +255,7 @@ public partial class Renderer
 
     private void CreateDrawQueue()
     {
-        myDrawQueue = new DrawQueue(GpuInstance);
+        myDrawQueue = new DrawQueue();
     }
 
     private void CreateApi(Window aWindow)
@@ -266,7 +266,8 @@ public partial class Renderer
 
     private void CreateSurface(Window aWindow)
     {
-        VulkanApi.CreateSurface(aWindow);
+        WindowSurface = VulkanApi.CreateSurface(aWindow);
+        
         myCleanupQueue.Add(WindowSurface);
     }
 
@@ -314,7 +315,7 @@ public partial class Renderer
         VkSurfaceFormatKHR surfaceFormat = GpuInstance.GetSurfaceFormat(PreferredFormat, PreferredColorSpace);
         VkPresentModeKHR presentMode = GpuInstance.GetPresentMode(PreferredPresentMode);
 
-        mySwapchain = new Swapchain(surfaceFormat, presentMode);
+        mySwapchain = new Swapchain(surfaceFormat, presentMode, WindowSurface.GetSwapbufferExtent(), WindowSurface);
         myCleanupQueue.Add(mySwapchain);
     }
     

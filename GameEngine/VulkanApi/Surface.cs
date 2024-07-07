@@ -57,8 +57,6 @@ public unsafe class Surface : IGpuDestroyable
             default:
                 throw new ArgumentOutOfRangeException();
         }
-
-        WindowSurface = this;
     }
     
     public VkExtent2D GetSwapbufferExtent()

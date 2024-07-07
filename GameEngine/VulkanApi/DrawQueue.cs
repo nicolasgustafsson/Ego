@@ -2,7 +2,7 @@ namespace Graphics;
 
 public unsafe class DrawQueue : Queue
 {
-    public DrawQueue(Gpu aGpu) : base(aGpu.MyGraphicsFamily) { }
+    public DrawQueue() : base(GpuInstance.MyGraphicsFamily) { }
     
     public void Submit(CommandBuffer aCommandBuffer, Semaphore aImageAvailableSemaphore, Semaphore aRenderFinishedSemaphore, Fence aRenderFence)
     {
