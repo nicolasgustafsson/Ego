@@ -1,6 +1,3 @@
-using System.Runtime.InteropServices;
-using SharpGLTF.Schema2;
-
 namespace Rendering;
 using Vortice.Vulkan;
 using Graphics;
@@ -54,7 +51,9 @@ public partial class Renderer
         DrawGeometry(cmd);
 
         cmd.BeginRendering(myDrawImage, myDepthImage);
-        MyImGuiContext.Render(cmd);
+        
+        ERenderImgui(cmd);
+        
         cmd.EndRendering();
 
         cmd.TransitionImage(myDrawImage, VkImageLayout.TransferSrcOptimal);
@@ -73,9 +72,9 @@ public partial class Renderer
         if (result == VkResult.ErrorOutOfDateKHR)
             myWantsResize = true;
 
-        MyImGuiContext.RenderOtherWindows();
-        
         myFrameNumber++;
+
+        EPostRender();
     }
 
     private unsafe void DrawGeometry(CommandBuffer cmd)

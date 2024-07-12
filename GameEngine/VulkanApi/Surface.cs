@@ -32,7 +32,7 @@ public unsafe class Surface : IGpuDestroyable
             {
                 VkXlibSurfaceCreateInfoKHR createInfo = new ()
                 {
-                    display = aWindow.X11Display,
+                    dpy = aWindow.X11Display,
                     window = (UIntPtr)aWindow.X11Window
                 };
                 fixed (VkSurfaceKHR* surfacePtr = &MyVkSurface)

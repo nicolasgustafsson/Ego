@@ -11,6 +11,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\ImGuiIntegration\ImGuiIntegration.csproj" />
       <ProjectReference Include="..\Rendering\Rendering.csproj" />
       <ProjectReference Include="../Utilities/Utilities.csproj" />
         <ProjectReference Include="..\Platform\Platform.csproj" />

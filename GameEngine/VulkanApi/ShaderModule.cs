@@ -37,7 +37,7 @@ public unsafe class ShaderModule : IGpuDestroyable
         VkPipelineShaderStageCreateInfo stageInfo = new();
         stageInfo.stage = aStage;
         stageInfo.module = MyModule;
-        stageInfo.pName = "main".ToSPointer();
+        stageInfo.pName = "main".ToPointer();
 
         return stageInfo;
     }

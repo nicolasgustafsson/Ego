@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
-using GLFW;
 using ImGuiNET;
+using Rendering;
 
 public static class Program
 {
@@ -12,30 +12,31 @@ public static class Program
     private static void Run()
     {
         Window window = new Window("Game", new Vector2(1280, 720));
-        Rendering.Renderer renderer = null!;
-
-        renderer = new(window);
-
+        Renderer renderer = new(window);
+        ImGuiContext imGuiContext = new (renderer, window);
+        
         Stopwatch stopwatch = new();
         while (!window.IsClosing)
         {
             stopwatch.Restart();
             
-            Debug(renderer);
+            Debug(renderer, imGuiContext);
             
             renderer.Draw();
+            
             window.Update();
             Console.WriteLine($"FPS: {1d / stopwatch.Elapsed.TotalSeconds}");
         }
 
+        imGuiContext.Destroy();
         renderer.Cleanup();
 
         window.Close();
     }
     
-    private static void Debug(Rendering.Renderer aRenderer)
+    private static void Debug(Renderer aRenderer, ImGuiContext aImguiContext)
     {
-        aRenderer.MyImGuiContext.Begin();
+        aImguiContext.Begin();
         
         ImGui.DockSpaceOverViewport(0, null, ImGuiDockNodeFlags.PassthruCentralNode);
         aRenderer.Debug();
@@ -43,6 +44,6 @@ public static class Program
         ImGui.ShowDemoWindow();
         ImGui.ShowAboutWindow();
         
-        aRenderer.MyImGuiContext.End();
+        aImguiContext.End();
     }
 }

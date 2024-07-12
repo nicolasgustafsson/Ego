@@ -1,5 +1,7 @@
-﻿using System.Diagnostics;
+﻿global using VkDeviceAddress = ulong;
+using System.Diagnostics;
 using System.Drawing;
+using System.Numerics;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -178,6 +180,9 @@ public class ImGuiContext : IGpuDestroyable
         UpdateMonitors();
 
         mainViewPort.PlatformUserData = GCHandle.ToIntPtr(CreateNewWindowUserData(aMainWindow).Pin());
+        
+        aRenderer.ERenderImgui += Render;
+        aRenderer.EPostRender += RenderOtherWindows;
     }
     
     private VkDescriptorSet AddTexture(Image aImage)
@@ -325,11 +330,11 @@ public class ImGuiContext : IGpuDestroyable
         window.EMouseButton += MouseButton;
         window.EMousePosition += MousePosition;
 
-        Device.WaitUntilIdle();
+        LogicalDevice.Device.WaitUntilIdle();
         var userData = myWindowUserDatas[guid];
-        userData.Surface = VulkanApi.CreateSurface(window);
-        VkSurfaceFormatKHR surfaceFormat = GpuInstance.GetSurfaceFormat(VkFormat.B8G8R8A8Unorm, VkColorSpaceKHR.SrgbNonLinear);
-        VkPresentModeKHR presentMode = GpuInstance.GetPresentMode(VkPresentModeKHR.FifoRelaxed);
+        userData.Surface = Api.VulkanApi.CreateSurface(window);
+        VkSurfaceFormatKHR surfaceFormat = Gpu.GpuInstance.GetSurfaceFormat(VkFormat.B8G8R8A8Unorm, VkColorSpaceKHR.SrgbNonLinear);
+        VkPresentModeKHR presentMode = Gpu.GpuInstance.GetPresentMode(VkPresentModeKHR.FifoRelaxed);
 
         userData.Swapchain = new Swapchain(surfaceFormat, presentMode, userData.Surface.GetSwapbufferExtent(), userData.Surface);
         userData.ImageViews = userData.Swapchain.CreateImageViews();
@@ -355,7 +360,7 @@ public class ImGuiContext : IGpuDestroyable
     
     private void ResizeWindow(WindowUserData aUserData)
     {
-        Device.WaitUntilIdle();
+        LogicalDevice.Device.WaitUntilIdle();
 
         aUserData.Swapchain!.Destroy();
         aUserData.DrawImage!.Destroy();
@@ -366,8 +371,8 @@ public class ImGuiContext : IGpuDestroyable
         
         aUserData.ImageViews.Clear();
 
-        VkSurfaceFormatKHR surfaceFormat = GpuInstance.GetSurfaceFormat(VkFormat.B8G8R8A8Unorm, VkColorSpaceKHR.SrgbNonLinear);
-        VkPresentModeKHR presentMode = GpuInstance.GetPresentMode(VkPresentModeKHR.Mailbox);
+        VkSurfaceFormatKHR surfaceFormat = Gpu.GpuInstance.GetSurfaceFormat(VkFormat.B8G8R8A8Unorm, VkColorSpaceKHR.SrgbNonLinear);
+        VkPresentModeKHR presentMode = Gpu.GpuInstance.GetPresentMode(VkPresentModeKHR.Mailbox);
         aUserData.Swapchain = new Swapchain(surfaceFormat, presentMode, aUserData.Surface!.GetSwapbufferExtent(), aUserData.Surface!);
         aUserData.ImageViews = aUserData.Swapchain.CreateImageViews();
         aUserData.DrawQueue = new DrawQueue();
@@ -387,7 +392,7 @@ public class ImGuiContext : IGpuDestroyable
             handle.Free();
             vp.PlatformUserData = IntPtr.Zero;
             
-            Device.WaitUntilIdle();
+            LogicalDevice.Device.WaitUntilIdle();
             data.Swapchain?.Destroy();
             data.Surface?.Destroy();
             
@@ -666,11 +671,12 @@ public class ImGuiContext : IGpuDestroyable
 
     public unsafe void Destroy()
     {
+        LogicalDevice.Device.WaitUntilIdle();
         myFontTexture.Destroy();
         myDescriptorAllocator.Destroy();
         mySampler.Destroy();
         
-        Vulkan.vkDestroyDescriptorSetLayout(Device.MyVkDevice, myLayout);
+        Vulkan.vkDestroyDescriptorSetLayout(LogicalDevice.Device.MyVkDevice, myLayout);
 
         myPipeline.Destroy();
 
@@ -709,7 +715,7 @@ public class ImGuiContext : IGpuDestroyable
             
             var viewportData = GetWindowUserDataFromViewport(viewport);
 
-            Device.WaitUntilIdle();
+            LogicalDevice.Device.WaitUntilIdle();
             
             viewportData.CurrentFrame.MyRenderFence.Wait();
             viewportData.CurrentFrame.MyRenderFence.Reset();
@@ -723,7 +729,7 @@ public class ImGuiContext : IGpuDestroyable
             viewportData.CurrentFrame.MyDeletionQueue.Flush();
             viewportData.CurrentFrame.MyFrameDescriptors.ClearPools();
             
-            var nextImage = Device.AcquireNextImage(viewportData.Swapchain!, viewportData.CurrentFrame.MyImageAvailableSemaphore);
+            var nextImage = LogicalDevice.Device.AcquireNextImage(viewportData.Swapchain!, viewportData.CurrentFrame.MyImageAvailableSemaphore);
             uint imageIndex = nextImage.imageIndex;
             if (nextImage.result == VkResult.ErrorOutOfDateKHR)
             {

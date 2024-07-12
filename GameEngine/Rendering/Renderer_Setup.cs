@@ -50,8 +50,6 @@ public partial class Renderer
 
         InitializePipelines();
         
-        CreateImGui(aWindow);
-
         CreateMonke();
         
         Console.WriteLine("Renderer successfully created!");
@@ -117,12 +115,6 @@ public partial class Renderer
     {
         myMeshes = Mesh.LoadGltf(this, "Models/basicmesh.glb").ToArray();
         myCleanupQueue.Add(myMeshes.ToList());
-    }
-
-    private void CreateImGui(Window aWindow)
-    {
-        MyImGuiContext = new(this, aWindow);
-        myCleanupQueue.Add(MyImGuiContext);
     }
 
     private void CreateImmediateCommandBuffer()

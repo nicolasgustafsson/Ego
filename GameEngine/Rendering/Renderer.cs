@@ -21,8 +21,6 @@ public partial class Renderer : IGpuImmediateSubmit
     private ComputePipeline myGradientPipeline = null!;
     private GraphicsPipeline myTrianglePipeline = null!;
 
-    public ImGuiContext MyImGuiContext = null!;
-
     private Fence myImmediateFence = null!;
     private CommandBuffer myImmediateCommandBuffer = null!;
     
@@ -53,6 +51,9 @@ public partial class Renderer : IGpuImmediateSubmit
     
     private ulong myFrameNumber = 0;
     private bool myWantsResize = false;
+    
+    public Action<CommandBuffer> ERenderImgui = delegate {};
+    public Action EPostRender = delegate {};
 
     public Renderer(Window aWindow)
     {

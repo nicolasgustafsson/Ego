@@ -101,7 +101,7 @@ public unsafe class Gpu
         }
 
         deviceCreateInfo.enabledExtensionCount = (uint)deviceExtensions.Length;
-        deviceCreateInfo.ppEnabledExtensionNames = (sbyte**)extensionsToBytesArray;
+        deviceCreateInfo.ppEnabledExtensionNames = (byte**)extensionsToBytesArray;
 
         vkCreateDevice(MyVkPhysicalDevice, &deviceCreateInfo, null, out logicalDevice.MyVkDevice).CheckResult();
 
@@ -188,7 +188,7 @@ public unsafe class Gpu
 
         for (int i = 0; i < extensionCount; i++)
         {
-            Console.WriteLine($"Extension: {Helpers.GetString(extensions[i].extensionName)} version: {extensions[i].specVersion}");
+            Console.WriteLine($"Extension: {Helpers.GetString((sbyte*)extensions[i].extensionName)} version: {extensions[i].specVersion}");
         }
         Console.WriteLine("--- ---------------------------- ---");
     }

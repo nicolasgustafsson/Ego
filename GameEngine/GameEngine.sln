@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImGui.NET", "..\ImguiDotNet
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{6BE9965E-4E6B-463C-88C6-1D37A2CEA4B4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImGuiIntegration", "ImGuiIntegration\ImGuiIntegration.csproj", "{5B8C4600-CEC7-4189-9F85-861B11209162}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,12 @@ Global
 		{323532F6-0CA4-45D7-A155-1A2410EC67D7}.DebugNoBuild|Any CPU.Build.0 = Debug|Any CPU
 		{323532F6-0CA4-45D7-A155-1A2410EC67D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{323532F6-0CA4-45D7-A155-1A2410EC67D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B8C4600-CEC7-4189-9F85-861B11209162}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B8C4600-CEC7-4189-9F85-861B11209162}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B8C4600-CEC7-4189-9F85-861B11209162}.DebugNoBuild|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B8C4600-CEC7-4189-9F85-861B11209162}.DebugNoBuild|Any CPU.Build.0 = Debug|Any CPU
+		{5B8C4600-CEC7-4189-9F85-861B11209162}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B8C4600-CEC7-4189-9F85-861B11209162}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

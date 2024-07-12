@@ -28,8 +28,8 @@ public unsafe class Api : IGpuDestroyable
         
         VkApplicationInfo appInfo = new VkApplicationInfo
         {
-            pApplicationName = aWindow.Name.ToSPointer(),
-            pEngineName = "Have A Great Day".ToSPointer(),
+            pApplicationName = aWindow.Name.ToPointer(),
+            pEngineName = "Have A Great Day".ToPointer(),
             applicationVersion = VkVersion.Version_1_3,
             apiVersion = VkVersion.Version_1_3,
             engineVersion = VkVersion.Version_1_3
@@ -45,8 +45,7 @@ public unsafe class Api : IGpuDestroyable
         }
 
         info.enabledExtensionCount = (uint)InstanceExtensions.Length;
-        info.ppEnabledExtensionNames = (sbyte**)extensionsToBytesArray;
-        
+        info.ppEnabledExtensionNames = (byte**)extensionsToBytesArray;
         
 #if DEBUG
         string[] validationLayers = ["VK_LAYER_KHRONOS_validation"];
@@ -57,7 +56,7 @@ public unsafe class Api : IGpuDestroyable
         }
 
         info.enabledLayerCount = (uint)validationLayers.Length;
-        info.ppEnabledLayerNames = (sbyte**)layersToBytesArray;      
+        info.ppEnabledLayerNames = (byte**)layersToBytesArray;      
            
         VkDebugUtilsMessengerCreateInfoEXT debugUtilsCreateInfo = new(); 
         debugUtilsCreateInfo.messageSeverity = VkDebugUtilsMessageSeverityFlagsEXT.Error | VkDebugUtilsMessageSeverityFlagsEXT.Warning;
@@ -90,7 +89,7 @@ public unsafe class Api : IGpuDestroyable
         VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
         void* userData)
     {
-        string message = new(pCallbackData->pMessage);
+        string message = new((sbyte*)pCallbackData->pMessage);
         
         Console.WriteLine($"[Vulkan]: {messageTypes}: {messageSeverity} - {message}");
         
@@ -107,7 +106,7 @@ public unsafe class Api : IGpuDestroyable
 
         for (int i = 0; i < extensionCount; i++)
         {
-            Console.WriteLine($"Extension: {Helpers.GetString(extensions[i].extensionName)} version: {extensions[i].specVersion}");
+            Console.WriteLine($"Extension: {Helpers.GetString((sbyte*)extensions[i].extensionName)} version: {extensions[i].specVersion}");
         }
 
         Console.WriteLine("--- ---------------------------- ---");

@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Platform\Platform.csproj" />
+      <ProjectReference Include="..\Rendering\Rendering.csproj" />
+      <ProjectReference Include="..\Utilities\Utilities.csproj" />
+      <ProjectReference Include="..\VulkanApi\VulkanApi.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Vortice.Vulkan" Version="1.9.2" />
+      <PackageReference Include="Vortice.VulkanMemoryAllocator" Version="1.5.0" />
+    </ItemGroup>
+
+</Project>
