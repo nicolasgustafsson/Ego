@@ -30,7 +30,7 @@ public partial class Renderer
         
         CreateDevice();
 
-        CreateDrawQueue();
+        CreateRenderQueue();
 
         CreateSwapchain();
 
@@ -97,7 +97,7 @@ public partial class Renderer
         Device.WaitUntilIdle();
 
         myCleanupQueue.RunDeletor(mySwapchain);
-        myCleanupQueue.RunDeletor(myDrawImage);
+        myCleanupQueue.RunDeletor(myRenderImage);
         myCleanupQueue.RunDeletor(myDepthImage);
         
         foreach (var imageView in myImageViews)
@@ -108,7 +108,7 @@ public partial class Renderer
         CreateSwapchain();
         CreateImageViews();
         CreateDrawImage();
-        UpdateDrawImageDescriptorSet();
+        UpdateRenderImageDescriptorSet();
     }
 
     private void CreateMonke()
@@ -120,7 +120,7 @@ public partial class Renderer
     private void CreateImmediateCommandBuffer()
     {
         myImmediateFence = new();
-        myImmediateCommandBuffer = new(myDrawQueue);
+        myImmediateCommandBuffer = new(myRenderQueue);
         myCleanupQueue.Add(myImmediateFence);
         myCleanupQueue.Add(myImmediateCommandBuffer);
     }
@@ -146,7 +146,7 @@ public partial class Renderer
             .DisableMultisampling()
             .EnableDepthTest()
             .SetBlendMode(BlendMode.Alpha)
-            .SetColorAttachmentFormat(myDrawImage.MyImageFormat)
+            .SetColorAttachmentFormat(myRenderImage.MyImageFormat)
             .SetDepthFormat(VkFormat.D32Sfloat)
             .Build();
 
@@ -155,14 +155,14 @@ public partial class Renderer
 
     private void InitializeBackgroundPipelines()
     {
-        myGradientPipeline = ComputePipeline.StartBuild().SetComputeShader("Shaders/comp.spv").AddLayout(myDrawImageDescriptorLayout).AddPushConstant<PushConstants>().Build();
+        myGradientPipeline = ComputePipeline.StartBuild().SetComputeShader("Shaders/comp.spv").AddLayout(myRenderImageDescriptorLayout).AddPushConstant<PushConstants>().Build();
         myCleanupQueue.Add(myGradientPipeline);
     }
 
     private void CreateDrawImage()
     {
-         myDrawImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1), false);
-         myCleanupQueue.Add(myDrawImage);
+         myRenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1), false);
+         myCleanupQueue.Add(myRenderImage);
          
          myDepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1), false);
          myCleanupQueue.Add(myDepthImage);
@@ -179,11 +179,11 @@ public partial class Renderer
         myGlobalDescriptorAllocator = new();
         myGlobalDescriptorAllocator.InitPool(10, sizes);
 
-        CreateDrawImageDescriptor();
+        CreateRenderImageDescriptor();
 
         myCleanupQueue.Add(() =>
         {
-            vkDestroyDescriptorSetLayout(Device.MyVkDevice, myDrawImageDescriptorLayout);
+            vkDestroyDescriptorSetLayout(Device.MyVkDevice, myRenderImageDescriptorLayout);
         });
         
         {
@@ -211,21 +211,21 @@ public partial class Renderer
         
     }
 
-    private void CreateDrawImageDescriptor()
+    private void CreateRenderImageDescriptor()
     {
         DescriptorLayoutBuilder builder = new();
         builder.AddBinding(0, VkDescriptorType.StorageImage);
-        myDrawImageDescriptorLayout = builder.Build(VkShaderStageFlags.Compute | VkShaderStageFlags.Fragment);
-        myDrawImageDescriptorSet = myGlobalDescriptorAllocator.Allocate(myDrawImageDescriptorLayout);
+        myRenderImageDescriptorLayout = builder.Build(VkShaderStageFlags.Compute | VkShaderStageFlags.Fragment);
+        myRenderImageDescriptorSet = myGlobalDescriptorAllocator.Allocate(myRenderImageDescriptorLayout);
         
-        UpdateDrawImageDescriptorSet();
+        UpdateRenderImageDescriptorSet();
     }
 
-    private void UpdateDrawImageDescriptorSet()
+    private void UpdateRenderImageDescriptorSet()
     {
         DescriptorWriter writer = new();
-        writer.WriteImage(0, myDrawImage.MyImageView, null, VkImageLayout.General, VkDescriptorType.StorageImage);
-        writer.UpdateSet(myDrawImageDescriptorSet);
+        writer.WriteImage(0, myRenderImage.MyImageView, null, VkImageLayout.General, VkDescriptorType.StorageImage);
+        writer.UpdateSet(myRenderImageDescriptorSet);
     }
 
     private void CreateMemoryAllocator()
@@ -245,9 +245,9 @@ public partial class Renderer
         GpuInstance = VulkanApi.PickGpu();
     }
 
-    private void CreateDrawQueue()
+    private void CreateRenderQueue()
     {
-        myDrawQueue = new DrawQueue();
+        myRenderQueue = new RenderQueue();
     }
 
     private void CreateApi(Window aWindow)
@@ -282,7 +282,7 @@ public partial class Renderer
         {
             FrameData newFrame = new();
 
-            newFrame.MyCommandBuffer = new CommandBuffer(myDrawQueue);
+            newFrame.MyCommandBuffer = new CommandBuffer(myRenderQueue);
             newFrame.MyRenderFinishedSemaphore = new();
             newFrame.MyImageAvailableSemaphore = new();
             newFrame.MyRenderFence = new();

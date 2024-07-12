@@ -12,7 +12,7 @@ struct PushConstants
 
 public partial class Renderer
 {
-    private void DrawInternal()
+    private void RenderInternal()
     {
         myCurrentFrame.MyRenderFence.Wait();
         myCurrentFrame.MyRenderFence.Reset();
@@ -41,33 +41,33 @@ public partial class Renderer
         cmd.Reset();
         cmd.BeginRecording();
 
-        cmd.TransitionImage(myDrawImage, VkImageLayout.General);
+        cmd.TransitionImage(myRenderImage, VkImageLayout.General);
         cmd.TransitionImage(myDepthImage, VkImageLayout.DepthAttachmentOptimal);
 
-        DrawBackground(cmd);
+        RenderBackground(cmd);
 
-        cmd.TransitionImage(myDrawImage, VkImageLayout.ColorAttachmentOptimal);
+        cmd.TransitionImage(myRenderImage, VkImageLayout.ColorAttachmentOptimal);
 
-        DrawGeometry(cmd);
+        RenderGeometry(cmd);
 
-        cmd.BeginRendering(myDrawImage, myDepthImage);
+        cmd.BeginRendering(myRenderImage, myDepthImage);
         
         ERenderImgui(cmd);
         
         cmd.EndRendering();
 
-        cmd.TransitionImage(myDrawImage, VkImageLayout.TransferSrcOptimal);
+        cmd.TransitionImage(myRenderImage, VkImageLayout.TransferSrcOptimal);
         cmd.TransitionImage(currentSwapchainImage, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal);
 
-        cmd.Blit(myDrawImage, currentSwapchainImage, mySwapchain.MyExtents);
+        cmd.Blit(myRenderImage, currentSwapchainImage, mySwapchain.MyExtents);
         
         cmd.TransitionImage(currentSwapchainImage, VkImageLayout.TransferDstOptimal, VkImageLayout.PresentSrcKHR);
 
         cmd.EndRecording();
 
-        myDrawQueue.Submit(cmd, myCurrentFrame.MyImageAvailableSemaphore, myCurrentFrame.MyRenderFinishedSemaphore, myCurrentFrame.MyRenderFence);
+        myRenderQueue.Submit(cmd, myCurrentFrame.MyImageAvailableSemaphore, myCurrentFrame.MyRenderFinishedSemaphore, myCurrentFrame.MyRenderFence);
         
-        VkResult result = myDrawQueue.Present(mySwapchain, myCurrentFrame.MyRenderFinishedSemaphore, imageIndex);
+        VkResult result = myRenderQueue.Present(mySwapchain, myCurrentFrame.MyRenderFinishedSemaphore, imageIndex);
         
         if (result == VkResult.ErrorOutOfDateKHR)
             myWantsResize = true;
@@ -77,7 +77,7 @@ public partial class Renderer
         EPostRender();
     }
 
-    private unsafe void DrawGeometry(CommandBuffer cmd)
+    private unsafe void RenderGeometry(CommandBuffer cmd)
     {
         AllocatedBuffer<SceneData> sceneDataBuffer = new(VkBufferUsageFlags.UniformBuffer, VmaMemoryUsage.CpuToGpu);
         myCurrentFrame.MyDeletionQueue.Add(sceneDataBuffer);
@@ -90,7 +90,7 @@ public partial class Renderer
             writer.UpdateSet(globalDescriptor);
         }
         
-        cmd.BeginRendering(myDrawImage, myDepthImage); 
+        cmd.BeginRendering(myRenderImage, myDepthImage); 
 
         cmd.BindPipeline(myTrianglePipeline);
 
@@ -105,7 +105,7 @@ public partial class Renderer
         cmd.BindDescriptorSet(myTrianglePipeline.MyVkLayout, descriptorSet, VkPipelineBindPoint.Graphics); 
         
         Matrix4x4 view = Matrix4x4.CreateTranslation(new Vector3(0f, 0f, -2f));
-        Matrix4x4 projection = MatrixExtensions.CreatePerspectiveFieldOfView(90f * (float)(Math.PI/180f), (float)myDrawImage.MyExtent.width / (float)myDrawImage.MyExtent.height, 10000f, 0.1f);
+        Matrix4x4 projection = MatrixExtensions.CreatePerspectiveFieldOfView(90f * (float)(Math.PI/180f), (float)myRenderImage.MyExtent.width / (float)myRenderImage.MyExtent.height, 10000f, 0.1f);
 
         projection[1, 1] *= -1f;
 
@@ -122,11 +122,11 @@ public partial class Renderer
         cmd.EndRendering();
     }
 
-    private void DrawBackground(CommandBuffer cmd)
+    private void RenderBackground(CommandBuffer cmd)
     {
         cmd.BindPipeline(myGradientPipeline);
 
-        cmd.BindDescriptorSet(myGradientPipeline.MyVkLayout, myDrawImageDescriptorSet, VkPipelineBindPoint.Compute);
+        cmd.BindDescriptorSet(myGradientPipeline.MyVkLayout, myRenderImageDescriptorSet, VkPipelineBindPoint.Compute);
 
         PushConstants pushConstants = new();
         pushConstants.data1.X = 0f;

@@ -35,7 +35,7 @@ public class ImGuiContext : IGpuDestroyable
         public Surface? Surface = null;
         public Swapchain? Swapchain = null;
         public List<ImageView>? ImageViews = null;
-        public DrawQueue? DrawQueue = null;
+        public RenderQueue? DrawQueue = null;
 
         public WindowUserData(Window aWindow)
         {
@@ -338,7 +338,7 @@ public class ImGuiContext : IGpuDestroyable
 
         userData.Swapchain = new Swapchain(surfaceFormat, presentMode, userData.Surface.GetSwapbufferExtent(), userData.Surface);
         userData.ImageViews = userData.Swapchain.CreateImageViews();
-        userData.DrawQueue = new DrawQueue();
+        userData.DrawQueue = new RenderQueue();
 
         userData.DrawImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(userData.Swapchain.MyExtents.width, userData.Swapchain.MyExtents.height, 1), false);
         userData.DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(userData.Swapchain.MyExtents.width, userData.Swapchain.MyExtents.height, 1), false);
@@ -375,7 +375,7 @@ public class ImGuiContext : IGpuDestroyable
         VkPresentModeKHR presentMode = Gpu.GpuInstance.GetPresentMode(VkPresentModeKHR.Mailbox);
         aUserData.Swapchain = new Swapchain(surfaceFormat, presentMode, aUserData.Surface!.GetSwapbufferExtent(), aUserData.Surface!);
         aUserData.ImageViews = aUserData.Swapchain.CreateImageViews();
-        aUserData.DrawQueue = new DrawQueue();
+        aUserData.DrawQueue = new RenderQueue();
 
         aUserData.DrawImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(aUserData.Swapchain.MyExtents.width, aUserData.Swapchain.MyExtents.height, 1), false);
         aUserData.DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(aUserData.Swapchain.MyExtents.width, aUserData.Swapchain.MyExtents.height, 1), false);

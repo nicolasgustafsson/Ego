@@ -1,8 +1,8 @@
 namespace Graphics;
 
-public unsafe class DrawQueue : Queue
+public unsafe class RenderQueue : Queue
 {
-    public DrawQueue() : base(GpuInstance.MyGraphicsFamily) { }
+    public RenderQueue() : base(GpuInstance.MyGraphicsFamily) { }
     
     public void Submit(CommandBuffer aCommandBuffer, Semaphore aImageAvailableSemaphore, Semaphore aRenderFinishedSemaphore, Fence aRenderFence)
     {

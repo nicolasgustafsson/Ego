@@ -13,8 +13,8 @@ namespace Rendering;
 public partial class Renderer : IGpuImmediateSubmit
 {
     private Swapchain mySwapchain = null!;
-    private DrawQueue myDrawQueue = null!;
-    private Image myDrawImage = null!;
+    private RenderQueue myRenderQueue = null!;
+    private Image myRenderImage = null!;
     private Image myDepthImage = null!;
     private DescriptorAllocatorGrowable myGlobalDescriptorAllocator = new();
     
@@ -25,8 +25,8 @@ public partial class Renderer : IGpuImmediateSubmit
     private CommandBuffer myImmediateCommandBuffer = null!;
     
     private List<ImageView> myImageViews = new();
-    private VkDescriptorSet myDrawImageDescriptorSet;
-    private VkDescriptorSetLayout myDrawImageDescriptorLayout;
+    private VkDescriptorSet myRenderImageDescriptorSet;
+    private VkDescriptorSetLayout myRenderImageDescriptorLayout;
 
     private VkDescriptorSetLayout mySingleTextureLayout;
 
@@ -68,13 +68,13 @@ public partial class Renderer : IGpuImmediateSubmit
         myImmediateCommandBuffer.BeginRecording();
         aAction(myImmediateCommandBuffer);
         myImmediateCommandBuffer.EndRecording();
-        myDrawQueue.Submit(myImmediateCommandBuffer, myImmediateFence);
+        myRenderQueue.Submit(myImmediateCommandBuffer, myImmediateFence);
         myImmediateFence.Wait();
     }
     
     public void Draw()
     {
-        DrawInternal();
+        RenderInternal();
     }
 
     public void Debug()
