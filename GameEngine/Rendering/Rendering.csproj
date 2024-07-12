@@ -11,7 +11,6 @@
     </PropertyGroup>
     <ItemGroup>
       <ProjectReference Include="..\..\ImguiDotNet\src\ImGui.NET\ImGui.NET.csproj" />
-      <ProjectReference Include="..\..\ImguiDotNet\src\ImPlot.NET\ImPlot.NET.csproj" />
       <ProjectReference Include="..\Platform\Platform.csproj" />
       <ProjectReference Include="..\Utilities\Utilities.csproj" />
       <ProjectReference Include="..\VulkanApi\VulkanApi.csproj" />

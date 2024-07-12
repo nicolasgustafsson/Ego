@@ -6,7 +6,6 @@ global using static Graphics.Gpu;
 
 using Graphics;
 using ImGuiNET;
-using ImPlotNET;
 using Vortice.Vulkan;
 
 namespace Rendering;

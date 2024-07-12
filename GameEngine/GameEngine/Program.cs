@@ -41,6 +41,7 @@ public static class Program
         aRenderer.Debug();
 
         ImGui.ShowDemoWindow();
+        ImGui.ShowAboutWindow();
         
         aRenderer.MyImGuiContext.End();
     }

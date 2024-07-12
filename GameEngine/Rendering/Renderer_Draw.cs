@@ -73,7 +73,6 @@ public partial class Renderer
         if (result == VkResult.ErrorOutOfDateKHR)
             myWantsResize = true;
 
-
         MyImGuiContext.RenderOtherWindows();
         
         myFrameNumber++;
