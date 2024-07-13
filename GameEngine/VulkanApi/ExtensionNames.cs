@@ -1,4 +1,4 @@
-﻿namespace Graphics;
+﻿namespace VulkanApi;
 
 public static class ExtensionNames
 {

@@ -1,7 +1,7 @@
-﻿global using static Graphics.Gpu;
+﻿global using static VulkanApi.Gpu;
 using System.Runtime.InteropServices;
 
-namespace Graphics;
+namespace VulkanApi;
 
 public unsafe class Gpu
 {
@@ -28,7 +28,7 @@ public unsafe class Gpu
         {
             VkPhysicalDevice physicalDevice = physicalDevices[i];
 
-            (MyGraphicsFamily, MyPresentFamily) = FindQueueFamilies(physicalDevice, WindowSurface.MyVkSurface);
+            (MyGraphicsFamily, MyPresentFamily) = FindQueueFamilies(physicalDevice, MainWindowSurface.MyVkSurface);
             
             if (IsDeviceSuitable(physicalDevice) == false)
                 continue;
@@ -59,9 +59,9 @@ public unsafe class Gpu
         if (MyPresentFamily == VK_QUEUE_FAMILY_IGNORED)
             return false;
 
-        Helpers.SwapChainSupportDetails swapChainSupport = Helpers.QuerySwapChainSupport(physicalDevice, WindowSurface.MyVkSurface);
+        Helpers.SwapChainSupportDetails swapChainSupport = Helpers.QuerySwapChainSupport(physicalDevice, MainWindowSurface.MyVkSurface);
 
-        WindowSurface.MySurfaceCapabilities = swapChainSupport.Capabilities;
+        MainWindowSurface.MySurfaceCapabilities = swapChainSupport.Capabilities;
         
         return !swapChainSupport.Formats.IsEmpty && !swapChainSupport.PresentModes.IsEmpty;
     }
@@ -112,7 +112,7 @@ public unsafe class Gpu
     
     public (uint graphicsFamily, uint presentFamily) FindQueueFamilies()
     {
-        return FindQueueFamilies(MyVkPhysicalDevice, WindowSurface.MyVkSurface);
+        return FindQueueFamilies(MyVkPhysicalDevice, MainWindowSurface.MyVkSurface);
     }
     
     public (uint graphicsFamily, uint presentFamily) FindQueueFamilies(VkSurfaceKHR aSurface)
@@ -154,7 +154,7 @@ public unsafe class Gpu
 
     public VkSurfaceFormatKHR GetSurfaceFormat(VkFormat aPreferredFormat, VkColorSpaceKHR aPreferredColorSpace)
     {
-        ReadOnlySpan<VkSurfaceFormatKHR> formats = vkGetPhysicalDeviceSurfaceFormatsKHR(MyVkPhysicalDevice, WindowSurface.MyVkSurface);
+        ReadOnlySpan<VkSurfaceFormatKHR> formats = vkGetPhysicalDeviceSurfaceFormatsKHR(MyVkPhysicalDevice, MainWindowSurface.MyVkSurface);
         
         foreach(VkSurfaceFormatKHR format in formats)
         {
@@ -167,7 +167,7 @@ public unsafe class Gpu
 
     public VkPresentModeKHR GetPresentMode(VkPresentModeKHR aPreferredPresentMode)
     {
-        ReadOnlySpan<VkPresentModeKHR> presentModes = vkGetPhysicalDeviceSurfacePresentModesKHR(MyVkPhysicalDevice, WindowSurface.MyVkSurface);
+        ReadOnlySpan<VkPresentModeKHR> presentModes = vkGetPhysicalDeviceSurfacePresentModesKHR(MyVkPhysicalDevice, MainWindowSurface.MyVkSurface);
         
         foreach(VkPresentModeKHR presentMode in presentModes)
         {

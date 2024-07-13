@@ -2,7 +2,7 @@ using System.Diagnostics;
 using Vortice.Vulkan;
 using static Vortice.Vulkan.Vulkan;
 
-namespace Graphics;
+namespace VulkanApi;
 
 public static unsafe class Helpers
 {

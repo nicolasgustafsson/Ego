@@ -3,7 +3,7 @@ using System.Drawing;
 using Vortice.Vulkan;
 using static Vortice.Vulkan.Vulkan;
 using System.Runtime.InteropServices;
-using Graphics;
+using VulkanApi;
 using Vortice.ShaderCompiler;
 
 namespace Rendering;
@@ -38,7 +38,7 @@ public partial class Renderer
 
         CreateMemoryAllocator();
         
-        CreateDrawImage();
+        CreateRenderImage();
 
         CreateImmediateCommandBuffer();
         
@@ -107,7 +107,7 @@ public partial class Renderer
         
         CreateSwapchain();
         CreateImageViews();
-        CreateDrawImage();
+        CreateRenderImage();
         UpdateRenderImageDescriptorSet();
     }
 
@@ -159,7 +159,7 @@ public partial class Renderer
         myCleanupQueue.Add(myGradientPipeline);
     }
 
-    private void CreateDrawImage()
+    private void CreateRenderImage()
     {
          myRenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(mySwapchain.MyExtents.width, mySwapchain.MyExtents.height, 1), false);
          myCleanupQueue.Add(myRenderImage);
@@ -236,13 +236,13 @@ public partial class Renderer
 
     private void PrintAllExtensions()
     {
-        VulkanApi.PrintAllAvailableInstanceExtensions();
+        ApiInstance.PrintAllAvailableInstanceExtensions();
         GpuInstance.PrintAllAvailableDeviceExtensions();
     }
 
     private void PickGpu()
     {
-        GpuInstance = VulkanApi.PickGpu();
+        GpuInstance = ApiInstance.PickGpu();
     }
 
     private void CreateRenderQueue()
@@ -253,14 +253,14 @@ public partial class Renderer
     private void CreateApi(Window aWindow)
     {
         new Api(aWindow, Defaults.InstanceExtensions);
-        myCleanupQueue.Add(VulkanApi);
+        myCleanupQueue.Add(ApiInstance);
     }
 
     private void CreateSurface(Window aWindow)
     {
-        WindowSurface = VulkanApi.CreateSurface(aWindow);
+        MainWindowSurface = ApiInstance.CreateSurface(aWindow);
         
-        myCleanupQueue.Add(WindowSurface);
+        myCleanupQueue.Add(MainWindowSurface);
     }
 
     private void CreateImageViews()
@@ -307,7 +307,7 @@ public partial class Renderer
         VkSurfaceFormatKHR surfaceFormat = GpuInstance.GetSurfaceFormat(PreferredFormat, PreferredColorSpace);
         VkPresentModeKHR presentMode = GpuInstance.GetPresentMode(PreferredPresentMode);
 
-        mySwapchain = new Swapchain(surfaceFormat, presentMode, WindowSurface.GetSwapbufferExtent(), WindowSurface);
+        mySwapchain = new Swapchain(surfaceFormat, presentMode, MainWindowSurface.GetSwapbufferExtent(), MainWindowSurface);
         myCleanupQueue.Add(mySwapchain);
     }
     

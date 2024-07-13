@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
-using Graphics;
+using VulkanApi;
 using Vortice.Vulkan;
-using Semaphore = Graphics.Semaphore;
+using Semaphore = VulkanApi.Semaphore;
 
 namespace Rendering;
 

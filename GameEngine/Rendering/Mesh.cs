@@ -1,8 +1,8 @@
-using Graphics;
+using VulkanApi;
 using ImageMagick;
 using SharpGLTF.Memory;
 using SharpGLTF.Schema2;
-using Image = Graphics.Image;
+using Image = VulkanApi.Image;
 
 namespace Rendering;
 

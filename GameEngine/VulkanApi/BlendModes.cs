@@ -1,6 +1,6 @@
 ﻿using System.IO.Enumeration;
 
-namespace Graphics;
+namespace VulkanApi;
 
 public enum BlendMode
 {

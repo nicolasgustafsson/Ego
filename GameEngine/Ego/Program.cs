@@ -22,7 +22,7 @@ public static class Program
             
             Debug(renderer, imGuiContext);
             
-            renderer.Draw();
+            renderer.Render();
             
             window.Update();
             Console.WriteLine($"FPS: {1d / stopwatch.Elapsed.TotalSeconds}");

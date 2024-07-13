@@ -1,4 +1,4 @@
-﻿namespace Graphics;
+﻿namespace VulkanApi;
 
 public unsafe class AllocatedRawBuffer : IGpuDestroyable
 {

@@ -1,5 +1,5 @@
-﻿global using static Graphics.LogicalDevice;
-namespace Graphics;
+﻿global using static VulkanApi.LogicalDevice;
+namespace VulkanApi;
 
 public unsafe class LogicalDevice : IGpuDestroyable
 {

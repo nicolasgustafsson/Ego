@@ -1,6 +1,6 @@
 using Vortice.ShaderCompiler;
 
-namespace Graphics;
+namespace VulkanApi;
 
 public unsafe class DescriptorAllocatorGrowable : IGpuDestroyable
 {

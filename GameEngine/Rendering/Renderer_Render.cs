@@ -1,6 +1,6 @@
 namespace Rendering;
 using Vortice.Vulkan;
-using Graphics;
+using VulkanApi;
 
 struct PushConstants
 {

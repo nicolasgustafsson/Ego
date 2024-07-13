@@ -1,10 +1,10 @@
-﻿global using static Graphics.LogicalDevice;
-global using static Graphics.Api;
-global using static Graphics.Surface;
-global using static Graphics.MemoryAllocator;
-global using static Graphics.Gpu;
+﻿global using static VulkanApi.LogicalDevice;
+global using static VulkanApi.Api;
+global using static VulkanApi.Surface;
+global using static VulkanApi.MemoryAllocator;
+global using static VulkanApi.Gpu;
 
-using Graphics;
+using VulkanApi;
 using ImGuiNET;
 using Vortice.Vulkan;
 
@@ -72,7 +72,7 @@ public partial class Renderer : IGpuImmediateSubmit
         myImmediateFence.Wait();
     }
     
-    public void Draw()
+    public void Render()
     {
         RenderInternal();
     }

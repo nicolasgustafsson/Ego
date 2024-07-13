@@ -1,4 +1,4 @@
-namespace Graphics;
+namespace VulkanApi;
 
 //Currently only one buffer per pool, this might change in the future
 public unsafe class CommandBuffer : IGpuDestroyable

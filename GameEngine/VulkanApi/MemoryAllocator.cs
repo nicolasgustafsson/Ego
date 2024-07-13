@@ -1,6 +1,6 @@
-global using static Graphics.MemoryAllocator;
+global using static VulkanApi.MemoryAllocator;
 using static Vortice.Vulkan.Vma;
-namespace Graphics;
+namespace VulkanApi;
 
 public unsafe class MemoryAllocator : IGpuDestroyable
 {
@@ -10,7 +10,7 @@ public unsafe class MemoryAllocator : IGpuDestroyable
     {
         VmaAllocatorCreateInfo createInfo = new();
         createInfo.physicalDevice = GpuInstance.MyVkPhysicalDevice;
-        createInfo.instance = VulkanApi.MyVkInstance;
+        createInfo.instance = ApiInstance.MyVkInstance;
         createInfo.device = Device.MyVkDevice;
         createInfo.flags = VmaAllocatorCreateFlags.BufferDeviceAddress;
         

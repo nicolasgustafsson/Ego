@@ -1,11 +1,11 @@
-﻿global using static Graphics.Api;
+﻿global using static VulkanApi.Api;
 global using static Vortice.Vulkan.Vulkan;
 global using Vortice.Vulkan;
 global using Utilities.Interop;
 global using Utilities.CommonExtensions;
 using System.Runtime.InteropServices;
 
-namespace Graphics;
+namespace VulkanApi;
 
 public enum DisplayServer
 {
@@ -16,7 +16,7 @@ public enum DisplayServer
 
 public unsafe class Api : IGpuDestroyable
 {
-    public static Api VulkanApi = null!;
+    public static Api ApiInstance = null!;
     public VkInstance MyVkInstance;
     private VkDebugUtilsMessengerEXT myDebugMessenger = VkDebugUtilsMessengerEXT.Null;
     
@@ -74,7 +74,7 @@ public unsafe class Api : IGpuDestroyable
 #if DEBUG
         vkCreateDebugUtilsMessengerEXT(MyVkInstance, &debugUtilsCreateInfo, null, out myDebugMessenger).CheckResult();
 #endif
-        VulkanApi = this;
+        ApiInstance = this;
     }
     
     public void Destroy()

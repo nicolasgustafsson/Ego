@@ -1,6 +1,4 @@
-using Vortice.ShaderCompiler;
-
-namespace Graphics;
+namespace VulkanApi;
 
 public unsafe class DescriptorWriter
 {

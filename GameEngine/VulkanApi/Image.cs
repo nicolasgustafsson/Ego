@@ -1,7 +1,7 @@
 using System.Numerics;
 using Rendering;
 
-namespace Graphics;
+namespace VulkanApi;
 
 public unsafe class Image : IGpuDestroyable
 {

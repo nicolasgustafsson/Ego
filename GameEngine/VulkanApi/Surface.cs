@@ -1,12 +1,12 @@
-﻿global using static Graphics.Surface;
-namespace Graphics;
+﻿global using static VulkanApi.Surface;
+namespace VulkanApi;
 
 public unsafe class Surface : IGpuDestroyable
 {
     private Window myWindow;
     public VkSurfaceKHR MyVkSurface;
     public VkSurfaceCapabilitiesKHR MySurfaceCapabilities;
-    public static Surface WindowSurface = null!;
+    public static Surface MainWindowSurface = null!;
 
     internal Surface(Api aApi, Window aWindow)
     {
@@ -79,6 +79,6 @@ public unsafe class Surface : IGpuDestroyable
     
     public void Destroy()
     {
-        vkDestroySurfaceKHR(VulkanApi.MyVkInstance, MyVkSurface);
+        vkDestroySurfaceKHR(ApiInstance.MyVkInstance, MyVkSurface);
     }
 }

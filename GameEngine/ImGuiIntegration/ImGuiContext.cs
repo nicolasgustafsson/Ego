@@ -6,12 +6,12 @@ using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using GLFW;
-using Graphics;
+using VulkanApi;
 using ImGuiNET;
 using Platform;
 using Utilities.Interop;
 using Vortice.Vulkan;
-using Image = Graphics.Image;
+using Image = VulkanApi.Image;
 using Vulkan = Vortice.Vulkan.Vulkan;
 
 namespace Rendering;
@@ -35,14 +35,14 @@ public class ImGuiContext : IGpuDestroyable
         public Surface? Surface = null;
         public Swapchain? Swapchain = null;
         public List<ImageView>? ImageViews = null;
-        public RenderQueue? DrawQueue = null;
+        public RenderQueue? RenderQueue = null;
 
         public WindowUserData(Window aWindow)
         {
             Window = aWindow;
         }
 
-        public Image? DrawImage { get; set; }
+        public Image? RenderImage { get; set; }
         public Image? DepthImage { get; set; }
         public List<FrameData>? FrameData { get; set; }
 
@@ -332,15 +332,15 @@ public class ImGuiContext : IGpuDestroyable
 
         LogicalDevice.Device.WaitUntilIdle();
         var userData = myWindowUserDatas[guid];
-        userData.Surface = Api.VulkanApi.CreateSurface(window);
+        userData.Surface = Api.ApiInstance.CreateSurface(window);
         VkSurfaceFormatKHR surfaceFormat = Gpu.GpuInstance.GetSurfaceFormat(VkFormat.B8G8R8A8Unorm, VkColorSpaceKHR.SrgbNonLinear);
         VkPresentModeKHR presentMode = Gpu.GpuInstance.GetPresentMode(VkPresentModeKHR.FifoRelaxed);
 
         userData.Swapchain = new Swapchain(surfaceFormat, presentMode, userData.Surface.GetSwapbufferExtent(), userData.Surface);
         userData.ImageViews = userData.Swapchain.CreateImageViews();
-        userData.DrawQueue = new RenderQueue();
+        userData.RenderQueue = new RenderQueue();
 
-        userData.DrawImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(userData.Swapchain.MyExtents.width, userData.Swapchain.MyExtents.height, 1), false);
+        userData.RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(userData.Swapchain.MyExtents.width, userData.Swapchain.MyExtents.height, 1), false);
         userData.DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(userData.Swapchain.MyExtents.width, userData.Swapchain.MyExtents.height, 1), false);
 
         userData.FrameData = new();
@@ -349,7 +349,7 @@ public class ImGuiContext : IGpuDestroyable
         {
             FrameData newFrame = new();
 
-            newFrame.MyCommandBuffer = new CommandBuffer(userData.DrawQueue);
+            newFrame.MyCommandBuffer = new CommandBuffer(userData.RenderQueue);
             newFrame.MyRenderFinishedSemaphore = new();
             newFrame.MyImageAvailableSemaphore = new();
             newFrame.MyRenderFence = new();
@@ -363,7 +363,7 @@ public class ImGuiContext : IGpuDestroyable
         LogicalDevice.Device.WaitUntilIdle();
 
         aUserData.Swapchain!.Destroy();
-        aUserData.DrawImage!.Destroy();
+        aUserData.RenderImage!.Destroy();
         aUserData.DepthImage!.Destroy();
 
         foreach (var imageView in aUserData.ImageViews!)
@@ -375,9 +375,9 @@ public class ImGuiContext : IGpuDestroyable
         VkPresentModeKHR presentMode = Gpu.GpuInstance.GetPresentMode(VkPresentModeKHR.Mailbox);
         aUserData.Swapchain = new Swapchain(surfaceFormat, presentMode, aUserData.Surface!.GetSwapbufferExtent(), aUserData.Surface!);
         aUserData.ImageViews = aUserData.Swapchain.CreateImageViews();
-        aUserData.DrawQueue = new RenderQueue();
+        aUserData.RenderQueue = new RenderQueue();
 
-        aUserData.DrawImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(aUserData.Swapchain.MyExtents.width, aUserData.Swapchain.MyExtents.height, 1), false);
+        aUserData.RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(aUserData.Swapchain.MyExtents.width, aUserData.Swapchain.MyExtents.height, 1), false);
         aUserData.DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(aUserData.Swapchain.MyExtents.width, aUserData.Swapchain.MyExtents.height, 1), false);
     }
 
@@ -400,7 +400,7 @@ public class ImGuiContext : IGpuDestroyable
                 foreach (var imageView in data.ImageViews)
                     imageView.Destroy();
 
-            data.DrawImage?.Destroy();
+            data.RenderImage?.Destroy();
             data.DepthImage?.Destroy();
             if (data.FrameData != null)
                 foreach (var frameData in data.FrameData)
@@ -694,7 +694,7 @@ public class ImGuiContext : IGpuDestroyable
                 foreach (var imageView in data.ImageViews)
                     imageView.Destroy();
 
-            data.DrawImage?.Destroy();
+            data.RenderImage?.Destroy();
             data.DepthImage?.Destroy();
             if (data.FrameData != null)
                 foreach (var frameData in data.FrameData)
@@ -745,24 +745,24 @@ public class ImGuiContext : IGpuDestroyable
             cmd.Reset();
             cmd.BeginRecording();
 
-            cmd.TransitionImage(viewportData.DrawImage!, VkImageLayout.General);
+            cmd.TransitionImage(viewportData.RenderImage!, VkImageLayout.General);
             cmd.TransitionImage(viewportData.DepthImage!, VkImageLayout.DepthAttachmentOptimal);
             
-            cmd.BeginRendering(viewportData.DrawImage!, viewportData.DepthImage!);
+            cmd.BeginRendering(viewportData.RenderImage!, viewportData.DepthImage!);
             RenderDrawData(cmd, viewport.DrawData);
             cmd.EndRendering();
-            cmd.TransitionImage(viewportData.DrawImage!, VkImageLayout.TransferSrcOptimal);
+            cmd.TransitionImage(viewportData.RenderImage!, VkImageLayout.TransferSrcOptimal);
             cmd.TransitionImage(currentSwapchainImage, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal);
 
-            cmd.Blit(viewportData.DrawImage!, currentSwapchainImage, viewportData.Swapchain.MyExtents);
+            cmd.Blit(viewportData.RenderImage!, currentSwapchainImage, viewportData.Swapchain.MyExtents);
             
             cmd.TransitionImage(currentSwapchainImage, VkImageLayout.TransferDstOptimal, VkImageLayout.PresentSrcKHR);
 
             cmd.EndRecording();
             
-            viewportData.DrawQueue!.Submit(cmd, viewportData.CurrentFrame.MyImageAvailableSemaphore, viewportData.CurrentFrame.MyRenderFinishedSemaphore, viewportData.CurrentFrame.MyRenderFence);
+            viewportData.RenderQueue!.Submit(cmd, viewportData.CurrentFrame.MyImageAvailableSemaphore, viewportData.CurrentFrame.MyRenderFinishedSemaphore, viewportData.CurrentFrame.MyRenderFence);
             
-            VkResult result = viewportData.DrawQueue.Present(viewportData.Swapchain, viewportData.CurrentFrame.MyRenderFinishedSemaphore, imageIndex);
+            VkResult result = viewportData.RenderQueue.Present(viewportData.Swapchain, viewportData.CurrentFrame.MyRenderFinishedSemaphore, imageIndex);
             
             if (result == VkResult.ErrorOutOfDateKHR)
                 viewportData.WantsResize = true;

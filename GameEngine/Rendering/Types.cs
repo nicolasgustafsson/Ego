@@ -6,7 +6,7 @@ using Utilities.Interop;
 using Vortice.ShaderCompiler;
 using Vortice.Vulkan;
 
-namespace Graphics;
+namespace VulkanApi;
 
 public struct Vertex
 {
@@ -49,13 +49,13 @@ public unsafe class MeshBuffers : IGpuDestroyable
             vertexCopy.dstOffset = 0;
             vertexCopy.srcOffset = 0;
             vertexCopy.size = vertexBufferSize;
-            Vulkan.vkCmdCopyBuffer(cmd.MyVkCommandBuffer, stagingRawBuffer.MyBuffer, MyVertexRawBuffer.MyBuffer, 1, &vertexCopy);
+            Vortice.Vulkan.Vulkan.vkCmdCopyBuffer(cmd.MyVkCommandBuffer, stagingRawBuffer.MyBuffer, MyVertexRawBuffer.MyBuffer, 1, &vertexCopy);
             
             VkBufferCopy indexCopy = new();
             indexCopy.dstOffset = 0;
             indexCopy.srcOffset = vertexBufferSize;
             indexCopy.size = indexBufferSize;
-            Vulkan.vkCmdCopyBuffer(cmd.MyVkCommandBuffer, stagingRawBuffer.MyBuffer, MyIndexRawBuffer.MyBuffer, 1, &indexCopy);
+            Vortice.Vulkan.Vulkan.vkCmdCopyBuffer(cmd.MyVkCommandBuffer, stagingRawBuffer.MyBuffer, MyIndexRawBuffer.MyBuffer, 1, &indexCopy);
         });
 
         stagingRawBuffer.Destroy();
