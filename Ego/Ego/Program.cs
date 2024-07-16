@@ -1,9 +1,14 @@
 ﻿using System.Diagnostics;
+using Ego;
 using ImGuiNET;
 using Rendering;
 
 public static class Program
 {
+    public static Renderer MyRenderer = null!;
+
+    public static Trunk myTree = new();
+    
     public static void Main()
     {
         Run();
@@ -11,25 +16,32 @@ public static class Program
 
     private static void Run()
     {
-        Window window = new Window("Game", new Vector2(1280, 720));
-        Renderer renderer = new(window);
-        ImGuiContext imGuiContext = new (renderer, window);
+        Window window = new Window("Game", new Vector2(1920, 1080));
+        MyRenderer = new(window);
+        
+        ImGuiContext imGuiContext = new (MyRenderer, window);
         
         Stopwatch stopwatch = new();
+
+        SinusoidalMovement child = new();
+        child.AddChild(new Camera());
+        myTree.AddChild(child);
+        
         while (!window.IsClosing)
         {
+            myTree.Update();
             stopwatch.Restart();
             
-            Debug(renderer, imGuiContext);
+            Debug(MyRenderer, imGuiContext);
             
-            renderer.Render();
+            MyRenderer.Render();
             
             window.Update();
             Console.WriteLine($"FPS: {1d / stopwatch.Elapsed.TotalSeconds}");
         }
 
         imGuiContext.Destroy();
-        renderer.Cleanup();
+        MyRenderer.Cleanup();
 
         window.Close();
     }

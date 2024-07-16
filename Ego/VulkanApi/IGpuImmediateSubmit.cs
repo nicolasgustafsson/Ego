@@ -2,5 +2,5 @@ namespace VulkanApi;
 
 public interface IGpuImmediateSubmit
 {
-    public void ImmediateSubmit(Action<CommandBuffer> aAction);
+    public void ImmediateSubmit(Action<CommandBufferHandle> aAction);
 }

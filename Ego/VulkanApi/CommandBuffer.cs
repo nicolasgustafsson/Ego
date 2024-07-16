@@ -27,19 +27,23 @@ public unsafe class CommandBuffer : IGpuDestroyable
         vkDestroyCommandPool(Device.MyVkDevice, MyVkCommandPool);
     }
     
-    public void Reset()
+    public CommandBufferHandle BeginRecording()
     {
+        return new CommandBufferHandle(this);
+    }
+}
+
+public unsafe class CommandBufferHandle : IDisposable
+{
+    private CommandBuffer myCommandBuffer;
+    public VkCommandBuffer MyVkCommandBuffer => myCommandBuffer.MyVkCommandBuffer;
+    
+    internal CommandBufferHandle(CommandBuffer aCommandBuffer)
+    {
+        myCommandBuffer = aCommandBuffer;
+        
         vkResetCommandBuffer(MyVkCommandBuffer, VkCommandBufferResetFlags.None).CheckResult();
-    }
-    
-    public void BeginRecording()
-    {
         vkBeginCommandBuffer(MyVkCommandBuffer, VkCommandBufferUsageFlags.OneTimeSubmit).CheckResult();
-    }
-    
-    public void EndRecording()
-    {
-        vkEndCommandBuffer(MyVkCommandBuffer);
     }
     
     public void TransitionImage(Image aImage, VkImageLayout aTo)
@@ -169,7 +173,7 @@ public unsafe class CommandBuffer : IGpuDestroyable
     
     public void BeginRendering(Image aDrawImage, Image aDepthImage)
     {
-        VkRenderingAttachmentInfo attachmentInfo = aDrawImage.GetAttachmentInfo(null, VkImageLayout.General);
+        VkRenderingAttachmentInfo attachmentInfo = aDrawImage.GetAttachmentInfo(null);
         VkRenderingAttachmentInfo depthAttachmentInfo = aDepthImage.GetDepthAttachmentInfo(VkImageLayout.DepthAttachmentOptimal);
         VkRenderingInfo renderingInfo = aDrawImage.GetRenderingInfo(new VkExtent2D(aDrawImage.MyExtent.width, aDrawImage.MyExtent.height), attachmentInfo, depthAttachmentInfo);
 
@@ -195,5 +199,10 @@ public unsafe class CommandBuffer : IGpuDestroyable
     public void EndRendering()
     {
         vkCmdEndRendering(MyVkCommandBuffer);
+    }
+
+    public void Dispose()
+    {
+        vkEndCommandBuffer(MyVkCommandBuffer);
     }
 }

@@ -529,7 +529,7 @@ public class ImGuiContext : IGpuDestroyable
         ImGui.UpdatePlatformWindows();
     }
     
-    public void Render(CommandBuffer cmd)
+    public void Render(CommandBufferHandle cmd)
     {
         RenderDrawData(cmd, ImGui.GetDrawData());
     }
@@ -549,7 +549,7 @@ public class ImGuiContext : IGpuDestroyable
     }
 
     List<ImDrawVertCorrected> corrected = new();
-    private unsafe void RenderDrawData(CommandBuffer cmd, ImDrawDataPtr aDrawDataPtr)
+    private unsafe void RenderDrawData(CommandBufferHandle cmd, ImDrawDataPtr aDrawDataPtr)
     {
         if (myOldIBuffers.Count > 5)
         {
@@ -576,8 +576,8 @@ public class ImGuiContext : IGpuDestroyable
         for(int i = 0; i < aDrawDataPtr.CmdListsCount; i++)
         {
             ref var cmdList = ref aDrawDataPtr.CmdLists[i];
-            ulong vtxChunkSize = (ulong) cmdList.VtxBuffer.Size * (ulong) sizeof(ImDrawVertCorrected);
-            ulong idxChunkSize = (ulong) cmdList.IdxBuffer.Size * sizeof(ushort);
+            ulong vertexChunkSize = (ulong) cmdList.VtxBuffer.Size * (ulong) sizeof(ImDrawVertCorrected);
+            ulong indexChunkSize = (ulong) cmdList.IdxBuffer.Size * sizeof(ushort);
 
             Span<ImDrawVert> vertices = new Span<ImDrawVert>(cmdList.VtxBuffer.Data.ToPointer(), cmdList.VtxBuffer.Size);
             corrected.Clear();
@@ -596,8 +596,8 @@ public class ImGuiContext : IGpuDestroyable
             vertexBuffer.SetWriteData(verticesReal, vtxOffset);
             indexBuffer.SetWriteData(indices, idxOffset);
 
-            vtxOffset += vtxChunkSize;
-            idxOffset += idxChunkSize;
+            vtxOffset += vertexChunkSize;
+            idxOffset += indexChunkSize;
         }
         
 
@@ -740,27 +740,24 @@ public class ImGuiContext : IGpuDestroyable
             
             VkImage currentSwapchainImage = viewportData.Swapchain!.MyImages[(int)imageIndex];
             
-            CommandBuffer cmd = viewportData.CurrentFrame.MyCommandBuffer;
+            using (CommandBufferHandle cmd = viewportData.CurrentFrame.MyCommandBuffer.BeginRecording())
+            {
+                cmd.TransitionImage(viewportData.RenderImage!, VkImageLayout.General);
+                cmd.TransitionImage(viewportData.DepthImage!, VkImageLayout.DepthAttachmentOptimal);
+                
+                cmd.BeginRendering(viewportData.RenderImage!, viewportData.DepthImage!);
+                RenderDrawData(cmd, viewport.DrawData);
+                cmd.EndRendering();
+                cmd.TransitionImage(viewportData.RenderImage!, VkImageLayout.TransferSrcOptimal);
+                cmd.TransitionImage(currentSwapchainImage, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal);
 
-            cmd.Reset();
-            cmd.BeginRecording();
+                cmd.Blit(viewportData.RenderImage!, currentSwapchainImage, viewportData.Swapchain.MyExtents);
+                
+                cmd.TransitionImage(currentSwapchainImage, VkImageLayout.TransferDstOptimal, VkImageLayout.PresentSrcKHR);
+            }
 
-            cmd.TransitionImage(viewportData.RenderImage!, VkImageLayout.General);
-            cmd.TransitionImage(viewportData.DepthImage!, VkImageLayout.DepthAttachmentOptimal);
             
-            cmd.BeginRendering(viewportData.RenderImage!, viewportData.DepthImage!);
-            RenderDrawData(cmd, viewport.DrawData);
-            cmd.EndRendering();
-            cmd.TransitionImage(viewportData.RenderImage!, VkImageLayout.TransferSrcOptimal);
-            cmd.TransitionImage(currentSwapchainImage, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal);
-
-            cmd.Blit(viewportData.RenderImage!, currentSwapchainImage, viewportData.Swapchain.MyExtents);
-            
-            cmd.TransitionImage(currentSwapchainImage, VkImageLayout.TransferDstOptimal, VkImageLayout.PresentSrcKHR);
-
-            cmd.EndRecording();
-            
-            viewportData.RenderQueue!.Submit(cmd, viewportData.CurrentFrame.MyImageAvailableSemaphore, viewportData.CurrentFrame.MyRenderFinishedSemaphore, viewportData.CurrentFrame.MyRenderFence);
+            viewportData.RenderQueue!.Submit(viewportData.CurrentFrame.MyCommandBuffer, viewportData.CurrentFrame.MyImageAvailableSemaphore, viewportData.CurrentFrame.MyRenderFinishedSemaphore, viewportData.CurrentFrame.MyRenderFence);
             
             VkResult result = viewportData.RenderQueue.Present(viewportData.Swapchain, viewportData.CurrentFrame.MyRenderFinishedSemaphore, imageIndex);
             

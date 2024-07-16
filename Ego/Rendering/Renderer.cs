@@ -6,6 +6,7 @@ global using static VulkanApi.Gpu;
 
 using VulkanApi;
 using ImGuiNET;
+using Vortice.ShaderCompiler;
 using Vortice.Vulkan;
 
 namespace Rendering;
@@ -31,7 +32,7 @@ public partial class Renderer : IGpuImmediateSubmit
     private VkDescriptorSetLayout mySingleTextureLayout;
 
     private readonly List<FrameData> myFrameData = new() { };
-    private FrameData myCurrentFrame => myFrameData[(int)(myFrameNumber % FrameOverlap)];
+    private FrameData myCurrentFrame => myFrameData[(int)(myFrameCount % FrameOverlap)];
 
     private DeletionQueue myCleanupQueue = new();
 
@@ -49,10 +50,10 @@ public partial class Renderer : IGpuImmediateSubmit
     private SceneData mySceneData = new SceneData();
     private VkDescriptorSetLayout mySceneDataLayout;
     
-    private ulong myFrameNumber = 0;
+    private ulong myFrameCount = 0;
     private bool myWantsResize = false;
     
-    public Action<CommandBuffer> ERenderImgui = delegate {};
+    public Action<CommandBufferHandle> ERenderImgui = delegate {};
     public Action EPostRender = delegate {};
 
     public Renderer(Window aWindow)
@@ -60,24 +61,31 @@ public partial class Renderer : IGpuImmediateSubmit
         Init(aWindow);
     }
     
-    public void ImmediateSubmit(Action<CommandBuffer> aAction)
+    public void ImmediateSubmit(Action<CommandBufferHandle> aAction)
     {
         myImmediateFence.Reset();
-        myImmediateCommandBuffer.Reset();
 
-        myImmediateCommandBuffer.BeginRecording();
-        aAction(myImmediateCommandBuffer);
-        myImmediateCommandBuffer.EndRecording();
+        using (var handle = myImmediateCommandBuffer.BeginRecording())
+            aAction(handle);
+        
         myRenderQueue.Submit(myImmediateCommandBuffer, myImmediateFence);
         myImmediateFence.Wait();
     }
     
     public void Render()
     {
-        RenderInternal();
+        RenderResult result = RenderInternal();
+        
+        if (result == RenderResult.ResizeNeeded)
+            Resize();
     }
 
     public void Debug()
     {
+    }
+
+    public void SetCameraView(Matrix4x4 aCameraView)
+    {
+        mySceneData.View = aCameraView;
     }
 }

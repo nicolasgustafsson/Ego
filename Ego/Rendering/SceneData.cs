@@ -4,10 +4,19 @@ namespace Rendering;
 
 public struct SceneData
 {
-    public Matrix4x4 View;
+    public Matrix4x4 View = Matrix4x4.Identity;
     public Matrix4x4 Projection;
     public Matrix4x4 ViewProjection;
     public Vector4 AmbientColor;
     public Vector4 SunlightDirection;
     public Vector4 SunlightColor;
+
+    public SceneData()
+    {
+        Projection = default;
+        ViewProjection = default;
+        AmbientColor = default;
+        SunlightDirection = default;
+        SunlightColor = default;
+    }
 }
