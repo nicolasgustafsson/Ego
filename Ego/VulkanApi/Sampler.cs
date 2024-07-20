@@ -2,7 +2,7 @@
 
 public unsafe class Sampler : IGpuDestroyable
 {
-    public VkSampler MyVkSampler;
+    public VkSampler VkSampler;
     
     public Sampler(VkFilter aFilter)
     {
@@ -10,11 +10,11 @@ public unsafe class Sampler : IGpuDestroyable
         samplerCreateInfo.minFilter = aFilter;
         samplerCreateInfo.magFilter = aFilter;
 
-        vkCreateSampler(Device.MyVkDevice, &samplerCreateInfo, null, out MyVkSampler).CheckResult();
+        vkCreateSampler(Device.VkDevice, &samplerCreateInfo, null, out VkSampler).CheckResult();
     }
     
     public void Destroy()
     {
-        vkDestroySampler(Device.MyVkDevice, MyVkSampler);
+        vkDestroySampler(Device.VkDevice, VkSampler);
     }
 }

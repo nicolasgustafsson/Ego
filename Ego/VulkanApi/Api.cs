@@ -17,8 +17,8 @@ public enum DisplayServer
 public unsafe class Api : IGpuDestroyable
 {
     public static Api ApiInstance = null!;
-    public VkInstance MyVkInstance;
-    private VkDebugUtilsMessengerEXT myDebugMessenger = VkDebugUtilsMessengerEXT.Null;
+    public VkInstance VkInstance;
+    private VkDebugUtilsMessengerEXT DebugMessenger = VkDebugUtilsMessengerEXT.Null;
     
     public Api(Window aWindow, List<string> aInstanceExtensions)
     {
@@ -67,20 +67,20 @@ public unsafe class Api : IGpuDestroyable
         info.enabledLayerCount = 0;
         info.pNext = null;
 #endif
-        vkCreateInstance(&info, null, out MyVkInstance).CheckResult();
-        vkLoadInstanceOnly(MyVkInstance);
+        vkCreateInstance(&info, null, out VkInstance).CheckResult();
+        vkLoadInstanceOnly(VkInstance);
         
         
 #if DEBUG
-        vkCreateDebugUtilsMessengerEXT(MyVkInstance, &debugUtilsCreateInfo, null, out myDebugMessenger).CheckResult();
+        vkCreateDebugUtilsMessengerEXT(VkInstance, &debugUtilsCreateInfo, null, out DebugMessenger).CheckResult();
 #endif
         ApiInstance = this;
     }
     
     public void Destroy()
     {
-        vkDestroyDebugUtilsMessengerEXT(MyVkInstance, myDebugMessenger);
-        vkDestroyInstance(MyVkInstance);
+        vkDestroyDebugUtilsMessengerEXT(VkInstance, DebugMessenger);
+        vkDestroyInstance(VkInstance);
     }
     
     [UnmanagedCallersOnly]

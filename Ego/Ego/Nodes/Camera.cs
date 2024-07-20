@@ -1,15 +1,31 @@
-﻿using Rendering;
+﻿using Ego.Systems;
+using ImGuiNET;
+using Rendering;
 using Quaternion = System.Numerics.Quaternion;
 
 namespace Ego;
 
 public class Camera : Node3D
 {
-    public override void Update()
+    public Camera()
     {
-        LocalRotation *= Quaternion.CreateFromYawPitchRoll(0f, 0f, 0.01f);
-        Program.MyRenderer.SetCameraView(WorldMatrix);
+        Program.Context.EUpdate += Update;
+        Program.Context.Debug.EDebug += Debug;
+    }
+    
+    public void Update()
+    {
+        //LocalRotation *= Quaternion.CreateFroawPitchRoll(0f, 0f, 0.01f);
+        Program.Context.Renderer.SetCameraView(WorldMatrix);
+    }
+    
+    public void Debug()
+    {
+        ImGui.Begin("Hello there");
 
-        base.Update();
+        var position = LocalPosition;
+        ImGui.SliderFloat3("Position", ref position, -10f, 10f);
+        LocalPosition = position;
+        ImGui.End();
     }
 }

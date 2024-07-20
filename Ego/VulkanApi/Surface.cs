@@ -3,14 +3,14 @@ namespace VulkanApi;
 
 public unsafe class Surface : IGpuDestroyable
 {
-    private Window myWindow;
-    public VkSurfaceKHR MyVkSurface;
-    public VkSurfaceCapabilitiesKHR MySurfaceCapabilities;
+    private Window Window;
+    public VkSurfaceKHR VkSurface;
+    public VkSurfaceCapabilitiesKHR SurfaceCapabilities;
     public static Surface MainWindowSurface = null!;
 
     internal Surface(Api aApi, Window aWindow)
     {
-        myWindow = aWindow;
+        Window = aWindow;
         
         switch (Helpers.GetDisplayServer())
         {
@@ -22,9 +22,9 @@ public unsafe class Surface : IGpuDestroyable
                     hinstance = System.Diagnostics.Process.GetCurrentProcess().Handle,
                     
                 };
-                fixed (VkSurfaceKHR* surfacePtr = &MyVkSurface)
+                fixed (VkSurfaceKHR* surfacePtr = &VkSurface)
                 {
-                    vkCreateWin32SurfaceKHR(aApi.MyVkInstance, &createInfo, null, surfacePtr).CheckResult();
+                    vkCreateWin32SurfaceKHR(aApi.VkInstance, &createInfo, null, surfacePtr).CheckResult();
                 }
                 break;
             }
@@ -35,9 +35,9 @@ public unsafe class Surface : IGpuDestroyable
                     dpy = aWindow.X11Display,
                     window = (UIntPtr)aWindow.X11Window
                 };
-                fixed (VkSurfaceKHR* surfacePtr = &MyVkSurface)
+                fixed (VkSurfaceKHR* surfacePtr = &VkSurface)
                 {
-                    vkCreateXlibSurfaceKHR(aApi.MyVkInstance, &createInfo, null, surfacePtr).CheckResult();
+                    vkCreateXlibSurfaceKHR(aApi.VkInstance, &createInfo, null, surfacePtr).CheckResult();
                 }
                 break;
             }
@@ -48,9 +48,9 @@ public unsafe class Surface : IGpuDestroyable
                     display = aWindow.WaylandDisplay,
                     surface = aWindow.WaylandWindow
                 };
-                fixed (VkSurfaceKHR* surfacePtr = &MyVkSurface)
+                fixed (VkSurfaceKHR* surfacePtr = &VkSurface)
                 {
-                    vkCreateWaylandSurfaceKHR(aApi.MyVkInstance, &createInfo, null, surfacePtr).CheckResult();
+                    vkCreateWaylandSurfaceKHR(aApi.VkInstance, &createInfo, null, surfacePtr).CheckResult();
                 }
                 break;
             }
@@ -61,24 +61,24 @@ public unsafe class Surface : IGpuDestroyable
     
     public VkExtent2D GetSwapbufferExtent()
     {
-        Helpers.SwapChainSupportDetails swapChainSupport = Helpers.QuerySwapChainSupport(GpuInstance.MyVkPhysicalDevice, MyVkSurface);
+        Helpers.SwapChainSupportDetails swapChainSupport = Helpers.QuerySwapChainSupport(GpuInstance.VkPhysicalDevice, VkSurface);
 
-        MySurfaceCapabilities = swapChainSupport.Capabilities;
+        SurfaceCapabilities = swapChainSupport.Capabilities;
         
-        (int width, int height) size = myWindow.GetFramebufferSize();
+        (int width, int height) size = Window.GetFramebufferSize();
 
         VkExtent2D extent;
         extent.width = (uint)size.width;
         extent.height = (uint)size.height;
 
-        extent.width = extent.width.Within(MySurfaceCapabilities.minImageExtent.width, MySurfaceCapabilities.maxImageExtent.width);
-        extent.height = extent.height.Within(MySurfaceCapabilities.minImageExtent.height, MySurfaceCapabilities.maxImageExtent.height);
+        extent.width = extent.width.Within(SurfaceCapabilities.minImageExtent.width, SurfaceCapabilities.maxImageExtent.width);
+        extent.height = extent.height.Within(SurfaceCapabilities.minImageExtent.height, SurfaceCapabilities.maxImageExtent.height);
 
         return extent;
     }
     
     public void Destroy()
     {
-        vkDestroySurfaceKHR(ApiInstance.MyVkInstance, MyVkSurface);
+        vkDestroySurfaceKHR(ApiInstance.VkInstance, VkSurface);
     }
 }

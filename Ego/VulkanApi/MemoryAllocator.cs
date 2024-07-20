@@ -5,24 +5,24 @@ namespace VulkanApi;
 public unsafe class MemoryAllocator : IGpuDestroyable
 {
     public static MemoryAllocator GlobalAllocator = null!;
-    public VmaAllocator myVmaAllocator;
+    public VmaAllocator VmaAllocator;
     public MemoryAllocator()
     {
         VmaAllocatorCreateInfo createInfo = new();
-        createInfo.physicalDevice = GpuInstance.MyVkPhysicalDevice;
-        createInfo.instance = ApiInstance.MyVkInstance;
-        createInfo.device = Device.MyVkDevice;
+        createInfo.physicalDevice = GpuInstance.VkPhysicalDevice;
+        createInfo.instance = ApiInstance.VkInstance;
+        createInfo.device = Device.VkDevice;
         createInfo.flags = VmaAllocatorCreateFlags.BufferDeviceAddress;
         
         createInfo.vulkanApiVersion = VkVersion.Version_1_3;
 
-        vmaCreateAllocator(&createInfo, out myVmaAllocator).CheckResult();
+        vmaCreateAllocator(&createInfo, out VmaAllocator).CheckResult();
         
         GlobalAllocator = this;
     }
     
     public void Destroy()
     {
-        vmaDestroyAllocator(myVmaAllocator);
+        vmaDestroyAllocator(VmaAllocator);
     }
 }

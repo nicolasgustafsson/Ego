@@ -5,16 +5,16 @@ namespace VulkanApi;
 
 public unsafe class Gpu
 {
-    public VkPhysicalDevice MyVkPhysicalDevice;
+    public VkPhysicalDevice VkPhysicalDevice;
     public static Gpu GpuInstance = null!;
 
-    public uint MyGraphicsFamily;
-    public uint MyPresentFamily;
+    public uint GraphicsFamily;
+    public uint PresentFamily;
     
     internal Gpu(Api aApi)
     {
         uint physicalDevicesCount = 0;
-        vkEnumeratePhysicalDevices(aApi.MyVkInstance, &physicalDevicesCount, null).CheckResult();
+        vkEnumeratePhysicalDevices(aApi.VkInstance, &physicalDevicesCount, null).CheckResult();
 
         if (physicalDevicesCount == 0)
         {
@@ -22,13 +22,13 @@ public unsafe class Gpu
         }
 
         VkPhysicalDevice* physicalDevices = stackalloc VkPhysicalDevice[(int)physicalDevicesCount];
-        vkEnumeratePhysicalDevices(aApi.MyVkInstance, &physicalDevicesCount, physicalDevices).CheckResult();
+        vkEnumeratePhysicalDevices(aApi.VkInstance, &physicalDevicesCount, physicalDevices).CheckResult();
 
         for (int i = 0; i < physicalDevicesCount; i++)
         {
             VkPhysicalDevice physicalDevice = physicalDevices[i];
 
-            (MyGraphicsFamily, MyPresentFamily) = FindQueueFamilies(physicalDevice, MainWindowSurface.MyVkSurface);
+            (GraphicsFamily, PresentFamily) = FindQueueFamilies(physicalDevice, MainWindowSurface.VkSurface);
             
             if (IsDeviceSuitable(physicalDevice) == false)
                 continue;
@@ -36,9 +36,9 @@ public unsafe class Gpu
             vkGetPhysicalDeviceProperties(physicalDevice, out VkPhysicalDeviceProperties checkProperties);
             bool discrete = checkProperties.deviceType == VkPhysicalDeviceType.DiscreteGpu;
 
-            if (discrete || MyVkPhysicalDevice.IsNull)
+            if (discrete || VkPhysicalDevice.IsNull)
             {
-                MyVkPhysicalDevice = physicalDevice;
+                VkPhysicalDevice = physicalDevice;
                 if (discrete)
                 {
                     // Prioritize discrete GPU
@@ -53,15 +53,15 @@ public unsafe class Gpu
     
     private bool IsDeviceSuitable(VkPhysicalDevice physicalDevice)
     {
-        if (MyGraphicsFamily == VK_QUEUE_FAMILY_IGNORED)
+        if (GraphicsFamily == VK_QUEUE_FAMILY_IGNORED)
             return false;
 
-        if (MyPresentFamily == VK_QUEUE_FAMILY_IGNORED)
+        if (PresentFamily == VK_QUEUE_FAMILY_IGNORED)
             return false;
 
-        Helpers.SwapChainSupportDetails swapChainSupport = Helpers.QuerySwapChainSupport(physicalDevice, MainWindowSurface.MyVkSurface);
+        Helpers.SwapChainSupportDetails swapChainSupport = Helpers.QuerySwapChainSupport(physicalDevice, MainWindowSurface.VkSurface);
 
-        MainWindowSurface.MySurfaceCapabilities = swapChainSupport.Capabilities;
+        MainWindowSurface.SurfaceCapabilities = swapChainSupport.Capabilities;
         
         return !swapChainSupport.Formats.IsEmpty && !swapChainSupport.PresentModes.IsEmpty;
     }
@@ -73,7 +73,7 @@ public unsafe class Gpu
         
         float queuePriority = 1f;
         VkDeviceQueueCreateInfo deviceQueueCreateInfo = new();
-        deviceQueueCreateInfo.queueFamilyIndex = MyGraphicsFamily;
+        deviceQueueCreateInfo.queueFamilyIndex = GraphicsFamily;
         deviceQueueCreateInfo.queueCount = 1;
         deviceQueueCreateInfo.pQueuePriorities = &queuePriority;
 
@@ -103,7 +103,7 @@ public unsafe class Gpu
         deviceCreateInfo.enabledExtensionCount = (uint)deviceExtensions.Length;
         deviceCreateInfo.ppEnabledExtensionNames = (byte**)extensionsToBytesArray;
 
-        vkCreateDevice(MyVkPhysicalDevice, &deviceCreateInfo, null, out logicalDevice.MyVkDevice).CheckResult();
+        vkCreateDevice(VkPhysicalDevice, &deviceCreateInfo, null, out logicalDevice.VkDevice).CheckResult();
 
         logicalDevice.LoadFunctions();
 
@@ -112,12 +112,12 @@ public unsafe class Gpu
     
     public (uint graphicsFamily, uint presentFamily) FindQueueFamilies()
     {
-        return FindQueueFamilies(MyVkPhysicalDevice, MainWindowSurface.MyVkSurface);
+        return FindQueueFamilies(VkPhysicalDevice, MainWindowSurface.VkSurface);
     }
     
     public (uint graphicsFamily, uint presentFamily) FindQueueFamilies(VkSurfaceKHR aSurface)
     {
-        return FindQueueFamilies(MyVkPhysicalDevice, aSurface);
+        return FindQueueFamilies(VkPhysicalDevice, aSurface);
     }
     
     public (uint graphicsFamily, uint presentFamily) FindQueueFamilies(VkPhysicalDevice aDevice, VkSurfaceKHR WindowSurface)
@@ -154,7 +154,7 @@ public unsafe class Gpu
 
     public VkSurfaceFormatKHR GetSurfaceFormat(VkFormat aPreferredFormat, VkColorSpaceKHR aPreferredColorSpace)
     {
-        ReadOnlySpan<VkSurfaceFormatKHR> formats = vkGetPhysicalDeviceSurfaceFormatsKHR(MyVkPhysicalDevice, MainWindowSurface.MyVkSurface);
+        ReadOnlySpan<VkSurfaceFormatKHR> formats = vkGetPhysicalDeviceSurfaceFormatsKHR(VkPhysicalDevice, MainWindowSurface.VkSurface);
         
         foreach(VkSurfaceFormatKHR format in formats)
         {
@@ -167,7 +167,7 @@ public unsafe class Gpu
 
     public VkPresentModeKHR GetPresentMode(VkPresentModeKHR aPreferredPresentMode)
     {
-        ReadOnlySpan<VkPresentModeKHR> presentModes = vkGetPhysicalDeviceSurfacePresentModesKHR(MyVkPhysicalDevice, MainWindowSurface.MyVkSurface);
+        ReadOnlySpan<VkPresentModeKHR> presentModes = vkGetPhysicalDeviceSurfacePresentModesKHR(VkPhysicalDevice, MainWindowSurface.VkSurface);
         
         foreach(VkPresentModeKHR presentMode in presentModes)
         {
@@ -182,9 +182,9 @@ public unsafe class Gpu
     {
         Console.WriteLine("--- AVAILABLE DEVICE EXTENSIONS ---");
         uint extensionCount = 0;
-        vkEnumerateDeviceExtensionProperties(MyVkPhysicalDevice, null, &extensionCount, null).CheckResult();
+        vkEnumerateDeviceExtensionProperties(VkPhysicalDevice, null, &extensionCount, null).CheckResult();
         VkExtensionProperties* extensions = stackalloc VkExtensionProperties[(int)extensionCount];
-        vkEnumerateDeviceExtensionProperties(MyVkPhysicalDevice, null, &extensionCount, extensions).CheckResult();
+        vkEnumerateDeviceExtensionProperties(VkPhysicalDevice, null, &extensionCount, extensions).CheckResult();
 
         for (int i = 0; i < extensionCount; i++)
         {

@@ -2,9 +2,9 @@
 
 public unsafe class AllocatedRawBuffer : IGpuDestroyable
 {
-    public VkBuffer MyBuffer;
-    public VmaAllocation MyAllocation;
-    public VmaAllocationInfo MyAllocationInfo;
+    public VkBuffer Buffer;
+    public VmaAllocation Allocation;
+    public VmaAllocationInfo AllocationInfo;
 
     public AllocatedRawBuffer(ulong aSize, VkBufferUsageFlags aBufferUsageFlags, VmaMemoryUsage aMemoryUsage)
     {
@@ -17,30 +17,30 @@ public unsafe class AllocatedRawBuffer : IGpuDestroyable
         allocationInfo.usage = aMemoryUsage;
         allocationInfo.flags = VmaAllocationCreateFlags.Mapped;
 
-        Vma.vmaCreateBuffer(GlobalAllocator.myVmaAllocator, &bufferCreateInfo, &allocationInfo, out MyBuffer, out MyAllocation, out MyAllocationInfo).CheckResult();
+        Vma.vmaCreateBuffer(GlobalAllocator.VmaAllocator, &bufferCreateInfo, &allocationInfo, out Buffer, out Allocation, out AllocationInfo).CheckResult();
     }
 
     public void Destroy()
     {
-        Vma.vmaDestroyBuffer(GlobalAllocator.myVmaAllocator, MyBuffer, MyAllocation);
+        Vma.vmaDestroyBuffer(GlobalAllocator.VmaAllocator, Buffer, Allocation);
     }
     
     public ulong GetDeviceAddress()
     {
         VkBufferDeviceAddressInfo deviceAddressInfo = new();
-        deviceAddressInfo.buffer = MyBuffer; 
+        deviceAddressInfo.buffer = Buffer; 
 
-        return vkGetBufferDeviceAddress(Device.MyVkDevice, &deviceAddressInfo);
+        return vkGetBufferDeviceAddress(Device.VkDevice, &deviceAddressInfo);
     }
     
     public void Map(MemoryAllocator aAllocator, byte** aData)
     {
-        Vma.vmaMapMemory(aAllocator.myVmaAllocator, MyAllocation, (void**)aData).CheckResult();
+        Vma.vmaMapMemory(aAllocator.VmaAllocator, Allocation, (void**)aData).CheckResult();
     }
     
     public void UnMap(MemoryAllocator aAllocator)
     {
-        Vma.vmaUnmapMemory(aAllocator.myVmaAllocator, MyAllocation);
+        Vma.vmaUnmapMemory(aAllocator.VmaAllocator, Allocation);
     }
 }
 
@@ -53,14 +53,14 @@ public unsafe class AllocatedBuffer<T> : AllocatedRawBuffer where T : unmanaged
     
     public void SetWriteData(T aValue)
     {
-        byte* mappedData = (byte*)MyAllocationInfo.pMappedData;
+        byte* mappedData = (byte*)AllocationInfo.pMappedData;
         Span<T> destination = new(mappedData, sizeof(T));
         destination[0] = aValue;
     }
     
     public void SetWriteData(Span<T> aValue, ulong aOffset = 0)
     {
-        byte* mappedData = (byte*)MyAllocationInfo.pMappedData;
+        byte* mappedData = (byte*)AllocationInfo.pMappedData;
         Span<T> destination = new(mappedData + aOffset, aValue.Length);
 
         aValue.CopyTo(destination);

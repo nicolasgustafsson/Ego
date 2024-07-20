@@ -7,12 +7,12 @@ namespace KHRRTXHelloTriangle
     {
         const uint WIDTH = 800;
         const uint HEIGHT = 600;
-        private NativeWindow myWindow;
+        private NativeWindow Window;
 
         private void InitWindow()
         {
             
-            myWindow = new NativeWindow(800, 600, "Hello World!");
+            Window = new NativeWindow(800, 600, "Hello World!");
             /*window = new Form();
             window.Text = "Vulkan Triangle Rasterization";
             window.Size = new System.Drawing.Size((int)WIDTH, (int)HEIGHT);
@@ -51,9 +51,9 @@ namespace KHRRTXHelloTriangle
 
         private void MainLoop()
         {
-            while (!myWindow.IsClosing)
+            while (!Window.IsClosing)
             {
-                myWindow.SwapBuffers();
+                Window.SwapBuffers();
                 Glfw.PollEvents();
                 DrawFrame();
             }

@@ -3,28 +3,28 @@ namespace VulkanApi;
 //Currently only one buffer per pool, this might change in the future
 public unsafe class CommandBuffer : IGpuDestroyable
 {
-    public VkCommandPool MyVkCommandPool;
-    public VkCommandBuffer MyVkCommandBuffer;
+    public VkCommandPool VkCommandPool;
+    public VkCommandBuffer VkCommandBuffer;
     
     public CommandBuffer(Queue aQueue)
     {
         VkCommandPoolCreateInfo createInfo = new();
         createInfo.flags = VkCommandPoolCreateFlags.ResetCommandBuffer;
-        createInfo.queueFamilyIndex = aQueue.MyQueueFamilyIndex;
+        createInfo.queueFamilyIndex = aQueue.QueueFamilyIndex;
         
-        vkCreateCommandPool(Device.MyVkDevice, &createInfo, null, out MyVkCommandPool).CheckResult();
+        vkCreateCommandPool(Device.VkDevice, &createInfo, null, out VkCommandPool).CheckResult();
 
         VkCommandBufferAllocateInfo allocateInfo = new();
-        allocateInfo.commandPool = MyVkCommandPool;
+        allocateInfo.commandPool = VkCommandPool;
         allocateInfo.commandBufferCount = 1;
         allocateInfo.level = VkCommandBufferLevel.Primary;
 
-        vkAllocateCommandBuffer(Device.MyVkDevice, &allocateInfo, out MyVkCommandBuffer).CheckResult();
+        vkAllocateCommandBuffer(Device.VkDevice, &allocateInfo, out VkCommandBuffer).CheckResult();
     }
     
     public void Destroy()
     {
-        vkDestroyCommandPool(Device.MyVkDevice, MyVkCommandPool);
+        vkDestroyCommandPool(Device.VkDevice, VkCommandPool);
     }
     
     public CommandBufferHandle BeginRecording()
@@ -35,22 +35,22 @@ public unsafe class CommandBuffer : IGpuDestroyable
 
 public unsafe class CommandBufferHandle : IDisposable
 {
-    private CommandBuffer myCommandBuffer;
-    public VkCommandBuffer MyVkCommandBuffer => myCommandBuffer.MyVkCommandBuffer;
+    private CommandBuffer CommandBuffer;
+    public VkCommandBuffer VkCommandBuffer => CommandBuffer.VkCommandBuffer;
     
     internal CommandBufferHandle(CommandBuffer aCommandBuffer)
     {
-        myCommandBuffer = aCommandBuffer;
+        CommandBuffer = aCommandBuffer;
         
-        vkResetCommandBuffer(MyVkCommandBuffer, VkCommandBufferResetFlags.None).CheckResult();
-        vkBeginCommandBuffer(MyVkCommandBuffer, VkCommandBufferUsageFlags.OneTimeSubmit).CheckResult();
+        vkResetCommandBuffer(VkCommandBuffer, VkCommandBufferResetFlags.None).CheckResult();
+        vkBeginCommandBuffer(VkCommandBuffer, VkCommandBufferUsageFlags.OneTimeSubmit).CheckResult();
     }
     
     public void TransitionImage(Image aImage, VkImageLayout aTo)
     {
-        TransitionImage(aImage.MyVkImage, aImage.MyCurrentLayout, aTo);
+        TransitionImage(aImage.VkImage, aImage.CurrentLayout, aTo);
 
-        aImage.MyCurrentLayout = aTo;
+        aImage.CurrentLayout = aTo;
     }
     
     public void TransitionImage(VkImage aImage, VkImageLayout aFrom, VkImageLayout aTo)
@@ -74,20 +74,20 @@ public unsafe class CommandBufferHandle : IDisposable
         depInfo.imageMemoryBarrierCount = 1;
         depInfo.pImageMemoryBarriers = &imageBarrier;
 
-        vkCmdPipelineBarrier2(MyVkCommandBuffer, &depInfo);
+        vkCmdPipelineBarrier2(VkCommandBuffer, &depInfo);
     }
     
     public void Blit(Image aFrom, Image aTo)
     {
-        Blit(aFrom, aTo.MyVkImage, new VkExtent2D(aTo.MyExtent.width, aTo.MyExtent.height));
+        Blit(aFrom, aTo.VkImage, new VkExtent2D(aTo.Extent.width, aTo.Extent.height));
     }
     
     public void Blit(Image aFrom, VkImage aTo, VkExtent2D aExtent)
     {
         VkImageBlit2 blitRegion = new();
 
-        blitRegion.srcOffsets[1].x = (int)aFrom.MyExtent.width;
-        blitRegion.srcOffsets[1].y = (int)aFrom.MyExtent.height;
+        blitRegion.srcOffsets[1].x = (int)aFrom.Extent.width;
+        blitRegion.srcOffsets[1].y = (int)aFrom.Extent.height;
         blitRegion.srcOffsets[1].z = 1;
         
         blitRegion.dstOffsets[1].x = (int)aExtent.width;
@@ -106,7 +106,7 @@ public unsafe class CommandBufferHandle : IDisposable
 
         VkBlitImageInfo2 blitInfo = new();
 
-        blitInfo.srcImage = aFrom.MyVkImage;
+        blitInfo.srcImage = aFrom.VkImage;
         blitInfo.srcImageLayout = VkImageLayout.TransferSrcOptimal;
         
         blitInfo.dstImage = aTo;
@@ -116,93 +116,93 @@ public unsafe class CommandBufferHandle : IDisposable
         blitInfo.regionCount = 1;
         blitInfo.pRegions = &blitRegion;
 
-        vkCmdBlitImage2(MyVkCommandBuffer, &blitInfo);
+        vkCmdBlitImage2(VkCommandBuffer, &blitInfo);
     }
     
     public void ClearColor(Image aImage, VkImageLayout aImageLayout, VkClearColorValue aColor)
     {
         VkImageSubresourceRange clearRange = new VkImageSubresourceRange(VkImageAspectFlags.Color);
-        vkCmdClearColorImage(MyVkCommandBuffer, aImage.MyVkImage, aImageLayout, &aColor, 1, &clearRange);
+        vkCmdClearColorImage(VkCommandBuffer, aImage.VkImage, aImageLayout, &aColor, 1, &clearRange);
     }
     
     public void SetPushConstants<T>(T aPushConstants, VkPipelineLayout aLayout, VkShaderStageFlags aShaderStages) where T : unmanaged
     {
-        vkCmdPushConstants(MyVkCommandBuffer, aLayout, aShaderStages, 0, (uint)sizeof(T), &aPushConstants);
+        vkCmdPushConstants(VkCommandBuffer, aLayout, aShaderStages, 0, (uint)sizeof(T), &aPushConstants);
     }
     
     public void DispatchCompute(uint X, uint Y, uint Z = 1)
     {
-        vkCmdDispatch(MyVkCommandBuffer, X, Y, Z);
+        vkCmdDispatch(VkCommandBuffer, X, Y, Z);
     }
     
     public void BindPipeline(Pipeline aPipeline)
     {
-        vkCmdBindPipeline(MyVkCommandBuffer, aPipeline.MyBindPoint, aPipeline.MyVkPipeline);
+        vkCmdBindPipeline(VkCommandBuffer, aPipeline.BindPoint, aPipeline.VkPipeline);
     }
     
     public void BindIndexBuffer(AllocatedRawBuffer aIndexRawBuffer, VkIndexType aIndexType = VkIndexType.Uint32)
     {
-        vkCmdBindIndexBuffer(MyVkCommandBuffer, aIndexRawBuffer.MyBuffer, 0, aIndexType);
+        vkCmdBindIndexBuffer(VkCommandBuffer, aIndexRawBuffer.Buffer, 0, aIndexType);
     }
     
     public void BindDescriptorSet(VkPipelineLayout aLayout, VkDescriptorSet aDescriptorSet, VkPipelineBindPoint aBindPoint)
     {
-        vkCmdBindDescriptorSets(MyVkCommandBuffer, aBindPoint, aLayout, 0, aDescriptorSet);
+        vkCmdBindDescriptorSets(VkCommandBuffer, aBindPoint, aLayout, 0, aDescriptorSet);
     }
         
     
     public void Draw(int aVertexCount)
     {
-        vkCmdDraw(MyVkCommandBuffer, (uint)aVertexCount, 1, 0, 0);
+        vkCmdDraw(VkCommandBuffer, (uint)aVertexCount, 1, 0, 0);
     }
     
     public void DrawIndexed(uint aIndexCount)
     {
-        vkCmdDrawIndexed(MyVkCommandBuffer, (uint)aIndexCount, 1, 0, 0, 0);
+        vkCmdDrawIndexed(VkCommandBuffer, (uint)aIndexCount, 1, 0, 0, 0);
     }
     
     public void SetScissor(VkRect2D aRect)
     {
-        vkCmdSetScissor(MyVkCommandBuffer, aRect);
+        vkCmdSetScissor(VkCommandBuffer, aRect);
     }
     
     public void DrawIndexed(uint aIndexCount, uint aInstanceCount, uint aFirstIndex, int aVertexOffset, uint aFirstInstance)
     {
-        vkCmdDrawIndexed(MyVkCommandBuffer, (uint)aIndexCount, instanceCount: aInstanceCount, firstIndex: aFirstIndex, vertexOffset: aVertexOffset, firstInstance: aFirstInstance);
+        vkCmdDrawIndexed(VkCommandBuffer, (uint)aIndexCount, instanceCount: aInstanceCount, firstIndex: aFirstIndex, vertexOffset: aVertexOffset, firstInstance: aFirstInstance);
     }
     
     public void BeginRendering(Image aDrawImage, Image aDepthImage)
     {
         VkRenderingAttachmentInfo attachmentInfo = aDrawImage.GetAttachmentInfo(null);
         VkRenderingAttachmentInfo depthAttachmentInfo = aDepthImage.GetDepthAttachmentInfo(VkImageLayout.DepthAttachmentOptimal);
-        VkRenderingInfo renderingInfo = aDrawImage.GetRenderingInfo(new VkExtent2D(aDrawImage.MyExtent.width, aDrawImage.MyExtent.height), attachmentInfo, depthAttachmentInfo);
+        VkRenderingInfo renderingInfo = aDrawImage.GetRenderingInfo(new VkExtent2D(aDrawImage.Extent.width, aDrawImage.Extent.height), attachmentInfo, depthAttachmentInfo);
 
-        vkCmdBeginRendering(MyVkCommandBuffer, &renderingInfo);
+        vkCmdBeginRendering(VkCommandBuffer, &renderingInfo);
 
         VkViewport dynamicViewport = new();
         dynamicViewport.x = 0;
         dynamicViewport.y = 0;
-        dynamicViewport.width = aDrawImage.MyExtent.width;
-        dynamicViewport.height = aDrawImage.MyExtent.height;
+        dynamicViewport.width = aDrawImage.Extent.width;
+        dynamicViewport.height = aDrawImage.Extent.height;
         dynamicViewport.minDepth = 0f;
         dynamicViewport.maxDepth = 1f;
 
-        vkCmdSetViewport(MyVkCommandBuffer, 0, dynamicViewport);
+        vkCmdSetViewport(VkCommandBuffer, 0, dynamicViewport);
 
         VkRect2D scissor = new();
-        scissor.extent = new VkExtent2D(aDrawImage.MyExtent.width, aDrawImage.MyExtent.height);
+        scissor.extent = new VkExtent2D(aDrawImage.Extent.width, aDrawImage.Extent.height);
         scissor.offset = new VkOffset2D(0, 0);
 
-        vkCmdSetScissor(MyVkCommandBuffer, 0, scissor);
+        vkCmdSetScissor(VkCommandBuffer, 0, scissor);
     }
     
     public void EndRendering()
     {
-        vkCmdEndRendering(MyVkCommandBuffer);
+        vkCmdEndRendering(VkCommandBuffer);
     }
 
     public void Dispose()
     {
-        vkEndCommandBuffer(MyVkCommandBuffer);
+        vkEndCommandBuffer(VkCommandBuffer);
     }
 }

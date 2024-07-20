@@ -2,14 +2,14 @@ namespace VulkanApi;
 
 public unsafe class Semaphore : IGpuDestroyable
 {
-    public VkSemaphore MyVkSemaphore;
+    public VkSemaphore VkSemaphore;
     public Semaphore()
     {
-        vkCreateSemaphore(Device.MyVkDevice, out MyVkSemaphore).CheckResult();
+        vkCreateSemaphore(Device.VkDevice, out VkSemaphore).CheckResult();
     }
     
     public void Destroy()
     {
-        vkDestroySemaphore(Device.MyVkDevice, MyVkSemaphore);
+        vkDestroySemaphore(Device.VkDevice, VkSemaphore);
     }
 }

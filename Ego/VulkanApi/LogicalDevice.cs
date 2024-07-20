@@ -4,36 +4,36 @@ namespace VulkanApi;
 public unsafe class LogicalDevice : IGpuDestroyable
 {
     public static LogicalDevice Device;
-    public VkDevice MyVkDevice;
+    public VkDevice VkDevice;
 
     public void LoadFunctions()
     {
-        vkLoadDevice(MyVkDevice);
+        vkLoadDevice(VkDevice);
     }
     
     public void WaitUntilIdle()
     {
-        vkDeviceWaitIdle(MyVkDevice);
+        vkDeviceWaitIdle(VkDevice);
     }
     
     public void WaitForFence(VkFence aFence)
     {
-        vkWaitForFences(MyVkDevice, aFence, true, 300_000_000).CheckResult();
+        vkWaitForFences(VkDevice, aFence, true, 300_000_000).CheckResult();
     }
     
     public void ResetFence(VkFence aFence)
     {
-        vkResetFences(MyVkDevice, aFence).CheckResult();
+        vkResetFences(VkDevice, aFence).CheckResult();
     }
     
     public (VkResult result, uint imageIndex) AcquireNextImage(Swapchain aSwapchain, Semaphore aImageAvailableSemaphore)
     {
-        VkResult result = vkAcquireNextImageKHR(MyVkDevice, aSwapchain.MyVkSwapchain, 1_000_000_000, aImageAvailableSemaphore.MyVkSemaphore, VkFence.Null, out uint imageIndex);
+        VkResult result = vkAcquireNextImageKHR(VkDevice, aSwapchain.VkSwapchain, 1_000_000_000, aImageAvailableSemaphore.VkSemaphore, VkFence.Null, out uint imageIndex);
         return (result, imageIndex);
     }
 
     public void Destroy()
     {
-        vkDestroyDevice(MyVkDevice);
+        vkDestroyDevice(VkDevice);
     }
 }

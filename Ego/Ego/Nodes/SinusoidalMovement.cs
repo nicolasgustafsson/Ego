@@ -1,12 +1,18 @@
-﻿namespace Ego;
+﻿using Ego.Systems;
+
+namespace Ego;
 
 public class SinusoidalMovement : Node3D
 {
     public Vector3 Movement = new Vector3(1f, 0f, 0f);
     
-    public override void Update()
+    public SinusoidalMovement()
     {
-        LocalPosition = Movement * (float)Math.Sin(DateTime.Now.TimeOfDay.TotalSeconds);
-        base.Update();
+        Program.Context.EUpdate += Update;
+    }
+    
+    public void Update()
+    {
+        LocalPosition = Movement * (float)Math.Sin(Program.Context.Time.ElapsedSeconds);
     }
 }

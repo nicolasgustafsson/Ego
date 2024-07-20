@@ -7,24 +7,24 @@ namespace Rendering;
 
 public class FrameData : IGpuDestroyable
 {
-    public CommandBuffer MyCommandBuffer = null!;
+    public CommandBuffer CommandBuffer = null!;
     
-    public Semaphore MyImageAvailableSemaphore = null!;
-    public Semaphore MyRenderFinishedSemaphore = null!;
+    public Semaphore ImageAvailableSemaphore = null!;
+    public Semaphore RenderFinishedSemaphore = null!;
 
-    public Fence MyRenderFence = null!;
+    public Fence RenderFence = null!;
 
-    public DeletionQueue MyDeletionQueue = new();
+    public DeletionQueue DeletionQueue = new();
 
-    public DescriptorAllocatorGrowable MyFrameDescriptors = new();
+    public DescriptorAllocatorGrowable FrameDescriptors = new();
     
     public void Destroy()
     {
-        MyDeletionQueue.Flush();
-        MyCommandBuffer.Destroy();
-        MyImageAvailableSemaphore.Destroy();
-        MyRenderFinishedSemaphore.Destroy();
-        MyRenderFence.Destroy();
-        MyFrameDescriptors.Destroy();
+        DeletionQueue.Flush();
+        CommandBuffer.Destroy();
+        ImageAvailableSemaphore.Destroy();
+        RenderFinishedSemaphore.Destroy();
+        RenderFence.Destroy();
+        FrameDescriptors.Destroy();
     }
 }

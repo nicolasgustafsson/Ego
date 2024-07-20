@@ -2,24 +2,24 @@ namespace VulkanApi;
 
 public unsafe class Fence : IGpuDestroyable
 {
-    public VkFence MyVkFence;
+    public VkFence VkFence;
     public Fence()
     {
-        vkCreateFence(Device.MyVkDevice, VkFenceCreateFlags.Signaled, out MyVkFence).CheckResult();
+        vkCreateFence(Device.VkDevice, VkFenceCreateFlags.Signaled, out VkFence).CheckResult();
     }
     
     public void Destroy()
     {
-        vkDestroyFence(Device.MyVkDevice, MyVkFence);
+        vkDestroyFence(Device.VkDevice, VkFence);
     }
     
     public void Wait()
     {
-        Device.WaitForFence(MyVkFence);
+        Device.WaitForFence(VkFence);
     }
     
     public void Reset()
     {
-        Device.ResetFence(MyVkFence);
+        Device.ResetFence(VkFence);
     }
 }

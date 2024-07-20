@@ -2,16 +2,16 @@
 
 public unsafe class DescriptorLayoutBuilder
 {
-    public List<VkDescriptorSetLayoutBinding> MyBindings = new();
+    public List<VkDescriptorSetLayoutBinding> Bindings = new();
     
     public void AddBinding(uint aBinding, VkDescriptorType aType)
     {
-        MyBindings.Add(new() { binding = aBinding, descriptorType = aType, descriptorCount = 1 });
+        Bindings.Add(new() { binding = aBinding, descriptorType = aType, descriptorCount = 1 });
     }
     
     public void Clear()
     {
-        MyBindings.Clear();
+        Bindings.Clear();
     }
 
     public VkDescriptorSetLayout Build(VkShaderStageFlags aShaderStages)
@@ -22,24 +22,24 @@ public unsafe class DescriptorLayoutBuilder
     public VkDescriptorSetLayout Build(VkShaderStageFlags aShaderStages, void* pNext, VkDescriptorSetLayoutCreateFlags aFlags)
     {
         VkDescriptorSetLayoutCreateInfo createInfo = new();
-        for(int i = 0; i < MyBindings.Count; i++)
+        for(int i = 0; i < Bindings.Count; i++)
         {
-            var binding = MyBindings[i];
+            var binding = Bindings[i];
             binding.stageFlags |= aShaderStages;
-            MyBindings[i] = binding;
+            Bindings[i] = binding;
         }
 
-        var bindingsArray = stackalloc VkDescriptorSetLayoutBinding[MyBindings.Count];
+        var bindingsArray = stackalloc VkDescriptorSetLayoutBinding[Bindings.Count];
 
-        for (int i = 0; i < MyBindings.Count; i++)
-            bindingsArray[i] = MyBindings[i];
+        for (int i = 0; i < Bindings.Count; i++)
+            bindingsArray[i] = Bindings[i];
         
         createInfo.pNext = pNext;
-        createInfo.bindingCount = (uint)MyBindings.Count;
+        createInfo.bindingCount = (uint)Bindings.Count;
         createInfo.pBindings = bindingsArray;
         createInfo.flags = aFlags;
 
-        vkCreateDescriptorSetLayout(Device.MyVkDevice, &createInfo, null, out VkDescriptorSetLayout layout).CheckResult();
+        vkCreateDescriptorSetLayout(Device.VkDevice, &createInfo, null, out VkDescriptorSetLayout layout).CheckResult();
         
         return layout;
     }

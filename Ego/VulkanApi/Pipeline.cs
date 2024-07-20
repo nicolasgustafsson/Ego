@@ -2,13 +2,13 @@
 
 public unsafe class Pipeline : IGpuDestroyable
 {
-    public VkPipeline MyVkPipeline;
-    public VkPipelineLayout MyVkLayout;
-    public VkPipelineBindPoint MyBindPoint;
+    public VkPipeline VkPipeline;
+    public VkPipelineLayout VkLayout;
+    public VkPipelineBindPoint BindPoint;
     
     public void Destroy()
     {
-        vkDestroyPipelineLayout(Device.MyVkDevice, MyVkLayout);
-        vkDestroyPipeline(Device.MyVkDevice, MyVkPipeline);
+        vkDestroyPipelineLayout(Device.VkDevice, VkLayout);
+        vkDestroyPipeline(Device.VkDevice, VkPipeline);
     }
 }

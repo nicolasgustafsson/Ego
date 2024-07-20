@@ -6,33 +6,33 @@ public class ComputePipeline : Pipeline
 {
     public unsafe class ComputePipelineBuilder()
     {
-        private List<VkDescriptorSetLayout> myLayouts = new();
-        private List<VkPushConstantRange> myPushConstants = new();
-        private ShaderModule myComputeShader;
+        private List<VkDescriptorSetLayout> Layouts = new();
+        private List<VkPushConstantRange> PushConstants = new();
+        private ShaderModule ComputeShader;
 
-        private uint myCurrentOffset = 0;
+        private uint CurrentOffset = 0;
 
         public ComputePipelineBuilder AddLayout(VkDescriptorSetLayout aLayout)
         {
-            myLayouts.Add(aLayout);
+            Layouts.Add(aLayout);
             return this;
         }
         
         public ComputePipelineBuilder AddPushConstant<T>() where T : unmanaged
         {
             VkPushConstantRange range = new();
-            range.offset = myCurrentOffset;
+            range.offset = CurrentOffset;
             range.size = (uint)sizeof(T);
             range.stageFlags = VkShaderStageFlags.Compute;
 
-            myCurrentOffset += (uint)sizeof(T);
+            CurrentOffset += (uint)sizeof(T);
 
             return AddPushConstant(range);
         }
         
         public ComputePipelineBuilder AddPushConstant(VkPushConstantRange aPushConstant)
         {
-            myPushConstants.Add(aPushConstant);
+            PushConstants.Add(aPushConstant);
             return this;
         }
         
@@ -51,7 +51,7 @@ public class ComputePipeline : Pipeline
         
         public ComputePipelineBuilder SetComputeShader(ShaderModule aShaderModule)
         {
-            myComputeShader = aShaderModule;
+            ComputeShader = aShaderModule;
             return this;
         }
         
@@ -61,26 +61,26 @@ public class ComputePipeline : Pipeline
             
             VkPipelineLayoutCreateInfo computeLayout = new();
             
-            computeLayout.pSetLayouts = myLayouts.AsSpan().GetPointerUnsafe();
+            computeLayout.pSetLayouts = Layouts.AsSpan().GetPointerUnsafe();
 
-            computeLayout.setLayoutCount = (uint)myLayouts.Count;
+            computeLayout.setLayoutCount = (uint)Layouts.Count;
             
-            computeLayout.pPushConstantRanges = myPushConstants.AsSpan().GetPointerUnsafe();
-            computeLayout.pushConstantRangeCount = (uint)myPushConstants.Count();
+            computeLayout.pPushConstantRanges = PushConstants.AsSpan().GetPointerUnsafe();
+            computeLayout.pushConstantRangeCount = (uint)PushConstants.Count();
 
-            vkCreatePipelineLayout(Device.MyVkDevice, &computeLayout, null, out computePipeline.MyVkLayout).CheckResult();
+            vkCreatePipelineLayout(Device.VkDevice, &computeLayout, null, out computePipeline.VkLayout).CheckResult();
 
             VkComputePipelineCreateInfo computePipelineCreateInfo = new();
-            computePipelineCreateInfo.layout = computePipeline.MyVkLayout;
-            computePipelineCreateInfo.stage = myComputeShader.GetCreateInfo(VkShaderStageFlags.Compute);
+            computePipelineCreateInfo.layout = computePipeline.VkLayout;
+            computePipelineCreateInfo.stage = ComputeShader.GetCreateInfo(VkShaderStageFlags.Compute);
 
             VkPipeline pipeline;
-            vkCreateComputePipelines(Device.MyVkDevice, VkPipelineCache.Null, computePipelineCreateInfo, &pipeline).CheckResult();
+            vkCreateComputePipelines(Device.VkDevice, VkPipelineCache.Null, computePipelineCreateInfo, &pipeline).CheckResult();
 
-            computePipeline.MyVkPipeline = pipeline;
-            computePipeline.MyBindPoint = VkPipelineBindPoint.Compute;
+            computePipeline.VkPipeline = pipeline;
+            computePipeline.BindPoint = VkPipelineBindPoint.Compute;
 
-            myComputeShader.Destroy();
+            ComputeShader.Destroy();
 
             return computePipeline;
         }

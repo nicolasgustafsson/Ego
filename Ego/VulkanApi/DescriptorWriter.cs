@@ -15,25 +15,25 @@ public unsafe class DescriptorWriter
         public int Index = index;
     }
     
-    private List<VkDescriptorImageInfo> myImageInfos = new();
-    private List<VkDescriptorBufferInfo> myBufferInfos = new(); 
-    private List<DescriptorWrite> myWrites = new();
+    private List<VkDescriptorImageInfo> ImageInfos = new();
+    private List<VkDescriptorBufferInfo> BufferInfos = new(); 
+    private List<DescriptorWrite> Writes = new();
     
     public void WriteImage(uint aBinding, ImageView aImageView, Sampler? aSampler, VkImageLayout aImageLayout, VkDescriptorType aType)
     {
         VkDescriptorImageInfo imageInfo = new();
-        imageInfo.sampler = aSampler?.MyVkSampler ?? VkSampler.Null;
-        imageInfo.imageView = aImageView.MyVkImageView;
+        imageInfo.sampler = aSampler?.VkSampler ?? VkSampler.Null;
+        imageInfo.imageView = aImageView.VkImageView;
         imageInfo.imageLayout = aImageLayout;
 
-        myImageInfos.Add(imageInfo);
+        ImageInfos.Add(imageInfo);
 
         VkWriteDescriptorSet write = new();
         write.dstBinding = aBinding;
         write.descriptorCount = 1;
         write.descriptorType = aType;
 
-        myWrites.Add(new(write, DescriptorWrite.WriteType.Image, myImageInfos.Count - 1));
+        Writes.Add(new(write, DescriptorWrite.WriteType.Image, ImageInfos.Count - 1));
     }
     
     public void WriteBuffer(uint aBinding, VkBuffer aBuffer, ulong aSize, ulong aOffset, VkDescriptorType aType)
@@ -43,31 +43,31 @@ public unsafe class DescriptorWriter
         bufferInfo.offset = aOffset;
         bufferInfo.range = aSize;
 
-        myBufferInfos.Add(bufferInfo);
+        BufferInfos.Add(bufferInfo);
 
         VkWriteDescriptorSet write = new();
         write.dstBinding = aBinding;
         write.descriptorCount = 1;
         write.descriptorType = aType;
 
-        myWrites.Add(new(write, DescriptorWrite.WriteType.Buffer, myBufferInfos.Count - 1));
+        Writes.Add(new(write, DescriptorWrite.WriteType.Buffer, BufferInfos.Count - 1));
     }
     
     public void Clear()
     {
-        myImageInfos.Clear();
-        myBufferInfos.Clear();
-        myWrites.Clear();
+        ImageInfos.Clear();
+        BufferInfos.Clear();
+        Writes.Clear();
     }
     
     public void UpdateSet(VkDescriptorSet aSet)
     {
-        var spanBufferInfos = myBufferInfos.AsSpan();
-        var spanImageInfos = myImageInfos.AsSpan();
-        VkWriteDescriptorSet[] descriptorSets = new VkWriteDescriptorSet[myWrites.Count];
-        for (int i = 0; i < myWrites.Count; i++)
+        var spanBufferInfos = BufferInfos.AsSpan();
+        var spanImageInfos = ImageInfos.AsSpan();
+        VkWriteDescriptorSet[] descriptorSets = new VkWriteDescriptorSet[Writes.Count];
+        for (int i = 0; i < Writes.Count; i++)
         {
-            var write = myWrites[i];
+            var write = Writes[i];
 
             write.Write.dstSet = aSet;
             
@@ -94,6 +94,6 @@ public unsafe class DescriptorWriter
             descriptorSets[i] = write.Write;
         }
 
-        vkUpdateDescriptorSets(Device.MyVkDevice, new ReadOnlySpan<VkWriteDescriptorSet>(descriptorSets));
+        vkUpdateDescriptorSets(Device.VkDevice, new ReadOnlySpan<VkWriteDescriptorSet>(descriptorSets));
     }
 }

@@ -22,42 +22,42 @@ public unsafe class DescriptorAllocatorGrowable : IGpuDestroyable
         }
     }
 
-    private List<PoolSizeRatio> myRatios = new();
-    public uint mySetsPerPool;
-    private List<VkDescriptorPool> myFullPools = new();
-    private Stack<VkDescriptorPool> myReadyPools = new();
+    private List<PoolSizeRatio> Ratios = new();
+    public uint SetsPerPool;
+    private List<VkDescriptorPool> FullPools = new();
+    private Stack<VkDescriptorPool> ReadyPools = new();
 
     public void InitPool(uint aSets, List<PoolSizeRatio> aRatios)
     {
-        mySetsPerPool = aSets;
-        myRatios = aRatios;
+        SetsPerPool = aSets;
+        Ratios = aRatios;
     }
     
     public void ClearPools()
     {
-        foreach(var pool in myReadyPools)
+        foreach(var pool in ReadyPools)
         {
-            vkResetDescriptorPool(Device.MyVkDevice, pool, 0);
+            vkResetDescriptorPool(Device.VkDevice, pool, 0);
         }
-        foreach(var pool in myFullPools)
+        foreach(var pool in FullPools)
         {
-            vkResetDescriptorPool(Device.MyVkDevice, pool, 0);
-            myReadyPools.Push(pool);
+            vkResetDescriptorPool(Device.VkDevice, pool, 0);
+            ReadyPools.Push(pool);
         }
 
-        myFullPools.Clear();
+        FullPools.Clear();
     }
     
     public void Destroy()
     {
-        foreach(var pool in myFullPools)
+        foreach(var pool in FullPools)
         {
-            vkDestroyDescriptorPool(Device.MyVkDevice, pool, null);
+            vkDestroyDescriptorPool(Device.VkDevice, pool, null);
         }
         
-        foreach(var pool in myReadyPools)
+        foreach(var pool in ReadyPools)
         {
-            vkDestroyDescriptorPool(Device.MyVkDevice, pool, null);
+            vkDestroyDescriptorPool(Device.VkDevice, pool, null);
         }
     }
     
@@ -70,31 +70,31 @@ public unsafe class DescriptorAllocatorGrowable : IGpuDestroyable
         allocInfo.pSetLayouts = &aLayout;
 
         VkDescriptorSet descriptorSet;
-        VkResult result = vkAllocateDescriptorSets(Device.MyVkDevice, &allocInfo, &descriptorSet);
+        VkResult result = vkAllocateDescriptorSets(Device.VkDevice, &allocInfo, &descriptorSet);
         
         if (result is VkResult.ErrorOutOfPoolMemory or VkResult.ErrorFragmentedPool)
         {
-            myFullPools.Add(pool);
+            FullPools.Add(pool);
             return Allocate(aLayout);
         }
         
         result.CheckResult();
 
-        myReadyPools.Push(pool);
+        ReadyPools.Push(pool);
 
         return descriptorSet;
     }
     
     private void Grow()
     {
-        mySetsPerPool = (uint)(mySetsPerPool * 1.5f).AtMost(MaxPoolSize);
+        SetsPerPool = (uint)(SetsPerPool * 1.5f).AtMost(MaxPoolSize);
     }
     
     private VkDescriptorPool AcquirePool()
     {
-        if (!myReadyPools.IsEmpty())
+        if (!ReadyPools.IsEmpty())
         {
-            return myReadyPools.Pop();
+            return ReadyPools.Pop();
         }
 
         Grow();
@@ -103,14 +103,14 @@ public unsafe class DescriptorAllocatorGrowable : IGpuDestroyable
     
     private VkDescriptorPool CreatePool()
     {
-        List<VkDescriptorPoolSize> sizes = myRatios.Select(ratio => new VkDescriptorPoolSize(ratio.Type, (uint)(ratio.Ratio * (float)mySetsPerPool))).ToList();
+        List<VkDescriptorPoolSize> sizes = Ratios.Select(ratio => new VkDescriptorPoolSize(ratio.Type, (uint)(ratio.Ratio * (float)SetsPerPool))).ToList();
         VkDescriptorPoolCreateInfo createInfo = new();
         createInfo.flags = VkDescriptorPoolCreateFlags.None;
-        createInfo.maxSets = mySetsPerPool;
-        createInfo.poolSizeCount = (uint)myRatios.Count;
+        createInfo.maxSets = SetsPerPool;
+        createInfo.poolSizeCount = (uint)Ratios.Count;
         createInfo.pPoolSizes = sizes.AsSpan().GetPointerUnsafe();
 
-        vkCreateDescriptorPool(Device.MyVkDevice, &createInfo, null, out var pool).CheckResult();
+        vkCreateDescriptorPool(Device.VkDevice, &createInfo, null, out var pool).CheckResult();
 
         return pool;
     }

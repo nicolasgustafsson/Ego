@@ -5,17 +5,17 @@ namespace VulkanApi;
 
 public unsafe class Image : IGpuDestroyable
 {
-    public VkImage MyVkImage;
-    public ImageView MyImageView;
-    public VmaAllocation MyAllocation;
-    public VkExtent3D MyExtent;
-    public VkFormat MyImageFormat;
+    public VkImage VkImage;
+    public ImageView ImageView;
+    public VmaAllocation Allocation;
+    public VkExtent3D Extent;
+    public VkFormat ImageFormat;
     
-    public VkImageLayout MyCurrentLayout = VkImageLayout.Undefined;
+    public VkImageLayout CurrentLayout = VkImageLayout.Undefined;
     
     public nint GetHandle()
     {
-        return (nint)MyVkImage.Handle;
+        return (nint)VkImage.Handle;
     }
     
     public Image(VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps)
@@ -24,8 +24,8 @@ public unsafe class Image : IGpuDestroyable
         {
             Console.WriteLine("Depth should not be 0!");
         }
-        MyExtent = aExtent;
-        MyImageFormat = aFormat;
+        Extent = aExtent;
+        ImageFormat = aFormat;
         
         VkImageCreateInfo createInfo = new();
         createInfo.imageType = VkImageType.Image2D;
@@ -47,11 +47,11 @@ public unsafe class Image : IGpuDestroyable
         allocCreateInfo.usage = VmaMemoryUsage.GpuOnly;
         allocCreateInfo.requiredFlags = VkMemoryPropertyFlags.DeviceLocal;
         
-        Vma.vmaCreateImage(GlobalAllocator.myVmaAllocator, &createInfo, &allocCreateInfo, out MyVkImage, out MyAllocation, out VmaAllocationInfo allocInfo).CheckResult();
+        Vma.vmaCreateImage(GlobalAllocator.VmaAllocator, &createInfo, &allocCreateInfo, out VkImage, out Allocation, out VmaAllocationInfo allocInfo).CheckResult();
 
-        MyImageView = new(MyVkImage, aFormat, (int)(aUsageFlags & VkImageUsageFlags.DepthStencilAttachment) != 0 ? VkImageAspectFlags.Depth : VkImageAspectFlags.Color, createInfo.mipLevels);
+        ImageView = new(VkImage, aFormat, (int)(aUsageFlags & VkImageUsageFlags.DepthStencilAttachment) != 0 ? VkImageAspectFlags.Depth : VkImageAspectFlags.Color, createInfo.mipLevels);
 
-        ImageRegistry.PointersToImages.Add((nint)MyVkImage.Handle, this);
+        ImageRegistry.PointersToImages.Add((nint)VkImage.Handle, this);
     }
     
     public Image(IGpuImmediateSubmit aSubmit, byte* aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps) : this(aFormat, aUsageFlags | VkImageUsageFlags.TransferDst, aExtent, aMipMaps)
@@ -60,7 +60,7 @@ public unsafe class Image : IGpuDestroyable
 
         AllocatedRawBuffer staging = new(dataSize, VkBufferUsageFlags.TransferSrc, VmaMemoryUsage.CpuToGpu);
 
-        Buffer.MemoryCopy(aData, staging.MyAllocationInfo.pMappedData, dataSize, dataSize);
+        Buffer.MemoryCopy(aData, staging.AllocationInfo.pMappedData, dataSize, dataSize);
 
         aSubmit.ImmediateSubmit(cmd =>
         {
@@ -77,7 +77,7 @@ public unsafe class Image : IGpuDestroyable
             copyRegion.imageSubresource.layerCount = 1;
             copyRegion.imageExtent = aExtent;
 
-            vkCmdCopyBufferToImage(cmd.MyVkCommandBuffer, staging.MyBuffer, MyVkImage, VkImageLayout.TransferDstOptimal, 1, &copyRegion);
+            vkCmdCopyBufferToImage(cmd.VkCommandBuffer, staging.Buffer, VkImage, VkImageLayout.TransferDstOptimal, 1, &copyRegion);
 
             cmd.TransitionImage(this, VkImageLayout.ReadOnlyOptimal);
         });
@@ -87,16 +87,16 @@ public unsafe class Image : IGpuDestroyable
     
     public void Destroy()
     {
-        MyImageView.Destroy();
+        ImageView.Destroy();
 
-        Vma.vmaDestroyImage(GlobalAllocator.myVmaAllocator, MyVkImage, MyAllocation);
+        Vma.vmaDestroyImage(GlobalAllocator.VmaAllocator, VkImage, Allocation);
     }
 
     public VkRenderingAttachmentInfo GetAttachmentInfo(VkClearValue? aClear,  VkImageLayout aLayout = VkImageLayout.ColorAttachmentOptimal)
     {
         VkRenderingAttachmentInfo colorAttachment = new();
 
-        colorAttachment.imageView = MyImageView.MyVkImageView;
+        colorAttachment.imageView = ImageView.VkImageView;
         colorAttachment.imageLayout = aLayout;
         colorAttachment.loadOp = aClear == null ? VkAttachmentLoadOp.Load : VkAttachmentLoadOp.Clear;
         colorAttachment.storeOp = VkAttachmentStoreOp.Store;
@@ -110,7 +110,7 @@ public unsafe class Image : IGpuDestroyable
     {
         VkRenderingAttachmentInfo depthAttachment = new();
         
-        depthAttachment.imageView = MyImageView.MyVkImageView;
+        depthAttachment.imageView = ImageView.VkImageView;
         depthAttachment.imageLayout = layout;
         depthAttachment.loadOp = VkAttachmentLoadOp.Clear;
         depthAttachment.storeOp = VkAttachmentStoreOp.Store;

@@ -11,50 +11,52 @@ using Vortice.Vulkan;
 
 namespace Rendering;
 
-public partial class Renderer : IGpuImmediateSubmit
+public partial class Renderer : Node, IGpuImmediateSubmit
 {
-    private Swapchain mySwapchain = null!;
-    private RenderQueue myRenderQueue = null!;
-    private Image myRenderImage = null!;
-    private Image myDepthImage = null!;
-    private DescriptorAllocatorGrowable myGlobalDescriptorAllocator = new();
+    private Swapchain Swapchain = null!;
+    private RenderQueue RenderQueue = null!;
+    private Image RenderImage = null!;
+    private Image DepthImage = null!;
+    private DescriptorAllocatorGrowable GlobalDescriptorAllocator = new();
     
-    private ComputePipeline myGradientPipeline = null!;
-    private GraphicsPipeline myTrianglePipeline = null!;
+    private ComputePipeline GradientPipeline = null!;
+    private GraphicsPipeline TrianglePipeline = null!;
 
-    private Fence myImmediateFence = null!;
-    private CommandBuffer myImmediateCommandBuffer = null!;
+    private Fence ImmediateFence = null!;
+    private CommandBuffer ImmediateCommandBuffer = null!;
     
-    private List<ImageView> myImageViews = new();
-    private VkDescriptorSet myRenderImageDescriptorSet;
-    private VkDescriptorSetLayout myRenderImageDescriptorLayout;
+    private List<ImageView> ImageViews = new();
+    private VkDescriptorSet RenderImageDescriptorSet;
+    private VkDescriptorSetLayout RenderImageDescriptorLayout;
 
-    private VkDescriptorSetLayout mySingleTextureLayout;
+    private VkDescriptorSetLayout SingleTextureLayout;
 
-    private readonly List<FrameData> myFrameData = new() { };
-    private FrameData myCurrentFrame => myFrameData[(int)(myFrameCount % FrameOverlap)];
+    private readonly List<FrameData> FrameData = new() { };
+    private FrameData CurrentFrame => FrameData[(int)(FrameCount % FrameOverlap)];
 
-    private DeletionQueue myCleanupQueue = new();
+    private DeletionQueue CleanupQueue = new();
 
-    private Mesh[] myMeshes = null!;
-    private Mesh myMonke => myMeshes[2];
+    private Mesh[] Meshes = null!;
+    private Mesh Monke => Meshes[2];
 
-    private Image myBlackImage = null!;
-    private Image myGreyImage = null!;
-    private Image myWhiteImage = null!;
-    public Image myCheckerBoardImage = null!;
+    private Image BlackImage = null!;
+    private Image GreyImage = null!;
+    private Image WhiteImage = null!;
+    public Image CheckerBoardImage = null!;
 
-    private Sampler myDefaultNearestSampler = null!;
-    private Sampler myDefaultLinearSampler = null!;
+    private Sampler DefaultNearestSampler = null!;
+    private Sampler DefaultLinearSampler = null!;
 
-    private SceneData mySceneData = new SceneData();
-    private VkDescriptorSetLayout mySceneDataLayout;
+    private SceneData SceneData = new SceneData();
+    private VkDescriptorSetLayout SceneDataLayout;
     
-    private ulong myFrameCount = 0;
-    private bool myWantsResize = false;
+    private ulong FrameCount = 0;
+    private bool WantsResize = false;
     
     public Action<CommandBufferHandle> ERenderImgui = delegate {};
     public Action EPostRender = delegate {};
+
+    private List<MeshRenderData> RenderData = new();
 
     public Renderer(Window aWindow)
     {
@@ -63,13 +65,13 @@ public partial class Renderer : IGpuImmediateSubmit
     
     public void ImmediateSubmit(Action<CommandBufferHandle> aAction)
     {
-        myImmediateFence.Reset();
+        ImmediateFence.Reset();
 
-        using (var handle = myImmediateCommandBuffer.BeginRecording())
+        using (var handle = ImmediateCommandBuffer.BeginRecording())
             aAction(handle);
         
-        myRenderQueue.Submit(myImmediateCommandBuffer, myImmediateFence);
-        myImmediateFence.Wait();
+        RenderQueue.Submit(ImmediateCommandBuffer, ImmediateFence);
+        ImmediateFence.Wait();
     }
     
     public void Render()
@@ -80,12 +82,14 @@ public partial class Renderer : IGpuImmediateSubmit
             Resize();
     }
 
-    public void Debug()
-    {
-    }
 
     public void SetCameraView(Matrix4x4 aCameraView)
     {
-        mySceneData.View = aCameraView;
+        SceneData.View = aCameraView;
+    }
+
+    public void SetRenderData(List<MeshRenderData> aRenderData)
+    {
+        RenderData = aRenderData;
     }
 }

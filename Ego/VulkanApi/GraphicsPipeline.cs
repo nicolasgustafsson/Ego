@@ -6,44 +6,44 @@ public class GraphicsPipeline : Pipeline
 {
     public unsafe class GraphicsPipelineBuilder()
     {
-        private List<VkDescriptorSetLayout> myLayouts = new();
-        private List<VkPushConstantRange> myPushConstants = new();
-        private ShaderModule myVertexShader;
-        private ShaderModule myFragmentShader;
+        private List<VkDescriptorSetLayout> Layouts = new();
+        private List<VkPushConstantRange> PushConstants = new();
+        private ShaderModule VertexShader;
+        private ShaderModule FragmentShader;
 
-        private uint myCurrentPushConstantOffset = 0;
+        private uint CurrentPushConstantOffset = 0;
         
-        private VkPipelineInputAssemblyStateCreateInfo myInputAssembly = new();
-        private VkPipelineRasterizationStateCreateInfo myRasterizer = new();
-        private VkPipelineColorBlendAttachmentState myColorBlendAttachment = new();
-        private VkPipelineMultisampleStateCreateInfo myMultisample = new();
-        private VkPipelineDepthStencilStateCreateInfo myDepthStencilState = new();
-        private VkPipelineRenderingCreateInfo myRenderingInfo = new();
-        private VkFormat myColorAttachmentFormat = new();
-        private List<VkVertexInputBindingDescription>? myVertexBindings = null;
-        private List<VkVertexInputAttributeDescription>? myVertexAttributes = null;
+        private VkPipelineInputAssemblyStateCreateInfo InputAssembly = new();
+        private VkPipelineRasterizationStateCreateInfo Rasterizer = new();
+        private VkPipelineColorBlendAttachmentState ColorBlendAttachment = new();
+        private VkPipelineMultisampleStateCreateInfo Multisample = new();
+        private VkPipelineDepthStencilStateCreateInfo DepthStencilState = new();
+        private VkPipelineRenderingCreateInfo RenderingInfo = new();
+        private VkFormat ColorAttachmentFormat = new();
+        private List<VkVertexInputBindingDescription>? VertexBindings = null;
+        private List<VkVertexInputAttributeDescription>? VertexAttributes = null;
 
         public GraphicsPipelineBuilder AddLayout(VkDescriptorSetLayout aLayout)
         {
-            myLayouts.Add(aLayout);
+            Layouts.Add(aLayout);
             return this;
         }
         
         public GraphicsPipelineBuilder AddPushConstant<T>(VkShaderStageFlags aShaderStages) where T : unmanaged
         {
             VkPushConstantRange range = new();
-            range.offset = myCurrentPushConstantOffset;
+            range.offset = CurrentPushConstantOffset;
             range.size = (uint)sizeof(T);
             range.stageFlags = aShaderStages;
 
-            myCurrentPushConstantOffset += (uint)sizeof(T);
+            CurrentPushConstantOffset += (uint)sizeof(T);
 
             return AddPushConstant(range);
         }
         
         public GraphicsPipelineBuilder AddPushConstant(VkPushConstantRange aPushConstant)
         {
-            myPushConstants.Add(aPushConstant);
+            PushConstants.Add(aPushConstant);
             return this;
         }
         
@@ -62,7 +62,7 @@ public class GraphicsPipeline : Pipeline
         
         public GraphicsPipelineBuilder SetVertexShader(ShaderModule aShaderModule)
         {
-            myVertexShader = aShaderModule;
+            VertexShader = aShaderModule;
             return this;
         }
         
@@ -81,106 +81,106 @@ public class GraphicsPipeline : Pipeline
         
         public GraphicsPipelineBuilder SetFragmentShader(ShaderModule aShaderModule)
         {
-            myFragmentShader = aShaderModule;
+            FragmentShader = aShaderModule;
             return this;
         }
         
         public GraphicsPipelineBuilder DisableMultisampling()
         {
-            myMultisample.sampleShadingEnable = false;
-            myMultisample.rasterizationSamples = VkSampleCountFlags.Count1;
-            myMultisample.minSampleShading = 1f;
-            myMultisample.pSampleMask = null;
-            myMultisample.alphaToCoverageEnable = false;
-            myMultisample.alphaToOneEnable = false;
+            Multisample.sampleShadingEnable = false;
+            Multisample.rasterizationSamples = VkSampleCountFlags.Count1;
+            Multisample.minSampleShading = 1f;
+            Multisample.pSampleMask = null;
+            Multisample.alphaToCoverageEnable = false;
+            Multisample.alphaToOneEnable = false;
             return this;
         }
         
         public GraphicsPipelineBuilder SetBlendMode(BlendMode aBlendMode)
         {
-            myColorBlendAttachment = aBlendMode.ToVkBlendAttachment();
+            ColorBlendAttachment = aBlendMode.ToVkBlendAttachment();
             return this;
         }
         
         public GraphicsPipelineBuilder SetVertexBinding(uint aStride, uint aBinding)
         {
-            myVertexBindings ??= new();
-            myVertexBindings.Add(new(stride: aStride, VkVertexInputRate.Vertex, aBinding));
+            VertexBindings ??= new();
+            VertexBindings.Add(new(stride: aStride, VkVertexInputRate.Vertex, aBinding));
 
             return this;
         }
         
         public GraphicsPipelineBuilder SetVertexAttribute(uint aLocation, uint aBinding, VkFormat aFormat)
         {
-            myVertexAttributes ??= new();
-            myVertexAttributes.Add(new VkVertexInputAttributeDescription(aLocation, aFormat, aBinding));
+            VertexAttributes ??= new();
+            VertexAttributes.Add(new VkVertexInputAttributeDescription(aLocation, aFormat, aBinding));
 
             return this;
         }
         
         public GraphicsPipelineBuilder SetColorAttachmentFormat(VkFormat aFormat)
         {
-            myColorAttachmentFormat = aFormat;
-            myRenderingInfo.colorAttachmentCount = 1;
+            ColorAttachmentFormat = aFormat;
+            RenderingInfo.colorAttachmentCount = 1;
             
-            fixed(VkFormat* formatPointer = &myColorAttachmentFormat)
-                myRenderingInfo.pColorAttachmentFormats = formatPointer;
+            fixed(VkFormat* formatPointer = &ColorAttachmentFormat)
+                RenderingInfo.pColorAttachmentFormats = formatPointer;
             return this;
         }
         
         public GraphicsPipelineBuilder SetDepthFormat(VkFormat aFormat)
         {
-            myRenderingInfo.depthAttachmentFormat = aFormat;
+            RenderingInfo.depthAttachmentFormat = aFormat;
             return this;
         }
         
         
         public GraphicsPipelineBuilder DisableDepthTest()
         {
-            myDepthStencilState.depthTestEnable = false;
-            myDepthStencilState.depthWriteEnable = false;
-            myDepthStencilState.depthCompareOp = VkCompareOp.Never;
-            myDepthStencilState.depthBoundsTestEnable = false;
-            myDepthStencilState.stencilTestEnable = false;
-            myDepthStencilState.front = new();
-            myDepthStencilState.back = new();
-            myDepthStencilState.minDepthBounds = 0f;
-            myDepthStencilState.maxDepthBounds = 1f;
+            DepthStencilState.depthTestEnable = false;
+            DepthStencilState.depthWriteEnable = false;
+            DepthStencilState.depthCompareOp = VkCompareOp.Never;
+            DepthStencilState.depthBoundsTestEnable = false;
+            DepthStencilState.stencilTestEnable = false;
+            DepthStencilState.front = new();
+            DepthStencilState.back = new();
+            DepthStencilState.minDepthBounds = 0f;
+            DepthStencilState.maxDepthBounds = 1f;
             return this;
         }
         
         public GraphicsPipelineBuilder EnableDepthTest()
         {
-            myDepthStencilState.depthTestEnable = true;
-            myDepthStencilState.depthWriteEnable = true;
-            myDepthStencilState.depthCompareOp = VkCompareOp.Greater;
-            myDepthStencilState.depthBoundsTestEnable = false;
-            myDepthStencilState.stencilTestEnable = false;
-            myDepthStencilState.front = new();
-            myDepthStencilState.back = new();
-            myDepthStencilState.minDepthBounds = 0f;
-            myDepthStencilState.maxDepthBounds = 1f;
+            DepthStencilState.depthTestEnable = true;
+            DepthStencilState.depthWriteEnable = true;
+            DepthStencilState.depthCompareOp = VkCompareOp.Greater;
+            DepthStencilState.depthBoundsTestEnable = false;
+            DepthStencilState.stencilTestEnable = false;
+            DepthStencilState.front = new();
+            DepthStencilState.back = new();
+            DepthStencilState.minDepthBounds = 0f;
+            DepthStencilState.maxDepthBounds = 1f;
             return this;
         }
         
         public GraphicsPipelineBuilder SetTopology(VkPrimitiveTopology aTopology)
         {
-            myInputAssembly.topology = aTopology;
-            myInputAssembly.primitiveRestartEnable = false;
+            InputAssembly.topology = aTopology;
+            InputAssembly.primitiveRestartEnable = false;
             return this;
         }
         
         public GraphicsPipelineBuilder SetPolygonMode(VkPolygonMode aPolygonMode)
         {
-            myRasterizer.polygonMode = aPolygonMode;
-            myRasterizer.lineWidth = 1f;
+            Rasterizer.polygonMode = aPolygonMode;
+            Rasterizer.lineWidth = 1f;
             return this;
         }
         
         public GraphicsPipelineBuilder SetCullMode(VkCullModeFlags aCullMode, VkFrontFace aFrontFace)
         {
-            myRasterizer.cullMode = aCullMode;
-            myRasterizer.frontFace = aFrontFace;
+            Rasterizer.cullMode = aCullMode;
+            Rasterizer.frontFace = aFrontFace;
 
             return this;
         }
@@ -188,16 +188,16 @@ public class GraphicsPipeline : Pipeline
         public GraphicsPipeline Build()
         {
             VkPipelineLayoutCreateInfo layoutCreateInfo = new();
-            layoutCreateInfo.pSetLayouts = myLayouts.AsSpan().GetPointerUnsafe();
+            layoutCreateInfo.pSetLayouts = Layouts.AsSpan().GetPointerUnsafe();
 
-            layoutCreateInfo.setLayoutCount = (uint)myLayouts.Count;
+            layoutCreateInfo.setLayoutCount = (uint)Layouts.Count;
             
-            layoutCreateInfo.pPushConstantRanges = myPushConstants.AsSpan().GetPointerUnsafe();
-            layoutCreateInfo.pushConstantRangeCount = (uint)myPushConstants.Count;
+            layoutCreateInfo.pPushConstantRanges = PushConstants.AsSpan().GetPointerUnsafe();
+            layoutCreateInfo.pushConstantRangeCount = (uint)PushConstants.Count;
 
             VkPipelineLayout layout = new();
 
-            vkCreatePipelineLayout(Device.MyVkDevice, &layoutCreateInfo, null, out layout).CheckResult();
+            vkCreatePipelineLayout(Device.VkDevice, &layoutCreateInfo, null, out layout).CheckResult();
             
             GraphicsPipeline graphicsPipeline = new();
             VkPipelineViewportStateCreateInfo viewportStateCreateInfo = new();
@@ -209,47 +209,47 @@ public class GraphicsPipeline : Pipeline
             blendStateCreateInfo.logicOp = VkLogicOp.Copy;
             blendStateCreateInfo.attachmentCount = 1;
             
-            fixed(VkPipelineColorBlendAttachmentState* colorBlendAttachmentP = &myColorBlendAttachment)
+            fixed(VkPipelineColorBlendAttachmentState* colorBlendAttachmentP = &ColorBlendAttachment)
                 blendStateCreateInfo.pAttachments = colorBlendAttachmentP;
 
             VkPipelineVertexInputStateCreateInfo vertexInputInfo = new();
             
-            if (myVertexBindings != null)
+            if (VertexBindings != null)
             {
-                vertexInputInfo.pVertexBindingDescriptions = myVertexBindings.AsSpan().GetPointerUnsafe();
-                vertexInputInfo.vertexBindingDescriptionCount = (uint)myVertexBindings.Count;
+                vertexInputInfo.pVertexBindingDescriptions = VertexBindings.AsSpan().GetPointerUnsafe();
+                vertexInputInfo.vertexBindingDescriptionCount = (uint)VertexBindings.Count;
             }
-            else if (myVertexAttributes != null)
+            else if (VertexAttributes != null)
             {
-                vertexInputInfo.pVertexAttributeDescriptions = myVertexAttributes.AsSpan().GetPointerUnsafe();
-                vertexInputInfo.vertexAttributeDescriptionCount = (uint)myVertexAttributes.Count;
+                vertexInputInfo.pVertexAttributeDescriptions = VertexAttributes.AsSpan().GetPointerUnsafe();
+                vertexInputInfo.vertexAttributeDescriptionCount = (uint)VertexAttributes.Count;
             }
             
             VkGraphicsPipelineCreateInfo pipelineCreateInfo = new();
             
-            fixed(VkPipelineRenderingCreateInfo* renderInfoP = &myRenderingInfo)
+            fixed(VkPipelineRenderingCreateInfo* renderInfoP = &RenderingInfo)
                 pipelineCreateInfo.pNext = renderInfoP;
 
-            List<VkPipelineShaderStageCreateInfo> shaderModules = new() {myVertexShader.GetCreateInfo(VkShaderStageFlags.Vertex), myFragmentShader.GetCreateInfo(VkShaderStageFlags.Fragment)};
+            List<VkPipelineShaderStageCreateInfo> shaderModules = new() {VertexShader.GetCreateInfo(VkShaderStageFlags.Vertex), FragmentShader.GetCreateInfo(VkShaderStageFlags.Fragment)};
 
             pipelineCreateInfo.stageCount = (uint)shaderModules.Count;
             pipelineCreateInfo.pStages = shaderModules.AsSpan().GetPointerUnsafe();
             pipelineCreateInfo.pVertexInputState = &vertexInputInfo;
             
-            fixed(VkPipelineInputAssemblyStateCreateInfo* pointer = &myInputAssembly)
+            fixed(VkPipelineInputAssemblyStateCreateInfo* pointer = &InputAssembly)
                 pipelineCreateInfo.pInputAssemblyState = pointer;
 
             pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
             
-            fixed(VkPipelineRasterizationStateCreateInfo* pointer = &myRasterizer)
+            fixed(VkPipelineRasterizationStateCreateInfo* pointer = &Rasterizer)
                 pipelineCreateInfo.pRasterizationState = pointer;
             
-            fixed(VkPipelineMultisampleStateCreateInfo* pointer = &myMultisample)
+            fixed(VkPipelineMultisampleStateCreateInfo* pointer = &Multisample)
                 pipelineCreateInfo.pMultisampleState = pointer;
             
             pipelineCreateInfo.pColorBlendState = &blendStateCreateInfo;
             
-            fixed(VkPipelineDepthStencilStateCreateInfo* pointer = &myDepthStencilState)
+            fixed(VkPipelineDepthStencilStateCreateInfo* pointer = &DepthStencilState)
             {
                 pipelineCreateInfo.pDepthStencilState = pointer;
                 
@@ -265,14 +265,14 @@ public class GraphicsPipeline : Pipeline
 
             pipelineCreateInfo.pDynamicState = &dynamicInfo;
 
-            vkCreateGraphicsPipeline(Device.MyVkDevice, pipelineCreateInfo, out VkPipeline pipeline).CheckResult("Could not create pipeline :(");
+            vkCreateGraphicsPipeline(Device.VkDevice, pipelineCreateInfo, out VkPipeline pipeline).CheckResult("Could not create pipeline :(");
 
-            graphicsPipeline.MyVkPipeline = pipeline;
-            graphicsPipeline.MyVkLayout = layout;
-            graphicsPipeline.MyBindPoint = VkPipelineBindPoint.Graphics;
+            graphicsPipeline.VkPipeline = pipeline;
+            graphicsPipeline.VkLayout = layout;
+            graphicsPipeline.BindPoint = VkPipelineBindPoint.Graphics;
 
-            vkDestroyShaderModule(Device.MyVkDevice, myFragmentShader.MyModule); 
-            vkDestroyShaderModule(Device.MyVkDevice, myVertexShader.MyModule); 
+            vkDestroyShaderModule(Device.VkDevice, FragmentShader.Module); 
+            vkDestroyShaderModule(Device.VkDevice, VertexShader.Module); 
             
             return graphicsPipeline;
         }

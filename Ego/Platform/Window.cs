@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using GLFW;
 
-public class Window
+public class Window : Node
 {
     private static readonly ErrorCallback errorCallback = GlfwError;
     private static readonly MouseCallback mouseScrollCallback = MouseScrollCallback;
@@ -13,7 +13,7 @@ public class Window
     private static readonly CharCallback charCallback = CharCallback;
     private static readonly MouseCallback mousePosCallback = MousePositionCallback;
 
-    private readonly NativeWindow myNativeWindow;
+    private readonly NativeWindow NativeWindow;
 
     public Action<Window, Vector2>? EMouseScrolled;
     public Action<Window, Vector2>? EMousePosition;
@@ -23,32 +23,32 @@ public class Window
 
     private static Dictionary<IntPtr, Window> Windows = new();
 
-    public bool IsClosing => myNativeWindow.IsClosing;
-    public bool IsClosed => myNativeWindow.IsClosed;
-    public IntPtr Hwnd => myNativeWindow.Hwnd;
-    public string Name => myNativeWindow.Title!;
+    public bool IsClosing => NativeWindow.IsClosing;
+    public bool IsClosed => NativeWindow.IsClosed;
+    public IntPtr Hwnd => NativeWindow.Hwnd;
+    public string Name => NativeWindow.Title!;
     
     public IntPtr X11Display => GLFW.Native.GetX11Display();
-    public IntPtr X11Window => GLFW.Native.GetX11Window(myNativeWindow);
+    public IntPtr X11Window => GLFW.Native.GetX11Window(NativeWindow);
 
     public IntPtr WaylandDisplay => GLFW.Native.GetWaylandDisplay();
-    public IntPtr WaylandWindow => GLFW.Native.GetWaylandWindow(myNativeWindow);
-    public bool Minimized => myNativeWindow.Minimized;
-    public bool IsFocused => myNativeWindow.IsFocused;
+    public IntPtr WaylandWindow => GLFW.Native.GetWaylandWindow(NativeWindow);
+    public bool Minimized => NativeWindow.Minimized;
+    public bool IsFocused => NativeWindow.IsFocused;
 
     public Window(string aName, System.Numerics.Vector2 aWindowSize)
     {
         Glfw.WindowHint(Hint.ClientApi, ClientApi.None);
         Glfw.SetErrorCallback(errorCallback);
-        myNativeWindow = new((int)aWindowSize.X, (int)aWindowSize.Y, aName);
+        NativeWindow = new((int)aWindowSize.X, (int)aWindowSize.Y, aName);
         
-        Glfw.SetScrollCallback(myNativeWindow, mouseScrollCallback);
-        Glfw.SetMouseButtonCallback(myNativeWindow, mouseButtonCallback);
-        Glfw.SetCursorPositionCallback(myNativeWindow, mousePosCallback);
-        Glfw.SetKeyCallback(myNativeWindow, keyCallback);
-        Glfw.SetCharCallback(myNativeWindow, charCallback);
+        Glfw.SetScrollCallback(NativeWindow, mouseScrollCallback);
+        Glfw.SetMouseButtonCallback(NativeWindow, mouseButtonCallback);
+        Glfw.SetCursorPositionCallback(NativeWindow, mousePosCallback);
+        Glfw.SetKeyCallback(NativeWindow, keyCallback);
+        Glfw.SetCharCallback(NativeWindow, charCallback);
 
-        Windows.Add(myNativeWindow.Handle, this);
+        Windows.Add(NativeWindow.Handle, this);
     }
 
     private static void KeyCallback(IntPtr aWindow, GLFW.Keys aKey, int aScancode, GLFW.InputState aState, ModifierKeys aMods)
@@ -88,19 +88,19 @@ public class Window
     
     public Vector2 GetCursorPosition()
     {
-        Glfw.GetCursorPosition(myNativeWindow, out double x, out double y);
+        Glfw.GetCursorPosition(NativeWindow, out double x, out double y);
 
         return new((float)x, (float)y);
     }
     
     public bool IsMouseButtonDown(MouseButton aMouseButton)
     {
-        return Glfw.GetMouseButton(myNativeWindow, (GLFW.MouseButton)aMouseButton) == GLFW.InputState.Press;
+        return Glfw.GetMouseButton(NativeWindow, (GLFW.MouseButton)aMouseButton) == GLFW.InputState.Press;
     }
     
     public bool IsKeyboardKeyDown(KeyboardKey aKey)
     {
-        return Glfw.GetKey(myNativeWindow, (GLFW.Keys)aKey) == GLFW.InputState.Press;
+        return Glfw.GetKey(NativeWindow, (GLFW.Keys)aKey) == GLFW.InputState.Press;
     }
     private static void GlfwError(ErrorCode code, IntPtr message)
     {
@@ -119,57 +119,57 @@ public class Window
     
     public (int width, int height) GetFramebufferSize()
     {
-        Glfw.GetFramebufferSize(myNativeWindow, out int width, out int height);
+        Glfw.GetFramebufferSize(NativeWindow, out int width, out int height);
 
         return (width, height);
     }
     
     public (int width, int height) GetWindowSize()
     {
-        Glfw.GetWindowSize(myNativeWindow, out int width, out int height);
+        Glfw.GetWindowSize(NativeWindow, out int width, out int height);
 
         return (width, height);
     }
     
     public void SetWindowPosition(int x, int y)
     {
-        Glfw.SetWindowPosition(myNativeWindow, x, y);
+        Glfw.SetWindowPosition(NativeWindow, x, y);
     }
     
     public void SetWindowSize(int width, int height)
     {
-        Glfw.SetWindowSize(myNativeWindow, width, height);
+        Glfw.SetWindowSize(NativeWindow, width, height);
     }
     
     public (int x, int y) GetWindowPosition()
     {
-        Glfw.GetWindowPosition(myNativeWindow, out int x, out int y);
+        Glfw.GetWindowPosition(NativeWindow, out int x, out int y);
         return (x, y);
     }
 
-    public void Close()
+    public override void OnDestroy()
     {
-        myNativeWindow.Close();
-        Windows.Remove(myNativeWindow.Handle);
+        NativeWindow.Close();
+        Windows.Remove(NativeWindow.Handle);
     }
     
     public void SetCursor(Cursor aCursor)
     {
-        Glfw.SetCursor(myNativeWindow, aCursor);
+        Glfw.SetCursor(NativeWindow, aCursor);
     }
 
     public void Show()
     {
-        Glfw.ShowWindow(myNativeWindow);
+        Glfw.ShowWindow(NativeWindow);
     }
 
     public void FocusWindow()
     {
-        Glfw.FocusWindow(myNativeWindow);
+        Glfw.FocusWindow(NativeWindow);
     }
 
     public void SetTitle(string aTitle)
     {
-        myNativeWindow.Title = aTitle;
+        NativeWindow.Title = aTitle;
     }
 }

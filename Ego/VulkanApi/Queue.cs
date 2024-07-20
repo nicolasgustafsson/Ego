@@ -2,13 +2,13 @@ namespace VulkanApi;
 
 public unsafe class Queue
 {
-    public VkQueue MyVkQueue;
-    public uint MyQueueFamilyIndex;
+    public VkQueue VkQueue;
+    public uint QueueFamilyIndex;
     
     protected VkSemaphoreSubmitInfo GetSemaphoreSubmitInfo(VkPipelineStageFlags2 aStageMask, Semaphore aSemaphore)
     {
         VkSemaphoreSubmitInfo info = new();
-        info.semaphore = aSemaphore.MyVkSemaphore;
+        info.semaphore = aSemaphore.VkSemaphore;
         info.stageMask = aStageMask;
         info.deviceIndex = 0;
         info.value = 1;
@@ -18,7 +18,7 @@ public unsafe class Queue
     protected VkCommandBufferSubmitInfo GetCommandBufferSubmitInfo(CommandBuffer aCmd)
     {
         VkCommandBufferSubmitInfo info = new();
-        info.commandBuffer = aCmd.MyVkCommandBuffer;
+        info.commandBuffer = aCmd.VkCommandBuffer;
         info.deviceMask = 0;
         return info;
     }
@@ -45,7 +45,7 @@ public unsafe class Queue
     
     protected Queue(uint aQueueFamilyIndex)
     {
-        vkGetDeviceQueue(Device.MyVkDevice, aQueueFamilyIndex, 0, out MyVkQueue);
+        vkGetDeviceQueue(Device.VkDevice, aQueueFamilyIndex, 0, out VkQueue);
     }
     
 }

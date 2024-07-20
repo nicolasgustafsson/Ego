@@ -1,41 +1,28 @@
-﻿namespace Ego;
+﻿using SharpGLTF.Runtime;
+
+namespace Ego;
 
 public class Node3D : Node
 {
-    private Transform myTransform = new();
+    private Transform Transform = new();
 
-    private Matrix4x4? CachedWorldMatrix = null;
-
-    public Matrix4x4 LocalMatrix => myTransform.Matrix;
-    public override Matrix4x4 WorldMatrix => CachedWorldMatrix ??= LocalMatrix * MyParent.WorldMatrix;
+    protected Matrix4x4 WorldMatrix => Transform.Matrix * (GetFirstParentOfType<Node3D>()?.WorldMatrix ?? Matrix4x4.Identity);
     
     public Vector3 LocalPosition
     {
-        get => myTransform.Position;
-        set
-        {
-            myTransform.Position = value;
-            CachedWorldMatrix = null;
-        }
+        get => Transform.Position;
+        set => Transform.Position = value;
     }
     
     public Quaternion LocalRotation
     {
-        get => myTransform.Rotation;
-        set 
-        { 
-            myTransform.Rotation = value;
-            CachedWorldMatrix = null;
-        }
+        get => Transform.Rotation;
+        set => Transform.Rotation = value;
     }
     
     public Vector3 LocalScale
     {
-        get => myTransform.Scale;
-        set 
-        { 
-            myTransform.Scale = value;
-            CachedWorldMatrix = null;
-        }
+        get => Transform.Scale;
+        set => Transform.Scale = value;
     }
 }

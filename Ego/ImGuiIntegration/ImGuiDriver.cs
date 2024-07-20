@@ -16,7 +16,7 @@ using Vulkan = Vortice.Vulkan.Vulkan;
 
 namespace Rendering;
 
-public class ImGuiContext : IGpuDestroyable
+public class ImGuiDriver : Node, IGpuDestroyable
 {
     class PlatformUserData
     {
@@ -51,22 +51,22 @@ public class ImGuiContext : IGpuDestroyable
         public bool WantsResize = false;
     }
     
-    private Image myFontTexture;
-    private DescriptorAllocatorGrowable myDescriptorAllocator;
-    private VkDescriptorSetLayout myLayout;
+    private Image FontTexture;
+    private DescriptorAllocatorGrowable DescriptorAllocator;
+    private VkDescriptorSetLayout Layout;
 
     //We don't ever actually remove descriptors - this could be a problem in the future
-    private Dictionary<nint, VkDescriptorSet> myImageDescriptors = new();
-    private Sampler mySampler;
-    private GraphicsPipeline myPipeline;
-    private Window myMainWindow;
-    private List<Window> myAdditionalWindows = new();
-    private Dictionary<System.Guid, WindowUserData> myWindowUserDatas = new();
+    private Dictionary<nint, VkDescriptorSet> ImageDescriptors = new();
+    private Sampler Sampler;
+    private GraphicsPipeline Pipeline;
+    private Window MainWindow;
+    private List<Window> AdditionalWindows = new();
+    private Dictionary<System.Guid, WindowUserData> WindowUserDatas = new();
 
-    private List<AllocatedBuffer<ImDrawVertCorrected>> myOldVBuffers = new();
-    private List<AllocatedBuffer<ushort>> myOldIBuffers = new();
-    private VkDescriptorSetLayout myVertexBufferLayout;
-    private VkDescriptorSetLayout myIndexBufferLayout;
+    private List<AllocatedBuffer<ImDrawVertCorrected>> OldVBuffers = new();
+    private List<AllocatedBuffer<ushort>> OldIBuffers = new();
+    private VkDescriptorSetLayout VertexBufferLayout;
+    private VkDescriptorSetLayout IndexBufferLayout;
     private readonly Platform_CreateWindow _createWindow;
     private readonly Platform_DestroyWindow _destroyWindow;
     private readonly Platform_GetWindowPos _getWindowPos;
@@ -79,13 +79,13 @@ public class ImGuiContext : IGpuDestroyable
     private readonly Platform_GetWindowMinimized _getWindowMinimized;
     private readonly Platform_SetWindowTitle _setWindowTitle; 
     
-    private Stopwatch myStopwatch = new();
-    private PlatformUserData myPlatformUserData = new();
+    private Stopwatch Stopwatch = new();
+    private PlatformUserData PlatformData = new();
 
-    public unsafe ImGuiContext(Renderer aRenderer, Window aMainWindow)
+    public unsafe ImGuiDriver(Renderer aRenderer, Window aMainWindow)
     {
-        myStopwatch.Start();
-        myMainWindow = aMainWindow;
+        Stopwatch.Start();
+        MainWindow = aMainWindow;
         
         var context = ImGui.CreateContext();
         ImGui.SetCurrentContext(context);
@@ -97,23 +97,23 @@ public class ImGuiContext : IGpuDestroyable
         
         io.Fonts.GetTexDataAsRGBA32(out nint pixels, out var width, out var height);
         
-        myFontTexture = new Image(aRenderer, (byte*)pixels.ToPointer(), VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled | VkImageUsageFlags.TransferDst, new VkExtent3D(width, height, 1), false);
-        myDescriptorAllocator = new DescriptorAllocatorGrowable();
-        myDescriptorAllocator.InitPool(100, [new(ratio: 1000, type: VkDescriptorType.CombinedImageSampler)]);
+        FontTexture = new Image(aRenderer, (byte*)pixels.ToPointer(), VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled | VkImageUsageFlags.TransferDst, new VkExtent3D(width, height, 1), false);
+        DescriptorAllocator = new DescriptorAllocatorGrowable();
+        DescriptorAllocator.InitPool(100, [new(ratio: 1000, type: VkDescriptorType.CombinedImageSampler)]);
         
-        mySampler = new(VkFilter.Linear);
+        Sampler = new(VkFilter.Linear);
 
         DescriptorLayoutBuilder layoutBuilder = new();
         layoutBuilder.AddBinding(0, VkDescriptorType.CombinedImageSampler);
-        myLayout = layoutBuilder.Build(VkShaderStageFlags.Fragment);
+        Layout = layoutBuilder.Build(VkShaderStageFlags.Fragment);
 
-        AddTexture(myFontTexture);
+        AddTexture(FontTexture);
 
-        io.Fonts.SetTexID(myFontTexture.GetHandle());
+        io.Fonts.SetTexID(FontTexture.GetHandle());
         
-        myPipeline = new GraphicsPipeline.GraphicsPipelineBuilder()
+        Pipeline = new GraphicsPipeline.GraphicsPipelineBuilder()
             .AddPushConstant(new VkPushConstantRange { offset = 0, size = sizeof(float) * 4 + sizeof(VkDeviceAddress), stageFlags = VkShaderStageFlags.Vertex })
-            .AddLayout(myLayout)
+            .AddLayout(Layout)
             .SetBlendMode(BlendMode.Alpha)
             .DisableMultisampling()
             .SetVertexShader("Shaders/imguiVert.spv")
@@ -165,18 +165,18 @@ public class ImGuiContext : IGpuDestroyable
         ImGuiNative.ImGuiPlatformIO_Set_Platform_GetWindowPos(platformIo.NativePtr, Marshal.GetFunctionPointerForDelegate(_getWindowPos));
         ImGuiNative.ImGuiPlatformIO_Set_Platform_GetWindowSize(platformIo.NativePtr, Marshal.GetFunctionPointerForDelegate(_getWindowSize));
         
-        GCHandle handle = GCHandle.Alloc(myPlatformUserData, GCHandleType.Pinned);
+        GCHandle handle = GCHandle.Alloc(PlatformData, GCHandleType.Pinned);
         io.BackendPlatformUserData = GCHandle.ToIntPtr(handle);
         
-        myPlatformUserData.StandardCursor = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.Arrow);
-        myPlatformUserData.TextInputCursor = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.Beam);
-        myPlatformUserData.ResizeEW = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.ResizeHorizontal);
-        myPlatformUserData.ResizeNS = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.ResizeVertical);
-        myPlatformUserData.Hand = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.Hand);
+        PlatformData.StandardCursor = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.Arrow);
+        PlatformData.TextInputCursor = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.Beam);
+        PlatformData.ResizeEW = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.ResizeHorizontal);
+        PlatformData.ResizeNS = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.ResizeVertical);
+        PlatformData.Hand = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.Hand);
 
         ImGuiViewportPtr mainViewPort = ImGui.GetMainViewport();
         
-        myAdditionalWindows.Add(aMainWindow);
+        AdditionalWindows.Add(aMainWindow);
         UpdateMonitors();
 
         mainViewPort.PlatformUserData = GCHandle.ToIntPtr(CreateNewWindowUserData(aMainWindow).Pin());
@@ -187,14 +187,14 @@ public class ImGuiContext : IGpuDestroyable
     
     private VkDescriptorSet AddTexture(Image aImage)
     {
-        var newDescriptorSet = myDescriptorAllocator.Allocate(myLayout);
+        var newDescriptorSet = DescriptorAllocator.Allocate(Layout);
         
         {
             DescriptorWriter writer = new();
-            writer.WriteImage(0, aImage.MyImageView, mySampler, VkImageLayout.ShaderReadOnlyOptimal, VkDescriptorType.CombinedImageSampler);
+            writer.WriteImage(0, aImage.ImageView, Sampler, VkImageLayout.ShaderReadOnlyOptimal, VkDescriptorType.CombinedImageSampler);
             writer.UpdateSet(newDescriptorSet);
         }
-        myImageDescriptors.Add(aImage.GetHandle(), newDescriptorSet);
+        ImageDescriptors.Add(aImage.GetHandle(), newDescriptorSet);
 
         return newDescriptorSet;
     }
@@ -206,7 +206,7 @@ public class ImGuiContext : IGpuDestroyable
     
     private VkDescriptorSet GetOrAddDescriptor(Image aImage)
     {
-        if (myImageDescriptors.TryGetValue(aImage.GetHandle(), out var descriptorSet))
+        if (ImageDescriptors.TryGetValue(aImage.GetHandle(), out var descriptorSet))
         {
             return descriptorSet;
         }
@@ -217,7 +217,7 @@ public class ImGuiContext : IGpuDestroyable
     private System.Guid CreateNewWindowUserData(Window aWindow)
     {
         Guid guid = System.Guid.NewGuid();
-        myWindowUserDatas.Add(guid, new WindowUserData(aWindow));
+        WindowUserDatas.Add(guid, new WindowUserData(aWindow));
         return guid;
     }
 
@@ -269,22 +269,22 @@ public class ImGuiContext : IGpuDestroyable
     {
         var io = ImGui.GetIO();
 
-        Vector2 windowSize = new Vector2{X = myMainWindow.GetWindowSize().width, Y = myMainWindow.GetWindowSize().height};
-        Vector2 framebufferSize = new Vector2{X = myMainWindow.GetFramebufferSize().width, Y = myMainWindow.GetFramebufferSize().height};
+        Vector2 windowSize = new Vector2{X = MainWindow.GetWindowSize().width, Y = MainWindow.GetWindowSize().height};
+        Vector2 framebufferSize = new Vector2{X = MainWindow.GetFramebufferSize().width, Y = MainWindow.GetFramebufferSize().height};
         
-        io.DisplaySize = new Vector2(myMainWindow.GetFramebufferSize().width, myMainWindow.GetFramebufferSize().height);
+        io.DisplaySize = new Vector2(MainWindow.GetFramebufferSize().width, MainWindow.GetFramebufferSize().height);
         if (windowSize is {X: > 0, Y: > 0})
             io.DisplayFramebufferScale = new Vector2(framebufferSize.X / (float) windowSize.X,
                 framebufferSize.Y / (float) windowSize.Y);
         
-        io.DeltaTime = (float)myStopwatch.Elapsed.TotalSeconds;
-        myStopwatch.Restart();
+        io.DeltaTime = (float)Stopwatch.Elapsed.TotalSeconds;
+        Stopwatch.Restart();
     } 
     
     private unsafe void UpdateMonitors()
     {
         var platformIo = ImGui.GetPlatformIO();
-        myPlatformUserData.WantUpdateMonitors = false;
+        PlatformData.WantUpdateMonitors = false;
 
         Marshal.FreeHGlobal(platformIo.NativePtr->Monitors.Data);
 
@@ -316,11 +316,11 @@ public class ImGuiContext : IGpuDestroyable
         Glfw.WindowHint(Hint.Decorated, ((int)(vp.Flags & ImGuiViewportFlags.NoDecoration) == 0));
         Glfw.WindowHint(Hint.Floating, ((int)(vp.Flags & ImGuiViewportFlags.TopMost) == 1));
         
-        var window = new Window("Irrelevant", new Vector2(200, 200));
+        var window = AddChild(new Window("Irrelevant", new Vector2(200, 200)));
 
         var guid = CreateNewWindowUserData(window);
 
-        myAdditionalWindows.Add(window);
+        AdditionalWindows.Add(window);
 
         vp.PlatformUserData = GCHandle.ToIntPtr(guid.Pin());
         
@@ -331,7 +331,7 @@ public class ImGuiContext : IGpuDestroyable
         window.EMousePosition += MousePosition;
 
         LogicalDevice.Device.WaitUntilIdle();
-        var userData = myWindowUserDatas[guid];
+        var userData = WindowUserDatas[guid];
         userData.Surface = Api.ApiInstance.CreateSurface(window);
         VkSurfaceFormatKHR surfaceFormat = Gpu.GpuInstance.GetSurfaceFormat(VkFormat.B8G8R8A8Unorm, VkColorSpaceKHR.SrgbNonLinear);
         VkPresentModeKHR presentMode = Gpu.GpuInstance.GetPresentMode(VkPresentModeKHR.FifoRelaxed);
@@ -340,8 +340,8 @@ public class ImGuiContext : IGpuDestroyable
         userData.ImageViews = userData.Swapchain.CreateImageViews();
         userData.RenderQueue = new RenderQueue();
 
-        userData.RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(userData.Swapchain.MyExtents.width, userData.Swapchain.MyExtents.height, 1), false);
-        userData.DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(userData.Swapchain.MyExtents.width, userData.Swapchain.MyExtents.height, 1), false);
+        userData.RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(userData.Swapchain.Extents.width, userData.Swapchain.Extents.height, 1), false);
+        userData.DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(userData.Swapchain.Extents.width, userData.Swapchain.Extents.height, 1), false);
 
         userData.FrameData = new();
         
@@ -349,10 +349,10 @@ public class ImGuiContext : IGpuDestroyable
         {
             FrameData newFrame = new();
 
-            newFrame.MyCommandBuffer = new CommandBuffer(userData.RenderQueue);
-            newFrame.MyRenderFinishedSemaphore = new();
-            newFrame.MyImageAvailableSemaphore = new();
-            newFrame.MyRenderFence = new();
+            newFrame.CommandBuffer = new CommandBuffer(userData.RenderQueue);
+            newFrame.RenderFinishedSemaphore = new();
+            newFrame.ImageAvailableSemaphore = new();
+            newFrame.RenderFence = new();
 
             userData.FrameData.Add(newFrame);
         }
@@ -377,8 +377,8 @@ public class ImGuiContext : IGpuDestroyable
         aUserData.ImageViews = aUserData.Swapchain.CreateImageViews();
         aUserData.RenderQueue = new RenderQueue();
 
-        aUserData.RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(aUserData.Swapchain.MyExtents.width, aUserData.Swapchain.MyExtents.height, 1), false);
-        aUserData.DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(aUserData.Swapchain.MyExtents.width, aUserData.Swapchain.MyExtents.height, 1), false);
+        aUserData.RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(aUserData.Swapchain.Extents.width, aUserData.Swapchain.Extents.height, 1), false);
+        aUserData.DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(aUserData.Swapchain.Extents.width, aUserData.Swapchain.Extents.height, 1), false);
     }
 
     private void DestroyWindow(ImGuiViewportPtr vp)
@@ -386,9 +386,9 @@ public class ImGuiContext : IGpuDestroyable
         if (vp.PlatformUserData != IntPtr.Zero)
         {
             var data = GetWindowUserDataFromViewport(vp);
-            data.Window.Close();
+            data.Window.Destroy();
             var handle = GCHandle.FromIntPtr(vp.PlatformUserData);
-            myWindowUserDatas.Remove((Guid)(handle.Target!));
+            WindowUserDatas.Remove((Guid)(handle.Target!));
             handle.Free();
             vp.PlatformUserData = IntPtr.Zero;
             
@@ -412,7 +412,7 @@ public class ImGuiContext : IGpuDestroyable
     {
         System.Guid guid = (System.Guid)(GCHandle.FromIntPtr(aViewport.PlatformUserData).Target)!;
 
-        return myWindowUserDatas[guid];
+        return WindowUserDatas[guid];
     }
 
     private void ShowWindow(ImGuiViewportPtr vp)
@@ -496,19 +496,19 @@ public class ImGuiContext : IGpuDestroyable
             switch(imgui_cursor)
             {
                 case ImGuiMouseCursor.TextInput:
-                    data.Window.SetCursor(myPlatformUserData.TextInputCursor);
+                    data.Window.SetCursor(PlatformData.TextInputCursor);
                     break;
                 case ImGuiMouseCursor.ResizeEW:
-                    data.Window.SetCursor(myPlatformUserData.ResizeEW);
+                    data.Window.SetCursor(PlatformData.ResizeEW);
                     break;
                 case ImGuiMouseCursor.ResizeNS:
-                    data.Window.SetCursor(myPlatformUserData.ResizeNS);
+                    data.Window.SetCursor(PlatformData.ResizeNS);
                     break;
                 case ImGuiMouseCursor.Hand:
-                    data.Window.SetCursor(myPlatformUserData.Hand);
+                    data.Window.SetCursor(PlatformData.Hand);
                     break;
                 default:
-                    data.Window.SetCursor(myPlatformUserData.StandardCursor);
+                    data.Window.SetCursor(PlatformData.StandardCursor);
                     break;
             }
         }
@@ -551,15 +551,15 @@ public class ImGuiContext : IGpuDestroyable
     List<ImDrawVertCorrected> corrected = new();
     private unsafe void RenderDrawData(CommandBufferHandle cmd, ImDrawDataPtr aDrawDataPtr)
     {
-        if (myOldIBuffers.Count > 5)
+        if (OldIBuffers.Count > 5)
         {
-            myOldIBuffers[0].Destroy();
-            myOldIBuffers.RemoveAt(0);
+            OldIBuffers[0].Destroy();
+            OldIBuffers.RemoveAt(0);
         }
-        if (myOldVBuffers.Count > 5)
+        if (OldVBuffers.Count > 5)
         {
-            myOldVBuffers[0].Destroy();
-            myOldVBuffers.RemoveAt(0);
+            OldVBuffers[0].Destroy();
+            OldVBuffers.RemoveAt(0);
         }
         
         var framebufferWidth = (int) aDrawDataPtr.DisplaySize.X * aDrawDataPtr.FramebufferScale.X;
@@ -601,7 +601,7 @@ public class ImGuiContext : IGpuDestroyable
         }
         
 
-        cmd.BindPipeline(myPipeline);
+        cmd.BindPipeline(Pipeline);
 
         cmd.BindIndexBuffer(indexBuffer, VkIndexType.Uint16);
 
@@ -619,7 +619,7 @@ public class ImGuiContext : IGpuDestroyable
         pushConstants.Translate.Y = -1.0f - aDrawDataPtr.DisplayPos.Y * pushConstants.Scale.Y;
         pushConstants.VertexBuffer = vertexBuffer.GetDeviceAddress();
 
-        cmd.SetPushConstants(pushConstants, myPipeline.MyVkLayout, VkShaderStageFlags.Vertex);
+        cmd.SetPushConstants(pushConstants, Pipeline.VkLayout, VkShaderStageFlags.Vertex);
 
         var clipOff = aDrawDataPtr.DisplayPos;
         var clipScale = aDrawDataPtr.FramebufferScale;
@@ -632,7 +632,7 @@ public class ImGuiContext : IGpuDestroyable
             for (var i = 0; i < cmdList.CmdBuffer.Size; i++)
             {
                 var cmdItem = cmdList.CmdBuffer[i];
-                cmd.BindDescriptorSet(myPipeline.MyVkLayout, GetOrAddDescriptor(cmdItem.TextureId), VkPipelineBindPoint.Graphics);
+                cmd.BindDescriptorSet(Pipeline.VkLayout, GetOrAddDescriptor(cmdItem.TextureId), VkPipelineBindPoint.Graphics);
 
                 var clipRect = new Vector4
                 {
@@ -665,27 +665,27 @@ public class ImGuiContext : IGpuDestroyable
             vertexOffset += cmdList.VtxBuffer.Size;
         }
 
-        myOldVBuffers.Add(vertexBuffer);
-        myOldIBuffers.Add(indexBuffer);
+        OldVBuffers.Add(vertexBuffer);
+        OldIBuffers.Add(indexBuffer);
     }
 
-    public unsafe void Destroy()
+    public override unsafe void OnDestroy()
     {
         LogicalDevice.Device.WaitUntilIdle();
-        myFontTexture.Destroy();
-        myDescriptorAllocator.Destroy();
-        mySampler.Destroy();
+        FontTexture.Destroy();
+        DescriptorAllocator.Destroy();
+        Sampler.Destroy();
         
-        Vulkan.vkDestroyDescriptorSetLayout(LogicalDevice.Device.MyVkDevice, myLayout);
+        Vulkan.vkDestroyDescriptorSetLayout(LogicalDevice.Device.VkDevice, Layout);
 
-        myPipeline.Destroy();
+        Pipeline.Destroy();
 
-        foreach (var buffer in myOldVBuffers)
+        foreach (var buffer in OldVBuffers)
             buffer.Destroy();
-        foreach (var buffer in myOldIBuffers)
+        foreach (var buffer in OldIBuffers)
             buffer.Destroy();
         
-        foreach (var data in myWindowUserDatas.Values)
+        foreach (var data in WindowUserDatas.Values)
         {
             data.Swapchain?.Destroy();
             data.Surface?.Destroy();
@@ -717,8 +717,8 @@ public class ImGuiContext : IGpuDestroyable
 
             LogicalDevice.Device.WaitUntilIdle();
             
-            viewportData.CurrentFrame.MyRenderFence.Wait();
-            viewportData.CurrentFrame.MyRenderFence.Reset();
+            viewportData.CurrentFrame.RenderFence.Wait();
+            viewportData.CurrentFrame.RenderFence.Reset();
             
             if (viewportData.WantsResize)
             {
@@ -726,10 +726,10 @@ public class ImGuiContext : IGpuDestroyable
                 viewportData.WantsResize = false;
             }
             
-            viewportData.CurrentFrame.MyDeletionQueue.Flush();
-            viewportData.CurrentFrame.MyFrameDescriptors.ClearPools();
+            viewportData.CurrentFrame.DeletionQueue.Flush();
+            viewportData.CurrentFrame.FrameDescriptors.ClearPools();
             
-            var nextImage = LogicalDevice.Device.AcquireNextImage(viewportData.Swapchain!, viewportData.CurrentFrame.MyImageAvailableSemaphore);
+            var nextImage = LogicalDevice.Device.AcquireNextImage(viewportData.Swapchain!, viewportData.CurrentFrame.ImageAvailableSemaphore);
             uint imageIndex = nextImage.imageIndex;
             if (nextImage.result == VkResult.ErrorOutOfDateKHR)
             {
@@ -738,9 +738,9 @@ public class ImGuiContext : IGpuDestroyable
                 continue;
             }
             
-            VkImage currentSwapchainImage = viewportData.Swapchain!.MyImages[(int)imageIndex];
+            VkImage currentSwapchainImage = viewportData.Swapchain!.Images[(int)imageIndex];
             
-            using (CommandBufferHandle cmd = viewportData.CurrentFrame.MyCommandBuffer.BeginRecording())
+            using (CommandBufferHandle cmd = viewportData.CurrentFrame.CommandBuffer.BeginRecording())
             {
                 cmd.TransitionImage(viewportData.RenderImage!, VkImageLayout.General);
                 cmd.TransitionImage(viewportData.DepthImage!, VkImageLayout.DepthAttachmentOptimal);
@@ -751,15 +751,15 @@ public class ImGuiContext : IGpuDestroyable
                 cmd.TransitionImage(viewportData.RenderImage!, VkImageLayout.TransferSrcOptimal);
                 cmd.TransitionImage(currentSwapchainImage, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal);
 
-                cmd.Blit(viewportData.RenderImage!, currentSwapchainImage, viewportData.Swapchain.MyExtents);
+                cmd.Blit(viewportData.RenderImage!, currentSwapchainImage, viewportData.Swapchain.Extents);
                 
                 cmd.TransitionImage(currentSwapchainImage, VkImageLayout.TransferDstOptimal, VkImageLayout.PresentSrcKHR);
             }
 
             
-            viewportData.RenderQueue!.Submit(viewportData.CurrentFrame.MyCommandBuffer, viewportData.CurrentFrame.MyImageAvailableSemaphore, viewportData.CurrentFrame.MyRenderFinishedSemaphore, viewportData.CurrentFrame.MyRenderFence);
+            viewportData.RenderQueue!.Submit(viewportData.CurrentFrame.CommandBuffer, viewportData.CurrentFrame.ImageAvailableSemaphore, viewportData.CurrentFrame.RenderFinishedSemaphore, viewportData.CurrentFrame.RenderFence);
             
-            VkResult result = viewportData.RenderQueue.Present(viewportData.Swapchain, viewportData.CurrentFrame.MyRenderFinishedSemaphore, imageIndex);
+            VkResult result = viewportData.RenderQueue.Present(viewportData.Swapchain, viewportData.CurrentFrame.RenderFinishedSemaphore, imageIndex);
             
             if (result == VkResult.ErrorOutOfDateKHR)
                 viewportData.WantsResize = true;

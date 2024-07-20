@@ -11,5 +11,4 @@ public struct Transform
     }
     
     public Matrix4x4 Matrix => Matrix4x4.CreateTranslation(Position) * Matrix4x4.CreateFromQuaternion(Rotation) * Matrix4x4.CreateScale(Scale);
-    
 }

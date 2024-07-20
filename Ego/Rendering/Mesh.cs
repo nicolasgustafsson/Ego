@@ -14,20 +14,20 @@ public struct GeoSurface
 
 public class Mesh : IGpuDestroyable
 {
-    public string MyName;
-    public List<GeoSurface> MySurfaces;
-    public MeshBuffers MyMeshBuffers;
+    public string Name;
+    public List<GeoSurface> Surfaces;
+    public MeshBuffers MeshBuffers;
 
     private Mesh(string aName, List<GeoSurface> WindowSurfaces, MeshBuffers aMeshBuffers)
     {
-        MyName = aName;
-        MySurfaces = WindowSurfaces;
-        MyMeshBuffers = aMeshBuffers;
+        Name = aName;
+        Surfaces = WindowSurfaces;
+        MeshBuffers = aMeshBuffers;
     }
     
     public void Destroy()
     {
-        MyMeshBuffers.Destroy();
+        MeshBuffers.Destroy();
     }
     
     public static List<Mesh> LoadGltf(Renderer aRenderer, string aFilePath)

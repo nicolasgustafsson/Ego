@@ -2,7 +2,7 @@ namespace VulkanApi;
 
 public unsafe class ImageView : IGpuDestroyable
 {
-    public VkImageView MyVkImageView;
+    public VkImageView VkImageView;
     
     public ImageView(VkImage aImage, VkFormat aFormat, VkImageAspectFlags aAspectFlags, uint aMipLevels = 1)
     {
@@ -19,11 +19,11 @@ public unsafe class ImageView : IGpuDestroyable
         createInfo.subresourceRange.baseArrayLayer = 0;
         createInfo.subresourceRange.layerCount = 1;
 
-        vkCreateImageView(Device.MyVkDevice, &createInfo, null, out MyVkImageView).CheckResult();
+        vkCreateImageView(Device.VkDevice, &createInfo, null, out VkImageView).CheckResult();
     }
     
     public void Destroy()
     {
-        vkDestroyImageView(Device.MyVkDevice, MyVkImageView, null);
+        vkDestroyImageView(Device.VkDevice, VkImageView, null);
     }
 }
