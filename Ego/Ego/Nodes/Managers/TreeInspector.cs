@@ -61,11 +61,9 @@ public class TreeInspector : Node
         x1 += ImGui.GetWindowContentRegionMin().X;
         x2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
 
-        Vector2 size = ImGui.GetWindowSize();
         float item_spacing_y = ImGui.GetStyle().ItemSpacing.Y;
         float item_offset_y = -item_spacing_y * 0.5f;
         float line_height = ImGui.GetTextLineHeight() + item_spacing_y + FramePadding.Y * 2f;
-
 
         var pos = ImGui.GetCursorPos();
         int rows = Tree(Parent!);
@@ -95,6 +93,9 @@ public class TreeInspector : Node
         if (aNode.Children.Count == 0)
             flags |= ImGuiTreeNodeFlags.Leaf;
 
+        if (rows == 0)
+            flags |= ImGuiTreeNodeFlags.DefaultOpen;
+        
         rows++;
         
         bool wasOpened = ImGui.TreeNodeEx(aNode.GetName(true), flags, aNode.GetName());
