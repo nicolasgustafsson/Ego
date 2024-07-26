@@ -2,6 +2,7 @@ using VulkanApi;
 using ImageMagick;
 using SharpGLTF.Memory;
 using SharpGLTF.Schema2;
+using Utilities;
 using Image = VulkanApi.Image;
 
 namespace Rendering;
@@ -10,6 +11,28 @@ public struct GeoSurface
 {
     public UInt32 StartIndex;
     public UInt32 Count;
+}
+
+public class MeshCollection : Node, IAsset
+{
+    public List<Mesh> Meshes = null!;
+    
+    public void LoadFrom(string aPath)
+    {
+        Meshes = Mesh.LoadGltf(Context!.Get<Renderer>()!, aPath);
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+
+        Context!.Get<Renderer>()!.WaitUntilIdle();
+        
+        foreach(var mesh in Meshes)
+        {
+            mesh.Destroy();
+        }
+    }
 }
 
 public class Mesh : IGpuDestroyable

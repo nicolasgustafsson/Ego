@@ -1,4 +1,4 @@
-﻿using Ego.Systems;
+﻿using ImGuiNET;
 
 namespace Ego;
 
@@ -11,8 +11,15 @@ public class SinusoidalMovement : Node3D
         Program.Context.EUpdate += Update;
     }
     
-    public void Update()
+    private void Update()
     {
         LocalPosition = Movement * (float)Math.Sin(Program.Context.Time.ElapsedSeconds);
+    }
+    
+    public override void Inspect()
+    {
+        base.Inspect();
+
+        ImGui.SliderFloat3("Movement", ref Movement, -10f, 10f);
     }
 }

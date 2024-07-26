@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Utilities;
 
 public class Node
 {
@@ -7,6 +8,8 @@ public class Node
     
     public IReadOnlyList<Node> Children => xChildren;
     public Node? Parent => xParent;
+
+    public Context? Context => GetFirstParentOfType<Context>();
     
     public T? GetFirstParentOfType<T>() where T : Node
     {
@@ -21,6 +24,11 @@ public class Node
         xChildren.Add(aChild);
         aChild.xParent = this;
         return aChild;
+    }
+    
+    public T? Get<T>() where T : Node
+    {
+        return Children.OfType<T>().FirstOrDefault();
     }
     
     public void RemoveChild<T>(T aChild) where T : Node
@@ -41,6 +49,19 @@ public class Node
     }
     
     public virtual void OnDestroy()
+    {
+        
+    }
+    
+    public string GetName(bool aIncludeUniqueIdentifier = false)
+    {
+        if (aIncludeUniqueIdentifier)
+            return $"{GetType().Name} {GetHashCode()}";
+        
+        return $"{GetType().Name}";
+    }
+
+    public virtual void Inspect()
     {
         
     }

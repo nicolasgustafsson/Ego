@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Ego.Systems;
+namespace Ego;
 
 public class TimeKeeper : Node
 {

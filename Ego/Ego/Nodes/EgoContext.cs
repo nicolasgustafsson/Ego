@@ -1,17 +1,16 @@
-﻿using Ego.Nodes;
-using Ego.Systems;
-using Rendering;
-using Debug = Ego.Systems.Debug;
+﻿using Rendering;
 
 namespace Ego;
 
-public class EgoContext : Node
+public class EgoContext : Context
 {
     public TimeKeeper Time = null!;
     public Window Window = null!;
     public Debug Debug = null!;
     public Renderer Renderer = null!;
     public RendererApi RendererApi = null!;
+    public AssetManager AssetManager = null!;
+    public TreeInspector TreeInspector = null!;
 
     public Action EUpdate = ()=>{};
     
@@ -22,6 +21,8 @@ public class EgoContext : Node
         Renderer = AddChild(new Renderer(Window));
         Debug = AddChild(new Debug());
         RendererApi = AddChild(new RendererApi());
+        AssetManager = AddChild(new AssetManager());
+        TreeInspector = AddChild(new TreeInspector());
         
         AddChild(new SinusoidalMovement()).AddChild(new Node()).AddChild(new MeshRenderer());
         AddChild(new SinusoidalMovement()).AddChild(new Node()).AddChild(new MeshRenderer()).LocalPosition += new Vector3(2f, 2f, 0f);

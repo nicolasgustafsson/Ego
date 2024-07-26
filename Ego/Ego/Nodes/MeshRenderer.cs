@@ -1,30 +1,28 @@
-﻿using Rendering;
+﻿using ImGuiNET;
+using Rendering;
 
-namespace Ego.Nodes;
+namespace Ego;
 
 public class MeshRenderer : Node3D
 {
-    private Mesh[] Meshes;
+    private MeshCollection Meshes;
+
+    private int MeshIndex = 0;
+    
     public MeshRenderer()
     {
-        Meshes = Mesh.LoadGltf(Program.Context.Renderer, "Models/basicmesh.glb").Skip(2).Take(1).ToArray();
+        Meshes = Program.Context.AssetManager.GetAsset<MeshCollection>("Models/basicmesh.glb");
         
         Program.Context.RendererApi.ERender += ERender;
     }
 
-    private void ERender(List<MeshRenderData> aRenderData)
+    public override void Inspect()
     {
-        foreach(var mesh in Meshes)
-        {
-            aRenderData.Add(new() { Mesh = mesh, WorldMatrix = WorldMatrix });
-        }
+        ImGui.SliderInt("Mesh Index", ref MeshIndex, 0, Meshes.Meshes.Count - 1);
     }
 
-    public override void OnDestroy()
+    private void ERender(List<MeshRenderData> aRenderData)
     {
-        base.OnDestroy();
-
-        foreach (var mesh in Meshes)
-            mesh.Destroy();
+        aRenderData.Add(new() { Mesh = Meshes.Meshes[MeshIndex], WorldMatrix = WorldMatrix });
     }
 }

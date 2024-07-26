@@ -1,7 +1,7 @@
 ﻿using ImGuiNET;
 using Rendering;
 
-namespace Ego.Systems;
+namespace Ego;
 
 public class Debug : Node
 {

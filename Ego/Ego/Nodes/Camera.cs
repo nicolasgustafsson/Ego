@@ -1,5 +1,4 @@
-﻿using Ego.Systems;
-using ImGuiNET;
+﻿using ImGuiNET;
 using Rendering;
 using Quaternion = System.Numerics.Quaternion;
 
@@ -10,7 +9,6 @@ public class Camera : Node3D
     public Camera()
     {
         Program.Context.EUpdate += Update;
-        Program.Context.Debug.EDebug += Debug;
     }
     
     public void Update()
@@ -19,13 +17,10 @@ public class Camera : Node3D
         Program.Context.Renderer.SetCameraView(WorldMatrix);
     }
     
-    public void Debug()
+    public override void Inspect()
     {
-        ImGui.Begin("Hello there");
-
         var position = LocalPosition;
         ImGui.SliderFloat3("Position", ref position, -10f, 10f);
         LocalPosition = position;
-        ImGui.End();
     }
 }

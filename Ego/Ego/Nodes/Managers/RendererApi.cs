@@ -1,7 +1,6 @@
-﻿using System.Collections;
-using Rendering;
+﻿using Rendering;
 
-namespace Ego.Systems;
+namespace Ego;
 
 public class RendererApi : Node
 {

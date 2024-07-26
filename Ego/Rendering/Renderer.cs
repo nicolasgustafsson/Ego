@@ -63,6 +63,11 @@ public partial class Renderer : Node, IGpuImmediateSubmit
         Init(aWindow);
     }
     
+    public void WaitUntilIdle()
+    {
+        Device.WaitUntilIdle();
+    }
+    
     public void ImmediateSubmit(Action<CommandBufferHandle> aAction)
     {
         ImmediateFence.Reset();
