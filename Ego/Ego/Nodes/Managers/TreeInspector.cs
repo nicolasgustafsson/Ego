@@ -48,12 +48,17 @@ public class TreeInspector : Node
         ImGui.SetCursorPos(pos);
     }
     
-    private void EDebug()
+    private unsafe void EDebug()
     {
         ImGui.Begin("Node Tree");
 
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, FramePadding);
+
+        bool parentActive = ImGui.IsWindowFocused();
+        
+        if (parentActive)
+            ImGui.PushStyleColor(ImGuiCol.Header, ImGui.GetStyleColorVec4(ImGuiCol.TabActive)[0]);
         
         float x1 = ImGui.GetWindowPos().X;
         float x2 = x1 + ImGui.GetWindowWidth();
@@ -76,6 +81,9 @@ public class TreeInspector : Node
         
         ImGui.PopStyleVar();
         ImGui.PopStyleVar();
+        
+        if (parentActive)
+            ImGui.PopStyleColor();
 
         ImGui.End();
 
@@ -84,7 +92,7 @@ public class TreeInspector : Node
         ImGui.End();
     }
     
-    private int Tree(Node aNode, int rows = 0)
+    private unsafe int Tree(Node aNode, int rows = 0)
     {
         var flags = Flags;
         if (InspectedNode == aNode)
@@ -98,7 +106,23 @@ public class TreeInspector : Node
         
         rows++;
         
+        if (aNode == InspectedNode)
+        {
+            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, ImGui.GetStyleColorVec4(ImGuiCol.TabActive)[0]);
+            var color = ImGui.GetStyleColorVec4(ImGuiCol.ScrollbarGrabActive)[0];
+
+            color.W = 1f;
+            
+            ImGui.PushStyleColor(ImGuiCol.HeaderActive, color);
+        }
+        
         bool wasOpened = ImGui.TreeNodeEx(aNode.GetName(true), flags, aNode.GetName());
+        
+        if (aNode == InspectedNode)
+        {
+            ImGui.PopStyleColor();
+            ImGui.PopStyleColor();
+        }
         
         if (ImGui.IsItemClicked())
             InspectedNode = aNode;

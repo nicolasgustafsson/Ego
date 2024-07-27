@@ -195,12 +195,14 @@ public class ImGuiDriver : Node, IGpuDestroyable
     
     private void SetupTheme()
     {
+        ImGui.GetStyle().FrameBorderSize = 1f;
+        
         var colors = ImGui.GetStyle().Colors;
         colors[(int)ImGuiCol.Text]                   = new Vector4(0.89f, 0.91f, 0.96f, 1.00f);
         colors[(int)ImGuiCol.TextDisabled]           = new Vector4(0.50f, 0.50f, 0.50f, 1.00f);
-        colors[(int)ImGuiCol.WindowBg]               = new Vector4(0.18f, 0.20f, 0.25f, 0.94f);
-        colors[(int)ImGuiCol.ChildBg]                = new Vector4(0.18f, 0.20f, 0.25f, 0.94f);
-        colors[(int)ImGuiCol.PopupBg]                = new Vector4(0.18f, 0.20f, 0.25f, 0.94f);
+        colors[(int)ImGuiCol.WindowBg]               = new Vector4(0.16f, 0.17f, 0.22f, 0.94f);
+        colors[(int)ImGuiCol.ChildBg]                = new Vector4(0.16f, 0.17f, 0.22f, 0.94f);
+        colors[(int)ImGuiCol.PopupBg]                = new Vector4(0.16f, 0.17f, 0.22f, 0.94f);
         colors[(int)ImGuiCol.Border]                 = new Vector4(0.30f, 0.34f, 0.42f, 0.50f);
         colors[(int)ImGuiCol.BorderShadow]           = new Vector4(0.85f, 0.87f, 0.91f, 0.01f);
         colors[(int)ImGuiCol.FrameBg]                = new Vector4(0.26f, 0.30f, 0.37f, 0.54f);
@@ -251,8 +253,19 @@ public class ImGuiDriver : Node, IGpuDestroyable
         colors[(int)ImGuiCol.NavWindowingHighlight]  = new Vector4(1.00f, 1.00f, 1.00f, 0.70f);
         colors[(int)ImGuiCol.NavWindowingDimBg]      = new Vector4(0.80f, 0.80f, 0.80f, 0.20f);
         colors[(int)ImGuiCol.ModalWindowDimBg]       = new Vector4(0.80f, 0.80f, 0.80f, 0.35f);
-
-        ImGui.GetStyle().FrameBorderSize = 1f;
+            
+            
+        //Orange Highlights
+        colors[(int)ImGuiCol.TabActive]              = new Vector4(0.63f, 0.41f, 0.12f, 1.00f);
+        colors[(int)ImGuiCol.TitleBgActive]          = new Vector4(0.79f, 0.51f, 0.15f, 0.36f);
+        colors[(int)ImGuiCol.ScrollbarGrabActive]    = new Vector4(0.79f, 0.51f, 0.15f, 0.36f);
+        colors[(int)ImGuiCol.SliderGrabActive]       = new Vector4(0.79f, 0.51f, 0.15f, 0.66f);
+        colors[(int)ImGuiCol.ButtonActive]           = new Vector4(0.63f, 0.41f, 0.12f, 1.00f);
+        //colors[(int)ImGuiCol.HeaderHovered]          = new Vector4(0.76f, 0.50f, 0.15f, 1.00f);
+        colors[(int)ImGuiCol.HeaderActive]           = new Vector4(0.88f, 0.91f, 0.96f, 0.37f);
+        //colors[(int)ImGuiCol.TabHovered]             = new Vector4(0.76f, 0.50f, 0.15f, 1.00f);
+        colors[(int)ImGuiCol.TabActive]              = new Vector4(0.72f, 0.47f, 0.13f, 1.00f);
+        colors[(int)ImGuiCol.ScrollbarGrabActive]    = new Vector4(0.79f, 0.51f, 0.15f, 0.81f);
     }
     
     private VkDescriptorSet AddTexture(Image aImage)
