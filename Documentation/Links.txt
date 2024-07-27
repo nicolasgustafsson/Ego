@@ -1,1 +1,2 @@
 ICONS: https://icon-sets.iconify.design
+FONTELLO: https://fontello.com/

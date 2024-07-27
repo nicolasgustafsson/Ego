@@ -60,6 +60,11 @@ public class Node
         
         return $"{GetType().Name}";
     }
+    
+    public virtual char GetIcon()
+    {
+        return (char)0xe005;
+    }
 
     public virtual void Inspect()
     {

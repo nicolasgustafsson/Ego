@@ -10,6 +10,7 @@ using VulkanApi;
 using ImGuiNET;
 using Platform;
 using Utilities.Interop;
+using Vortice.ShaderCompiler;
 using Vortice.Vulkan;
 using Image = VulkanApi.Image;
 using Vulkan = Vortice.Vulkan.Vulkan;
@@ -94,11 +95,23 @@ public class ImGuiDriver : Node, IGpuDestroyable
 
         io.ConfigFlags = ImGuiConfigFlags.DockingEnable | ImGuiConfigFlags.ViewportsEnable;
         io.Fonts.AddFontFromFileTTF("Roboto-Regular.ttf", 15f);
-        io.Fonts.AddFontFromFileTTF("Roboto-Regular.ttf", 16f);
+
+        List<ushort> icons = new(300);
+
+        icons.Add(0xe000);
+        icons.Add(0xe0fe);
+        icons.Add(0);
+        ImFontConfigPtr config = ImGuiNative.ImFontConfig_ImFontConfig();
+        config.MergeMode = true;
+        config.SizePixels = 15f;
+
+        config.GlyphOffset = new(0f, 2f);
+        
+        
+        io.Fonts.AddFontFromFileTTF("OpenFontIcons.ttf", 15f, config, (IntPtr)icons.AsSpan().GetPointerUnsafe());
         io.Fonts.AddFontDefault();
 
         io.Fonts.Fonts[0].ConfigData.RasterizerMultiply = 1.2f;
-        io.Fonts.Fonts[1].ConfigData.RasterizerMultiply = 1.2f;
         
         io.Fonts.GetTexDataAsRGBA32(out nint pixels, out var width, out var height);
         

@@ -23,4 +23,9 @@ public class Camera : Node3D
         ImGui.SliderFloat3("Position", ref position, -10f, 10f);
         LocalPosition = position;
     }
+
+    public override char GetIcon()
+    {
+        return (char)0xe0ee;
+    }
 }

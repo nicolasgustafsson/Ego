@@ -114,8 +114,9 @@ public class TreeInspector : Node
             
             ImGui.PushStyleColor(ImGuiCol.HeaderActive, color);
         }
-        
-        bool wasOpened = ImGui.TreeNodeEx(aNode.GetName(true), flags, aNode.GetName());
+
+        string title = aNode.GetIcon() == 0 ? aNode.GetName() : ("" + aNode.GetIcon() +$"{aNode.GetName()}");
+        bool wasOpened = ImGui.TreeNodeEx(aNode.GetName(true), flags, title);
         
         if (aNode == InspectedNode)
         {
@@ -155,6 +156,10 @@ public class TreeInspector : Node
             if (!aFlagIsActive)
                 Flags &= ~bla;
         }
-        
+    }
+
+    public override char GetIcon()
+    {
+        return (char)0xe0e1;
     }
 }

@@ -49,6 +49,7 @@ public class Window : Node
         Glfw.SetCharCallback(NativeWindow, charCallback);
 
         Windows.Add(NativeWindow.Handle, this);
+        
     }
 
     private static void KeyCallback(IntPtr aWindow, GLFW.Keys aKey, int aScancode, GLFW.InputState aState, ModifierKeys aMods)

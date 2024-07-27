@@ -71,8 +71,8 @@ public unsafe class Surface : IGpuDestroyable
         extent.width = (uint)size.width;
         extent.height = (uint)size.height;
 
-        extent.width = extent.width.Within(SurfaceCapabilities.minImageExtent.width, SurfaceCapabilities.maxImageExtent.width);
-        extent.height = extent.height.Within(SurfaceCapabilities.minImageExtent.height, SurfaceCapabilities.maxImageExtent.height);
+        extent.width = extent.width.Within(SurfaceCapabilities.minImageExtent.width.AtLeast(1u), SurfaceCapabilities.maxImageExtent.width);
+        extent.height = extent.height.Within(SurfaceCapabilities.minImageExtent.height.AtLeast(1u), SurfaceCapabilities.maxImageExtent.height);
 
         return extent;
     }
