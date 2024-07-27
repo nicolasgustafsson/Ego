@@ -59,23 +59,22 @@ public class TreeInspector : Node
         
         if (parentActive)
             ImGui.PushStyleColor(ImGuiCol.Header, ImGui.GetStyleColorVec4(ImGuiCol.TabActive)[0]);
-        
-        float x1 = ImGui.GetWindowPos().X;
-        float x2 = x1 + ImGui.GetWindowWidth();
 
-        x1 += ImGui.GetWindowContentRegionMin().X;
-        x2 = ImGui.GetWindowPos().X + ImGui.GetWindowContentRegionMax().X;
+        float windowPosX = ImGui.GetWindowPos().X;
+        float x1 = windowPosX + ImGui.GetWindowContentRegionMin().X;;
+        float x2 = windowPosX + ImGui.GetWindowContentRegionMax().X;
 
         float item_spacing_y = ImGui.GetStyle().ItemSpacing.Y;
         float item_offset_y = -item_spacing_y * 0.5f;
         float line_height = ImGui.GetTextLineHeight() + item_spacing_y + FramePadding.Y * 2f;
 
-        var pos = ImGui.GetCursorPos();
+        Vector2 cursorPosition = ImGui.GetCursorPos();
+        
         int rows = Tree(Parent!);
 
         var afterPos = ImGui.GetCursorPos();
 
-        ImGui.SetCursorPos(pos);
+        ImGui.SetCursorPos(cursorPosition);
         DrawRowsBackground(rows, line_height, x1, x2, item_offset_y, ImGui.GetColorU32(EvenColor), ImGui.GetColorU32(OddColor));
         ImGui.SetCursorPos(afterPos);
         
