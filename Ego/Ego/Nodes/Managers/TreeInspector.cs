@@ -126,7 +126,11 @@ public class TreeInspector : Node
         }
         var draw_list = ImGui.GetWindowDrawList();
 
-        draw_list.AddText(cursorPosition + ImGui.GetWindowPos() + FramePadding + new Vector2(15f, 0f), ImGui.GetColorU32(new Vector4(1f, 0f, 0f, 1f)), aNode.GetIcon().ToString());
+        Vector4? requestedColor = aNode.GetIconColor();
+        uint requestedU32Color = requestedColor.HasValue ? ImGui.GetColorU32(requestedColor.Value) : ImGui.GetColorU32(ImGuiCol.Text);
+        
+        
+        draw_list.AddText(cursorPosition + ImGui.GetWindowPos() + FramePadding + new Vector2(15f, 0f), requestedU32Color, aNode.GetIcon().ToString());
         
         //ImGui.SameLine();
         //ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), aNode.GetIcon().ToString());

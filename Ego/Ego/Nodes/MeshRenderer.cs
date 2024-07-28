@@ -18,6 +18,7 @@ public class MeshRenderer : Node3D
 
     public override void Inspect()
     {
+        base.Inspect();
         ImGui.SliderInt("Mesh Index", ref MeshIndex, 0, Meshes.Meshes.Count - 1);
     }
 

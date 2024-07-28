@@ -67,6 +67,11 @@ public class Node
     {
         return (char)61708;
     }
+    
+    public virtual Vector4? GetIconColor()
+    {
+        return null;
+    }
 
     public virtual void Inspect()
     {
