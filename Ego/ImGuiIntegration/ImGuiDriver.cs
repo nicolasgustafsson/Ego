@@ -98,17 +98,16 @@ public class ImGuiDriver : Node, IGpuDestroyable
 
         List<ushort> icons = new(300);
 
-        icons.Add(0xe000);
-        icons.Add(0xe0fe);
+        icons.Add(59392);
+        icons.Add(62324);
         icons.Add(0);
         ImFontConfigPtr config = ImGuiNative.ImFontConfig_ImFontConfig();
         config.MergeMode = true;
         config.SizePixels = 15f;
 
-        config.GlyphOffset = new(0f, 2f);
+        //config.GlyphOffset = new(0f, 2f);
         
-        
-        io.Fonts.AddFontFromFileTTF("OpenFontIcons.ttf", 15f, config, (IntPtr)icons.AsSpan().GetPointerUnsafe());
+        io.Fonts.AddFontFromFileTTF("ego-icon-font.ttf", 15f, config, (IntPtr)icons.AsSpan().GetPointerUnsafe());
         io.Fonts.AddFontDefault();
 
         io.Fonts.Fonts[0].ConfigData.RasterizerMultiply = 1.2f;

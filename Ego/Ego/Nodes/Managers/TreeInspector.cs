@@ -115,14 +115,24 @@ public class TreeInspector : Node
             ImGui.PushStyleColor(ImGuiCol.HeaderActive, color);
         }
 
-        string title = aNode.GetIcon() == 0 ? aNode.GetName() : ("" + aNode.GetIcon() +$"{aNode.GetName()}");
-        bool wasOpened = ImGui.TreeNodeEx(aNode.GetName(true), flags, title);
+        Vector2 cursorPosition = ImGui.GetCursorPos();
+        
+        bool wasOpened = ImGui.TreeNodeEx(aNode.GetName(true), flags, "     " + $"{aNode.GetName()}");
         
         if (aNode == InspectedNode)
         {
             ImGui.PopStyleColor();
             ImGui.PopStyleColor();
         }
+        var draw_list = ImGui.GetWindowDrawList();
+
+        draw_list.AddText(cursorPosition + ImGui.GetWindowPos() + FramePadding + new Vector2(15f, 0f), ImGui.GetColorU32(new Vector4(1f, 0f, 0f, 1f)), aNode.GetIcon().ToString());
+        
+        //ImGui.SameLine();
+        //ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), aNode.GetIcon().ToString());
+        //ImGui.SameLine();
+        //ImGui.Text(aNode.GetName());
+       
         
         if (ImGui.IsItemClicked())
             InspectedNode = aNode;
@@ -160,6 +170,6 @@ public class TreeInspector : Node
 
     public override char GetIcon()
     {
-        return (char)0xe0e1;
+        return (char)59393;
     }
 }

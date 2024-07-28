@@ -29,4 +29,9 @@ public class Debug : Node
         
         ImGuiDriver.End();
     }
+
+    public override char GetIcon()
+    {
+        return (char)61832;
+    }
 }

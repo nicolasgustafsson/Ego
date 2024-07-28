@@ -50,8 +50,6 @@ public partial class Renderer
 
         InitializePipelines();
         
-        CreateMonke();
-        
         Console.WriteLine("Renderer successfully created!");
     }
 
@@ -109,12 +107,6 @@ public partial class Renderer
         CreateImageViews();
         CreateRenderImage();
         UpdateRenderImageDescriptorSet();
-    }
-
-    private void CreateMonke()
-    {
-        Meshes = Mesh.LoadGltf(this, "Models/basicmesh.glb").ToArray();
-        CleanupQueue.Add(Meshes.ToList());
     }
 
     private void CreateImmediateCommandBuffer()

@@ -52,18 +52,20 @@ public class Node
     {
         
     }
+
+    protected virtual string Name => GetType().Name;
     
     public string GetName(bool aIncludeUniqueIdentifier = false)
     {
         if (aIncludeUniqueIdentifier)
-            return $"{GetType().Name} {GetHashCode()}";
+            return $"{Name} {GetHashCode()}";
         
-        return $"{GetType().Name}";
+        return $"{Name}";
     }
     
     public virtual char GetIcon()
     {
-        return (char)0xe005;
+        return (char)61708;
     }
 
     public virtual void Inspect()

@@ -36,9 +36,6 @@ public partial class Renderer : Node, IGpuImmediateSubmit
 
     private DeletionQueue CleanupQueue = new();
 
-    private Mesh[] Meshes = null!;
-    private Mesh Monke => Meshes[2];
-
     private Image BlackImage = null!;
     private Image GreyImage = null!;
     private Image WhiteImage = null!;

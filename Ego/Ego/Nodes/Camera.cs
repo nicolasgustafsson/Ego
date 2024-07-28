@@ -26,6 +26,6 @@ public class Camera : Node3D
 
     public override char GetIcon()
     {
-        return (char)0xe0ee;
+        return (char)59403;
     }
 }

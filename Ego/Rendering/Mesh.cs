@@ -16,9 +16,13 @@ public struct GeoSurface
 public class MeshCollection : Node, IAsset
 {
     public List<Mesh> Meshes = null!;
+    protected override string Name => FileName;
+
+    private string FileName = "Unknown";
     
     public void LoadFrom(string aPath)
     {
+        FileName = Path.GetFileNameWithoutExtension(aPath);
         Meshes = Mesh.LoadGltf(Context!.Get<Renderer>()!, aPath);
     }
 
