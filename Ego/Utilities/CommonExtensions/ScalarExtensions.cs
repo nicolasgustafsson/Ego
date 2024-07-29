@@ -26,4 +26,15 @@ public static partial class Extensions
     {
         return aValue.AtLeast(aMinimum).AtMost(aMaximum);
     }
+    
+    public static float ToRadians(this float aDegrees)
+    {
+        return aDegrees * 0.01745329252f;
+    }
+    
+    public static float ToDegrees(this float aRadians)
+    {
+        return aRadians * (180f / MathF.PI);
+    }
+    
 }
