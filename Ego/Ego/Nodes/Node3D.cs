@@ -47,24 +47,25 @@ public class Node3D : Node
             Ypr = LocalRotation.ToEulerAngle();
 
             Ypr.X = Ypr.X.ToDegrees();
-            Ypr.Y = Ypr.Z.ToDegrees();
+            Ypr.Y = Ypr.Y.ToDegrees();
             Ypr.Z = Ypr.Z.ToDegrees();
         }
         
         if (ImGui.DragFloat3("Rotation", ref Ypr, 1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat))
         {
-            if (Ypr.X > 360f)
+            if (Ypr.X > 180f)
                 Ypr.X -= 360f;
-            if (Ypr.Y > 360f)
+            if (Ypr.Y > 180f)
                 Ypr.Y -= 360f;
-            if (Ypr.Z > 360f)
+            if (Ypr.Z > 180f)
                 Ypr.Z -= 360f;
-            if (Ypr.X < -360f)
+            if (Ypr.X < -180f)
                 Ypr.X += 360f;
-            if (Ypr.Y < -360f)
+            if (Ypr.Y < -180f)
                 Ypr.Y += 360f;
-            if (Ypr.Z < -360f)
+            if (Ypr.Z < -180f)
                 Ypr.Z += 360f;
+            
                 
             var YprRadians = Ypr;
             YprRadians.X = Ypr.X.ToRadians();
