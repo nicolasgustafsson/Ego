@@ -9,9 +9,9 @@ public class MeshRenderer : Node3D
 
     private int MeshIndex = 0;
     
-    public MeshRenderer()
+    public MeshRenderer(string aModelPath = "Models/basicmesh.glb")
     {
-        Meshes = Program.Context.AssetManager.GetAsset<MeshCollection>("Models/basicmesh.glb");
+        Meshes = Program.Context.AssetManager.GetAsset<MeshCollection>(aModelPath);
         
         Program.Context.RendererApi.ERender += ERender;
     }
