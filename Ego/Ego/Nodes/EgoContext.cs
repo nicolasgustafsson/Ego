@@ -12,7 +12,6 @@ public class EgoContext : Context
     public AssetManager AssetManager = null!;
     public TreeInspector TreeInspector = null!;
 
-    public Action EUpdate = ()=>{};
     
     public void Run()
     {
@@ -25,7 +24,7 @@ public class EgoContext : Context
         TreeInspector = AddChild(new TreeInspector());
         
         AddChild(new SinusoidalMovement()).AddChild(new Node()).AddChild(new MeshRenderer());
-        AddChild(new SinusoidalMovement()).AddChild(new Node()).AddChild(new MeshRenderer("Models/monkeyHD.glb")).LocalPosition += new Vector3(2f, 2f, 0f);
+        AddChild(new SinusoidalMovement()).AddChild(new Node()).AddChild(new MeshRenderer()).LocalPosition += new Vector3(2f, 2f, 0f);
         AddChild(new Camera()).LocalPosition += new Vector3(0f, 0f, -7.5f);
         
         while (!Window.IsClosing)

@@ -6,14 +6,15 @@ namespace Ego;
 
 public class Camera : Node3D
 {
-    public Camera()
+    public override void Start()
     {
-        Program.Context.EUpdate += Update;
+        base.Start();
+        Context.EUpdate += Update;
     }
-    
+
     public void Update()
     {
-        Program.Context.Renderer.SetCameraView(WorldMatrix);
+        Context.Get<Renderer>()!.SetCameraView(WorldMatrix);
     }
 
     public override char GetIcon()

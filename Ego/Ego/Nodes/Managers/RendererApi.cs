@@ -6,9 +6,9 @@ public class RendererApi : Node
 {
     public Action<List<MeshRenderData>> ERender = (_) => {};
     
-    public RendererApi()
+    public override void Start()
     {
-        Program.Context.EUpdate += Update;
+        Context.EUpdate += Update;
     }
     
     private void Update()
@@ -16,6 +16,6 @@ public class RendererApi : Node
         List<MeshRenderData> renderData = new();
         ERender(renderData);
         
-        Program.Context.Renderer.SetRenderData(renderData);
+        Context.Get<Renderer>()!.SetRenderData(renderData);
     }
 }

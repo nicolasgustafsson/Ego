@@ -3,17 +3,18 @@ using Rendering;
 
 namespace Ego;
 
-public class MeshRenderer : Node3D
+public class MeshRenderer(string aModelPath = "Models/basicmesh.glb") : Node3D
 {
-    private MeshCollection Meshes;
+    private MeshCollection Meshes = null!;
 
     private int MeshIndex = 0;
-    
-    public MeshRenderer(string aModelPath = "Models/basicmesh.glb")
+
+    public override void Start()
     {
-        Meshes = Program.Context.AssetManager.GetAsset<MeshCollection>(aModelPath);
+        base.Start();
+        Meshes = Context.Get<AssetManager>()!.GetAsset<MeshCollection>(aModelPath);
         
-        Program.Context.RendererApi.ERender += ERender;
+        Context.Get<RendererApi>()!.ERender += ERender;
     }
 
     public override void Inspect()

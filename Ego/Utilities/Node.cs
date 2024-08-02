@@ -9,7 +9,7 @@ public class Node
     public IReadOnlyList<Node> Children => xChildren;
     public Node? Parent => xParent;
 
-    public Context? Context => GetFirstParentOfType<Context>();
+    public Context Context => GetFirstParentOfType<Context>()!;
     
     public T? GetFirstParentOfType<T>() where T : Node
     {
@@ -23,6 +23,8 @@ public class Node
     {
         xChildren.Add(aChild);
         aChild.xParent = this;
+
+        aChild.Start();
         return aChild;
     }
     
@@ -34,6 +36,11 @@ public class Node
     public void RemoveChild<T>(T aChild) where T : Node
     {
         xChildren.Remove(aChild);
+    }
+    
+    public virtual void Start()
+    {
+        
     }
     
     public void Destroy()

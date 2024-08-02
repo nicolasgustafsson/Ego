@@ -5,17 +5,19 @@ namespace Ego;
 
 public class Debug : Node
 {
-    private readonly ImGuiDriver ImGuiDriver;
+    private ImGuiDriver ImGuiDriver = null!;
 
     public Action EDebug = () => {};
     
-    public Debug()
+    public override void Start()
     {
-        ImGuiDriver = AddChild(new ImGuiDriver(Program.Context.Renderer, Program.Context.Window));
+        base.Start();
+        
+        ImGuiDriver = AddChild(new ImGuiDriver(Context.Get<Renderer>()!, Context.Get<Window>()!));
 
-        Program.Context.EUpdate += Update;
+        Context.EUpdate += Update;
     }
-    
+
     private void Update()
     {
         ImGuiDriver.Begin();

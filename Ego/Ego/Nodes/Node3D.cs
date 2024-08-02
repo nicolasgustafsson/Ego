@@ -28,7 +28,6 @@ public class Node3D : Node
         set => Transform.Scale = value;
     }
     
-    static Vector3 Ypr = Vector3.Zero;
     private static Node3D? LastInspectedNode;
     
     public override void Inspect()
@@ -40,16 +39,10 @@ public class Node3D : Node
         
         ImGui.DragFloat3("Scale", ref scale, 0.01f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat);
 
-        if (LastInspectedNode != this)
-        {
-            LastInspectedNode = this;
-
-            Ypr = LocalRotation.ToEulerAngle();
-
-            Ypr.X = Ypr.X.ToDegrees();
-            Ypr.Y = Ypr.Y.ToDegrees();
-            Ypr.Z = Ypr.Z.ToDegrees();
-        }
+        Vector3 Ypr;
+        Ypr.X = ImGui.GetStateStorage().GetFloat((uint)"yaw".GetHashCode(), LocalRotation.ToEulerAngle().X);
+        Ypr.Y = ImGui.GetStateStorage().GetFloat((uint)"pitch".GetHashCode(), LocalRotation.ToEulerAngle().Y);
+        Ypr.Z = ImGui.GetStateStorage().GetFloat((uint)"roll".GetHashCode(), LocalRotation.ToEulerAngle().Z);
         
         if (ImGui.DragFloat3("Rotation", ref Ypr, 1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat))
         {
@@ -73,6 +66,13 @@ public class Node3D : Node
             YprRadians.Z = Ypr.Z.ToRadians();
             LocalRotation = YprRadians.ToQuaternion();
         }
+
+        ImGui.GetStateStorage().SetFloat((uint)"yaw".GetHashCode(), Ypr.X);
+        ImGui.GetStateStorage().SetFloat((uint)"pitch".GetHashCode(), Ypr.Y);
+        ImGui.GetStateStorage().SetFloat((uint)"roll".GetHashCode(), Ypr.Z);
+            
+            
+        
         
         LocalScale = scale;
     }
