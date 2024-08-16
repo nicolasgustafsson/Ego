@@ -13,7 +13,7 @@ public class Debug : Node
     {
         base.Start();
         
-        ImGuiDriver = AddChild(new ImGuiDriver(Context.Get<Renderer>()!, Context.Get<Window>()!));
+        ImGuiDriver = AddChild(new ImGuiDriver(Context.Get<RendererApi>()!.Get<Renderer>()!, Context.Get<Window>()!));
 
         Context.EUpdate += Update;
     }
@@ -21,7 +21,7 @@ public class Debug : Node
     private void Update()
     {
         ImGuiDriver.Begin();
-        
+       
         ImGui.DockSpaceOverViewport(0, null, ImGuiDockNodeFlags.PassthruCentralNode);
 
         ImGui.ShowDemoWindow();

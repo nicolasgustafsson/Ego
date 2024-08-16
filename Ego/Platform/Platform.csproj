@@ -10,7 +10,12 @@
         <PackageId>Platform</PackageId>
         <Company>Platform</Company>
         <Product>Platform</Product>
-        <Configurations>Debug;Release;DebugNoBuild</Configurations>
+        <Configurations>Release;Development</Configurations>
+        <Platforms>AnyCPU</Platforms>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Development' ">
+      <DebugSymbols>true</DebugSymbols>
     </PropertyGroup>
 
     <ItemGroup>

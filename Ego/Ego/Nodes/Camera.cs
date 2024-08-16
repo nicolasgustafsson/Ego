@@ -14,7 +14,7 @@ public class Camera : Node3D
 
     public void Update()
     {
-        Context.Get<Renderer>()!.SetCameraView(WorldMatrix);
+        Context.Get<RendererApi>()!.Renderer.SetCameraView(WorldMatrix);
     }
 
     public override char GetIcon()

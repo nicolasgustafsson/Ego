@@ -1,7 +1,32 @@
 ﻿using ImGuiNET;
 using Rendering;
-
 namespace Ego;
+
+public class MeshCollection : Node, IAsset
+{
+    public List<Mesh> Meshes = null!;
+    protected override string Name => FileName;
+
+    private string FileName = "Unknown";
+    
+    public void LoadFrom(string aPath)
+    {
+        FileName = Path.GetFileNameWithoutExtension(aPath);
+        Meshes = Mesh.LoadGltf(Context.Get<RendererApi>()!.Get<Renderer>()!, aPath);
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+
+        Context.Get<RendererApi>()!.Get<Renderer>()!.WaitUntilIdle();
+        
+        foreach(var mesh in Meshes)
+        {
+            mesh.Destroy();
+        }
+    }
+}
 
 public class MeshRenderer(string aModelPath = "Models/basicmesh.glb") : Node3D
 {

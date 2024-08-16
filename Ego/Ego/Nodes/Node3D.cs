@@ -70,10 +70,7 @@ public class Node3D : Node
         ImGui.GetStateStorage().SetFloat((uint)"yaw".GetHashCode(), Ypr.X);
         ImGui.GetStateStorage().SetFloat((uint)"pitch".GetHashCode(), Ypr.Y);
         ImGui.GetStateStorage().SetFloat((uint)"roll".GetHashCode(), Ypr.Z);
-            
-            
-        
-        
+
         LocalScale = scale;
     }
 

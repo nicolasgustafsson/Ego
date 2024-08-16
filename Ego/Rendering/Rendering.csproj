@@ -7,7 +7,11 @@
         <AssemblyName>Rendering</AssemblyName>
         <RootNamespace>Rendering</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <Configurations>Debug;Release;DebugNoBuild</Configurations>
+        <Configurations>Release;Development</Configurations>
+        <Platforms>AnyCPU</Platforms>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Development' ">
+      <DebugSymbols>true</DebugSymbols>
     </PropertyGroup>
     <ItemGroup>
       <ProjectReference Include="..\..\ImguiDotNet\src\ImGui.NET\ImGui.NET.csproj" />
