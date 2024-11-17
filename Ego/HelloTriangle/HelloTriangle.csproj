@@ -5,8 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <Configurations>Release;Development</Configurations>
-        <Platforms>AnyCPU</Platforms>
+        <Configurations>Debug;Release;DebugNoBuild</Configurations>
     </PropertyGroup>
 
     <ItemGroup>

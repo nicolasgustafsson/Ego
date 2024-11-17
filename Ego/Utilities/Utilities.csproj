@@ -5,12 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <WarningsAsErrors>Nullable</WarningsAsErrors>
-        <Configurations>Release;Development</Configurations>
-        <Platforms>AnyCPU</Platforms>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Development' ">
-      <DebugSymbols>true</DebugSymbols>
+        <Configurations>Debug;Release;DebugNoBuild</Configurations>
     </PropertyGroup>
 
 </Project>
