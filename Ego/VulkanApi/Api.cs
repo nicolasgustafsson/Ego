@@ -47,7 +47,7 @@ public unsafe class Api : IGpuDestroyable
         info.enabledExtensionCount = (uint)InstanceExtensions.Length;
         info.ppEnabledExtensionNames = (byte**)extensionsToBytesArray;
         
-#if DEBUG
+#if DEBUG || DEVELOPMENT
         string[] validationLayers = ["VK_LAYER_KHRONOS_validation"];
         IntPtr* layersToBytesArray = stackalloc IntPtr[validationLayers.Length];
         for (int i = 0; i < validationLayers.Length; i++)
@@ -58,15 +58,16 @@ public unsafe class Api : IGpuDestroyable
         info.enabledLayerCount = (uint)validationLayers.Length;
         info.ppEnabledLayerNames = (byte**)layersToBytesArray;      
            
+#else
+        info.enabledLayerCount = 0;
+#endif
+        
         VkDebugUtilsMessengerCreateInfoEXT debugUtilsCreateInfo = new(); 
         debugUtilsCreateInfo.messageSeverity = VkDebugUtilsMessageSeverityFlagsEXT.Error | VkDebugUtilsMessageSeverityFlagsEXT.Warning;
         debugUtilsCreateInfo.messageType = VkDebugUtilsMessageTypeFlagsEXT.Validation | VkDebugUtilsMessageTypeFlagsEXT.Performance;
         debugUtilsCreateInfo.pfnUserCallback = &DebugMessengerCallback;
         info.pNext = &debugUtilsCreateInfo;
-#else
-        info.enabledLayerCount = 0;
-        info.pNext = null;
-#endif
+        
         vkCreateInstance(&info, null, out VkInstance).CheckResult();
         vkLoadInstanceOnly(VkInstance);
         
