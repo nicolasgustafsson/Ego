@@ -96,18 +96,18 @@ public class ImGuiDriver : Node, IGpuDestroyable
         io.ConfigFlags = ImGuiConfigFlags.DockingEnable | ImGuiConfigFlags.ViewportsEnable;
         io.Fonts.AddFontFromFileTTF("Roboto-Regular.ttf", 15f);
 
-        List<ushort> icons = new(300);
+        List<ushort> iconRange = new(300);
 
-        icons.Add(59392);
-        icons.Add(62324);
-        icons.Add(0);
+        iconRange.Add(59392);
+        iconRange.Add(62324);
+        iconRange.Add(0);
         ImFontConfigPtr config = ImGuiNative.ImFontConfig_ImFontConfig();
         config.MergeMode = true;
         config.SizePixels = 15f;
 
         //config.GlyphOffset = new(0f, 2f);
         
-        io.Fonts.AddFontFromFileTTF("ego-icon-font.ttf", 15f, config, (IntPtr)icons.AsSpan().GetPointerUnsafe());
+        io.Fonts.AddFontFromFileTTF("ego-icon-font.ttf", 15f, config, (IntPtr)iconRange.AsSpan().GetPointerUnsafe());
         io.Fonts.AddFontDefault();
 
         io.Fonts.Fonts[0].ConfigData.RasterizerMultiply = 1.2f;
@@ -127,7 +127,6 @@ public class ImGuiDriver : Node, IGpuDestroyable
         AddTexture(FontTexture);
 
         io.Fonts.SetTexID(FontTexture.GetHandle());
-        
         
         Pipeline = new GraphicsPipeline.GraphicsPipelineBuilder()
             .AddPushConstant(new VkPushConstantRange { offset = 0, size = sizeof(float) * 4 + sizeof(VkDeviceAddress), stageFlags = VkShaderStageFlags.Vertex })
@@ -612,7 +611,6 @@ public class ImGuiDriver : Node, IGpuDestroyable
     public void Begin()
     {
         SetFrameData();
-
         UpdateMouseCursor();
         ImGui.NewFrame();
     }
@@ -624,9 +622,14 @@ public class ImGuiDriver : Node, IGpuDestroyable
         ImGui.UpdatePlatformWindows();
     }
     
-    public void Render(CommandBufferHandle cmd)
+    public unsafe void Render(CommandBufferHandle cmd)
     {
-        RenderDrawData(cmd, ImGui.GetDrawData());
+        ImDrawDataPtr drawData = ImGui.GetDrawData();
+        
+        if (drawData.NativePtr == null)
+            return;
+        
+        RenderDrawData(cmd, drawData);
     }
     
     struct imguiPushConstants

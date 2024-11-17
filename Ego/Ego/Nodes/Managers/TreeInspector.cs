@@ -6,18 +6,20 @@ namespace Ego;
 public class TreeInspector : Node
 {
     private Node? InspectedNode = null;
+    private Node? PreviousInspectedNode = null;
 
     private ImGuiTreeNodeFlags Flags = ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick;
     private Vector4 EvenColor = new Vector4(1f, 1f, 1f, 0.0392f);
     private Vector4 OddColor = new Vector4(1f, 1f, 1f, 0f);
 
     private Vector2 FramePadding = new Vector2(0f, 3f);
-    
-    public TreeInspector()
+
+    public override void Start()
     {
-        Program.Context.Debug.EDebug += EDebug;
+        base.Start();
+        Context.Get<Debug>()!.EDebug += EDebug;
     }
-    
+
     unsafe void DrawRowsBackground(int aRowCount, float aLineHeight, float aMinX, float aMaxX, float aYOffset, uint aEvenColor, uint aOddColor)
     {
         var pos = ImGui.GetCursorPos();
@@ -85,8 +87,17 @@ public class TreeInspector : Node
 
         ImGui.End();
 
+
         ImGui.Begin("Inspector");
-        InspectedNode?.Inspect();
+        if (InspectedNode != null)
+        {
+            if (InspectedNode != PreviousInspectedNode)
+                ImGui.GetStateStorage().Clear();
+            InspectedNode.Inspect();
+
+            PreviousInspectedNode = InspectedNode;
+        }
+        
         ImGui.End();
     }
     
@@ -131,7 +142,10 @@ public class TreeInspector : Node
         draw_list.AddText(cursorPosition + ImGui.GetWindowPos() + FramePadding + new Vector2(15f, 0f), requestedU32Color, aNode.GetIcon().ToString());
     
         if (ImGui.IsItemClicked())
+        {
             InspectedNode = aNode;
+        }
+        
         
         if (wasOpened)
         {

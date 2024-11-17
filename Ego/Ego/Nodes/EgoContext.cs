@@ -7,20 +7,17 @@ public class EgoContext : Context
     public TimeKeeper Time = null!;
     public Window Window = null!;
     public Debug Debug = null!;
-    public Renderer Renderer = null!;
     public RendererApi RendererApi = null!;
     public AssetManager AssetManager = null!;
     public TreeInspector TreeInspector = null!;
 
-    public Action EUpdate = ()=>{};
     
     public void Run()
     {
         Time = AddChild(new TimeKeeper());
         Window = AddChild(new Window("Game", new Vector2(1920, 1080)));
-        Renderer = AddChild(new Renderer(Window));
+        RendererApi = AddChild(new RendererApi(Window));
         Debug = AddChild(new Debug());
-        RendererApi = AddChild(new RendererApi());
         AssetManager = AddChild(new AssetManager());
         TreeInspector = AddChild(new TreeInspector());
         
@@ -32,7 +29,7 @@ public class EgoContext : Context
         {
             EUpdate();
 
-            Renderer.Render();
+            RendererApi.Update();
             Window.Update();
         }
 

@@ -5,17 +5,22 @@ namespace Ego;
 public class RendererApi : Node
 {
     public Action<List<MeshRenderData>> ERender = (_) => {};
+    public Renderer Renderer = null!;
     
-    public RendererApi()
+    public RendererApi(Window aWindow)
     {
-        Program.Context.EUpdate += Update;
+        Renderer = AddChild(new Renderer(aWindow));
     }
     
-    private void Update()
+    public override void Start()
+    {
+    }
+
+    public void Update()
     {
         List<MeshRenderData> renderData = new();
         ERender(renderData);
-        
-        Program.Context.Renderer.SetRenderData(renderData);
+        Renderer.SetRenderData(renderData);
+        Renderer.Render();
     }
 }

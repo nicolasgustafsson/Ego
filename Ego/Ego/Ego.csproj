@@ -8,9 +8,19 @@
         <WarningsAsErrors>Nullable</WarningsAsErrors>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Company>Chromatic Ink</Company>
-        <Configurations>Debug;Release;DebugNoBuild</Configurations>
+        <Configurations>Release;Development</Configurations>
         <AssemblyName>Ego</AssemblyName>
         <RootNamespace>Ego</RootNamespace>
+        <Platforms>AnyCPU</Platforms>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <Optimize>false</Optimize>
+      <DebugSymbols>true</DebugSymbols>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Development' ">
+      <DebugSymbols>true</DebugSymbols>
     </PropertyGroup>
 
     <ItemGroup>

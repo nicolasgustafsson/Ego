@@ -1,19 +1,45 @@
 ﻿using ImGuiNET;
 using Rendering;
-
 namespace Ego;
 
-public class MeshRenderer : Node3D
+public class MeshCollection : Node, IAsset
 {
-    private MeshCollection Meshes;
+    public List<Mesh> Meshes = null!;
+    protected override string Name => FileName;
+
+    private string FileName = "Unknown";
+    
+    public void LoadFrom(string aPath)
+    {
+        FileName = Path.GetFileNameWithoutExtension(aPath);
+        Meshes = Mesh.LoadGltf(Context.Get<RendererApi>()!.Get<Renderer>()!, aPath);
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+
+        Context.Get<RendererApi>()!.Get<Renderer>()!.WaitUntilIdle();
+        
+        foreach(var mesh in Meshes)
+        {
+            mesh.Destroy();
+        }
+    }
+}
+
+public class MeshRenderer(string aModelPath = "Models/basicmesh.glb") : Node3D
+{
+    private MeshCollection Meshes = null!;
 
     private int MeshIndex = 0;
-    
-    public MeshRenderer(string aModelPath = "Models/basicmesh.glb")
+
+    public override void Start()
     {
-        Meshes = Program.Context.AssetManager.GetAsset<MeshCollection>(aModelPath);
+        base.Start();
+        Meshes = Context.Get<AssetManager>()!.GetAsset<MeshCollection>(aModelPath);
         
-        Program.Context.RendererApi.ERender += ERender;
+        Context.Get<RendererApi>()!.ERender += ERender;
     }
 
     public override void Inspect()

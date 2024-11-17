@@ -51,7 +51,7 @@ public unsafe class Image : IGpuDestroyable
 
         ImageView = new(VkImage, aFormat, (int)(aUsageFlags & VkImageUsageFlags.DepthStencilAttachment) != 0 ? VkImageAspectFlags.Depth : VkImageAspectFlags.Color, createInfo.mipLevels);
 
-        ImageRegistry.PointersToImages.Add((nint)VkImage.Handle, this);
+        ImageRegistry.PointersToImages.TryAdd((nint)VkImage.Handle, this);
     }
     
     public Image(IGpuImmediateSubmit aSubmit, byte* aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps) : this(aFormat, aUsageFlags | VkImageUsageFlags.TransferDst, aExtent, aMipMaps)

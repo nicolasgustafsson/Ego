@@ -7,9 +7,9 @@ namespace Ego;
 
 public static partial class Program
 {
-    public static EgoContext Context = null!;
     public static void Main()
     {
+        EgoContext Context = null!;
         Context = new();
         Context.Run();
     }
