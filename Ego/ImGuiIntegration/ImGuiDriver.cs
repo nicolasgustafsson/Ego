@@ -137,7 +137,9 @@ public class ImGuiDriver : Node, IGpuDestroyable
             .SetFragmentShader("Shaders/imguiFrag.spv")
             .SetTopology(VkPrimitiveTopology.TriangleList)
             .SetPolygonMode(VkPolygonMode.Fill)
+            .SetCullMode(VkCullModeFlags.None, VkFrontFace.Clockwise)
             .DisableDepthTest()
+            .SetColorAttachmentFormat(VkFormat.R16G16B16A16Sfloat)
             .SetDepthFormat(VkFormat.D32Sfloat)
             .Build();
 

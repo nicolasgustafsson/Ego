@@ -44,7 +44,7 @@ public partial class Renderer
             cmd.TransitionImage(RenderImage, VkImageLayout.ColorAttachmentOptimal);
 
             RenderGeometry(cmd);
-
+            
             cmd.BeginRendering(RenderImage, DepthImage);
             ERenderImgui(cmd);
             cmd.EndRendering();
