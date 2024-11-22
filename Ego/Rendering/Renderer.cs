@@ -67,7 +67,10 @@ public partial class Renderer : Node, IGpuImmediateSubmit
     
     public void WaitUntilIdle()
     {
-        Device.WaitUntilIdle();
+        lock(MainWindow)
+        {
+            Device.WaitUntilIdle();
+        }
     }
     
     public void ImmediateSubmit(Action<CommandBufferHandle> aAction)
