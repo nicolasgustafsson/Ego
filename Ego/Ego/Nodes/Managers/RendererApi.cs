@@ -9,6 +9,7 @@ public class RendererApi : Node
 
     private List<MeshRenderData> myRenderData = new();
     private Matrix4x4 myCameraView = new();
+    private bool myWantsToDie = false;
     
     public RendererApi(Window aWindow)
     {
@@ -18,6 +19,15 @@ public class RendererApi : Node
     public override void Start()
     {
         Task.Run(RenderMultithreaded);
+    }
+
+    protected override void DestroyChildren()
+    {
+        lock(myRenderData)
+        {
+            base.DestroyChildren();
+            myWantsToDie = true;
+        }
     }
 
     public void Update()
@@ -33,8 +43,7 @@ public class RendererApi : Node
     
     public async Task RenderMultithreaded()
     {
-        await Task.Delay(10);
-        while(true)
+        while(!myWantsToDie)
         {
             lock(myRenderData)
             {

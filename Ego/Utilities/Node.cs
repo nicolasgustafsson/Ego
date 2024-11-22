@@ -45,14 +45,19 @@ public class Node
     
     public void Destroy()
     {
-        foreach (var child in Children.Reverse())
-            child.Destroy();
+        DestroyChildren();
         
         OnDestroy();
         
         //We remove from parent last as OnDestroy might want to do things with the parent
         //Parent may be null when destroying contexts, so null check here
         Parent?.RemoveChild(this);
+    }
+    
+    protected virtual void DestroyChildren()
+    {
+        foreach (var child in Children.Reverse())
+            child.Destroy();
     }
     
     public virtual void OnDestroy()
