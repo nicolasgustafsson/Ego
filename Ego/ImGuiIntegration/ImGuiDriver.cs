@@ -563,7 +563,7 @@ public class ImGuiDriver : Node, IGpuDestroyable
     private byte GetWindowMinimized(ImGuiViewportPtr vp)
     {
         var data = GetWindowUserDataFromViewport(vp);
-        return (byte)(data!.Window.Minimized ? 1 : 0);
+        return (byte)(data!.Window.IsMinimized ? 1 : 0);
     }
 
     private unsafe void SetWindowTitle(ImGuiViewportPtr vp, IntPtr title)

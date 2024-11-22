@@ -10,6 +10,7 @@ public class RendererApi : Node
     private List<MeshRenderData> myRenderData = new();
     private Matrix4x4 myCameraView = new();
     private bool myWantsToDie = false;
+    private bool myCanDie = false;
     
     public RendererApi(Window aWindow)
     {
@@ -25,11 +26,22 @@ public class RendererApi : Node
     {
         lock(myRenderData)
         {
-            base.DestroyChildren();
-            myWantsToDie = true;
+            lock(Renderer.MainWindow)
+            {
+                base.DestroyChildren();
+                myWantsToDie = true;
+            }
         }
     }
-
+    
+    public void WaitUntilIdle()
+    {
+        lock(myRenderData)
+        {
+            Renderer.WaitUntilIdle();
+        }
+    }
+    
     public void Update()
     {
         List<MeshRenderData> renderData = new();
@@ -52,6 +64,8 @@ public class RendererApi : Node
             }
             
             Renderer.Render();
+
+            await Task.Yield();
         }
     }
     

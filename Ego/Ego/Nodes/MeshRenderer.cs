@@ -19,7 +19,7 @@ public class MeshCollection : Node, IAsset
     {
         base.OnDestroy();
 
-        Context.Get<RendererApi>()!.Get<Renderer>()!.WaitUntilIdle();
+        Context.Get<RendererApi>()!.WaitUntilIdle();
         
         foreach(var mesh in Meshes)
         {

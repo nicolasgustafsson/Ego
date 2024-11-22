@@ -57,7 +57,7 @@ public partial class Renderer : Node, IGpuImmediateSubmit
 
     private List<MeshRenderData> RenderData = new();
 
-    private Window MainWindow;
+    public Window MainWindow;
 
     public Renderer(Window aWindow)
     {
@@ -83,13 +83,16 @@ public partial class Renderer : Node, IGpuImmediateSubmit
 
     public void Render()
     {
-        if (MainWindow.Minimized)
-            return;
-        
-        RenderResult result = RenderInternal();
-        
-        if (result == RenderResult.ResizeNeeded)
-            Resize();
+        lock(MainWindow)
+        {
+            if (MainWindow.IsMinimized)
+                return;
+            
+            RenderResult result = RenderInternal();
+            
+            if (result == RenderResult.ResizeNeeded)
+                Resize();
+        }
     }
 
 

@@ -33,7 +33,7 @@ public class Window : Node
 
     public IntPtr WaylandDisplay => GLFW.Native.GetWaylandDisplay();
     public IntPtr WaylandWindow => GLFW.Native.GetWaylandWindow(NativeWindow);
-    public bool Minimized => NativeWindow.Minimized;
+    public bool IsMinimized => NativeWindow.Minimized;
     public bool IsFocused => NativeWindow.IsFocused;
 
     public Window(string aName, System.Numerics.Vector2 aWindowSize)
@@ -84,7 +84,10 @@ public class Window : Node
 
     public void Update()
     {
-        Glfw.PollEvents();
+        lock(this)
+        {
+            Glfw.PollEvents();
+        }
     }
     
     public Vector2 GetCursorPosition()
