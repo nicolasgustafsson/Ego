@@ -7,7 +7,7 @@
         <AssemblyName>Rendering</AssemblyName>
         <RootNamespace>Rendering</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <Configurations>Debug;Release;DebugNoBuild;Development</Configurations>
+        <Configurations>Debug;Release;Development</Configurations>
         <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
     <ItemGroup>

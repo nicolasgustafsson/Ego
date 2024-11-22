@@ -6,8 +6,10 @@ global using static VulkanApi.Gpu;
 
 using VulkanApi;
 using ImGuiNET;
+using SharpGLTF.Schema2;
 using Vortice.ShaderCompiler;
 using Vortice.Vulkan;
+using Image = VulkanApi.Image;
 
 namespace Rendering;
 
@@ -98,6 +100,6 @@ public partial class Renderer : Node, IGpuImmediateSubmit
 
     public void SetRenderData(List<MeshRenderData> aRenderData)
     {
-        RenderData = aRenderData;
+        RenderData = new(aRenderData);
     }
 }

@@ -20,16 +20,19 @@ public class Debug : Node
 
     private void Update()
     {
-        ImGuiDriver.Begin();
-       
-        ImGui.DockSpaceOverViewport(0, null, ImGuiDockNodeFlags.PassthruCentralNode);
+        lock(ImGuiDriver)
+        {
+            ImGuiDriver.Begin();
+           
+            ImGui.DockSpaceOverViewport(0, null, ImGuiDockNodeFlags.PassthruCentralNode);
 
-        ImGui.ShowDemoWindow();
-        ImGui.ShowAboutWindow();
+            ImGui.ShowDemoWindow();
+            ImGui.ShowAboutWindow();
 
-        EDebug();
-        
-        ImGuiDriver.End();
+            EDebug();
+            
+            ImGuiDriver.End();
+        }
     }
 
     public override char GetIcon()

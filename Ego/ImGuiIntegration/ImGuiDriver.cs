@@ -624,12 +624,16 @@ public class ImGuiDriver : Node, IGpuDestroyable
     
     public unsafe void Render(CommandBufferHandle cmd)
     {
-        ImDrawDataPtr drawData = ImGui.GetDrawData();
+        ImDrawDataPtr drawData;
+        lock(this)
+        {
+            drawData = ImGui.GetDrawData();
         
-        if (drawData.NativePtr == null)
-            return;
+            if (drawData.NativePtr == null)
+                return;
         
-        RenderDrawData(cmd, drawData);
+            RenderDrawData(cmd, drawData);
+        }
     }
     
     struct imguiPushConstants
@@ -802,67 +806,70 @@ public class ImGuiDriver : Node, IGpuDestroyable
 
     public unsafe void RenderOtherWindows()
     {
-        var platformIo = ImGui.GetPlatformIO();
-        
-        for(int i = 0; i < platformIo.Viewports.Size; i++)
+        lock(this)
         {
-            var viewport = platformIo.Viewports[i];
+            var platformIo = ImGui.GetPlatformIO();
+        
+            for(int i = 0; i < platformIo.Viewports.Size; i++)
+            {
+                var viewport = platformIo.Viewports[i];
 
-            if (viewport.NativePtr == ImGui.GetMainViewport().NativePtr)
-                continue;
-            
-            var viewportData = GetWindowUserDataFromViewport(viewport);
-
-            LogicalDevice.Device.WaitUntilIdle();
-            
-            viewportData.CurrentFrame.RenderFence.Wait();
-            viewportData.CurrentFrame.RenderFence.Reset();
-            
-            if (viewportData.WantsResize)
-            {
-                ResizeWindow(viewportData);
-                viewportData.WantsResize = false;
-            }
-            
-            viewportData.CurrentFrame.DeletionQueue.Flush();
-            viewportData.CurrentFrame.FrameDescriptors.ClearPools();
-            
-            var nextImage = LogicalDevice.Device.AcquireNextImage(viewportData.Swapchain!, viewportData.CurrentFrame.ImageAvailableSemaphore);
-            uint imageIndex = nextImage.imageIndex;
-            if (nextImage.result == VkResult.ErrorOutOfDateKHR)
-            {
-                viewportData.WantsResize = true;
-                i--;
-                continue;
-            }
-            
-            VkImage currentSwapchainImage = viewportData.Swapchain!.Images[(int)imageIndex];
-            
-            using (CommandBufferHandle cmd = viewportData.CurrentFrame.CommandBuffer.BeginRecording())
-            {
-                cmd.TransitionImage(viewportData.RenderImage!, VkImageLayout.General);
-                cmd.TransitionImage(viewportData.DepthImage!, VkImageLayout.DepthAttachmentOptimal);
+                if (viewport.NativePtr == ImGui.GetMainViewport().NativePtr)
+                    continue;
                 
-                cmd.BeginRendering(viewportData.RenderImage!, viewportData.DepthImage!);
-                RenderDrawData(cmd, viewport.DrawData);
-                cmd.EndRendering();
-                cmd.TransitionImage(viewportData.RenderImage!, VkImageLayout.TransferSrcOptimal);
-                cmd.TransitionImage(currentSwapchainImage, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal);
+                var viewportData = GetWindowUserDataFromViewport(viewport);
 
-                cmd.Blit(viewportData.RenderImage!, currentSwapchainImage, viewportData.Swapchain.Extents);
+                LogicalDevice.Device.WaitUntilIdle();
                 
-                cmd.TransitionImage(currentSwapchainImage, VkImageLayout.TransferDstOptimal, VkImageLayout.PresentSrcKHR);
-            }
+                viewportData.CurrentFrame.RenderFence.Wait();
+                viewportData.CurrentFrame.RenderFence.Reset();
+                
+                if (viewportData.WantsResize)
+                {
+                    ResizeWindow(viewportData);
+                    viewportData.WantsResize = false;
+                }
+                
+                viewportData.CurrentFrame.DeletionQueue.Flush();
+                viewportData.CurrentFrame.FrameDescriptors.ClearPools();
+                
+                var nextImage = LogicalDevice.Device.AcquireNextImage(viewportData.Swapchain!, viewportData.CurrentFrame.ImageAvailableSemaphore);
+                uint imageIndex = nextImage.imageIndex;
+                if (nextImage.result == VkResult.ErrorOutOfDateKHR)
+                {
+                    viewportData.WantsResize = true;
+                    i--;
+                    continue;
+                }
+                
+                VkImage currentSwapchainImage = viewportData.Swapchain!.Images[(int)imageIndex];
+                
+                using (CommandBufferHandle cmd = viewportData.CurrentFrame.CommandBuffer.BeginRecording())
+                {
+                    cmd.TransitionImage(viewportData.RenderImage!, VkImageLayout.General);
+                    cmd.TransitionImage(viewportData.DepthImage!, VkImageLayout.DepthAttachmentOptimal);
+                    
+                    cmd.BeginRendering(viewportData.RenderImage!, viewportData.DepthImage!);
+                    RenderDrawData(cmd, viewport.DrawData);
+                    cmd.EndRendering();
+                    cmd.TransitionImage(viewportData.RenderImage!, VkImageLayout.TransferSrcOptimal);
+                    cmd.TransitionImage(currentSwapchainImage, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal);
 
-            
-            viewportData.RenderQueue!.Submit(viewportData.CurrentFrame.CommandBuffer, viewportData.CurrentFrame.ImageAvailableSemaphore, viewportData.CurrentFrame.RenderFinishedSemaphore, viewportData.CurrentFrame.RenderFence);
-            
-            VkResult result = viewportData.RenderQueue.Present(viewportData.Swapchain, viewportData.CurrentFrame.RenderFinishedSemaphore, imageIndex);
-            
-            if (result == VkResult.ErrorOutOfDateKHR)
-                viewportData.WantsResize = true;
-            
-            viewportData.FrameNumber++;
+                    cmd.Blit(viewportData.RenderImage!, currentSwapchainImage, viewportData.Swapchain.Extents);
+                    
+                    cmd.TransitionImage(currentSwapchainImage, VkImageLayout.TransferDstOptimal, VkImageLayout.PresentSrcKHR);
+                }
+
+                
+                viewportData.RenderQueue!.Submit(viewportData.CurrentFrame.CommandBuffer, viewportData.CurrentFrame.ImageAvailableSemaphore, viewportData.CurrentFrame.RenderFinishedSemaphore, viewportData.CurrentFrame.RenderFence);
+                
+                VkResult result = viewportData.RenderQueue.Present(viewportData.Swapchain, viewportData.CurrentFrame.RenderFinishedSemaphore, imageIndex);
+                
+                if (result == VkResult.ErrorOutOfDateKHR)
+                    viewportData.WantsResize = true;
+                
+                viewportData.FrameNumber++;
+            }
         }
     }
 }
