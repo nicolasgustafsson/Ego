@@ -6,8 +6,10 @@ global using static VulkanApi.Gpu;
 
 using VulkanApi;
 using ImGuiNET;
+using SharpGLTF.Schema2;
 using Vortice.ShaderCompiler;
 using Vortice.Vulkan;
+using Image = VulkanApi.Image;
 
 namespace Rendering;
 
@@ -55,7 +57,7 @@ public partial class Renderer : Node, IGpuImmediateSubmit
 
     private List<MeshRenderData> RenderData = new();
 
-    private Window MainWindow;
+    public Window MainWindow;
 
     public Renderer(Window aWindow)
     {
@@ -65,7 +67,10 @@ public partial class Renderer : Node, IGpuImmediateSubmit
     
     public void WaitUntilIdle()
     {
-        Device.WaitUntilIdle();
+        lock(MainWindow)
+        {
+            Device.WaitUntilIdle();
+        }
     }
     
     public void ImmediateSubmit(Action<CommandBufferHandle> aAction)
@@ -81,13 +86,16 @@ public partial class Renderer : Node, IGpuImmediateSubmit
 
     public void Render()
     {
-        if (MainWindow.Minimized)
-            return;
-        
-        RenderResult result = RenderInternal();
-        
-        if (result == RenderResult.ResizeNeeded)
-            Resize();
+        lock(MainWindow)
+        {
+            if (MainWindow.IsMinimized)
+                return;
+            
+            RenderResult result = RenderInternal();
+            
+            if (result == RenderResult.ResizeNeeded)
+                Resize();
+        }
     }
 
 
@@ -98,6 +106,6 @@ public partial class Renderer : Node, IGpuImmediateSubmit
 
     public void SetRenderData(List<MeshRenderData> aRenderData)
     {
-        RenderData = aRenderData;
+        RenderData = new(aRenderData);
     }
 }

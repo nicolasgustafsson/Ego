@@ -10,7 +10,7 @@
         <PackageId>Platform</PackageId>
         <Company>Platform</Company>
         <Product>Platform</Product>
-        <Configurations>Debug;Release;DebugNoBuild;Development</Configurations>
+        <Configurations>Debug;Release;Development</Configurations>
         <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
