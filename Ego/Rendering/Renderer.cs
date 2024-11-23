@@ -67,10 +67,7 @@ public partial class Renderer : Node, IGpuImmediateSubmit
     
     public void WaitUntilIdle()
     {
-        lock(MainWindow)
-        {
-            Device.WaitUntilIdle();
-        }
+        Device.WaitUntilIdle();
     }
     
     public void ImmediateSubmit(Action<CommandBufferHandle> aAction)
@@ -86,16 +83,13 @@ public partial class Renderer : Node, IGpuImmediateSubmit
 
     public void Render()
     {
-        lock(MainWindow)
-        {
-            if (MainWindow.IsMinimized)
-                return;
-            
-            RenderResult result = RenderInternal();
-            
-            if (result == RenderResult.ResizeNeeded)
-                Resize();
-        }
+        if (MainWindow.IsMinimized)
+            return;
+        
+        RenderResult result = RenderInternal();
+        
+        if (result == RenderResult.ResizeNeeded)
+            Resize();
     }
 
 
@@ -106,6 +100,6 @@ public partial class Renderer : Node, IGpuImmediateSubmit
 
     public void SetRenderData(List<MeshRenderData> aRenderData)
     {
-        RenderData = new(aRenderData);
+        RenderData = aRenderData; //new(aRenderData);
     }
 }

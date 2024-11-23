@@ -1,4 +1,4 @@
-public class Context : Node
+public partial class Context : Node
 {
     public Action EUpdate = ()=>{};
     public new T? Get<T>() where T : Node

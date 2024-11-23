@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using Utilities;
 
-public class Node
+public partial class Node
 {
     private List<Node> xChildren { get; set; } = new();
     private Node? xParent = null;

@@ -12,7 +12,11 @@ public class MeshCollection : Node, IAsset
     public void LoadFrom(string aPath)
     {
         FileName = Path.GetFileNameWithoutExtension(aPath);
-        Meshes = Mesh.LoadGltf(Context.Get<RendererApi>()!.Get<Renderer>()!, aPath);
+        
+        lock(Context.Get<RendererApi>()!.MyRenderData)
+        {
+            Meshes = Mesh.LoadGltf(Context.Get<RendererApi>()!.Get<Renderer>()!, aPath);
+        }
     }
 
     public override void OnDestroy()
@@ -50,6 +54,6 @@ public class MeshRenderer(string aModelPath = "Models/basicmesh.glb") : Node3D
 
     private void ERender(List<MeshRenderData> aRenderData)
     {
-        aRenderData.Add(new() { Mesh = Meshes.Meshes[MeshIndex], WorldMatrix = WorldMatrix });
+        aRenderData.Add(new(){ Mesh = Meshes.Meshes[MeshIndex], WorldMatrix = WorldMatrix });
     }
 }
