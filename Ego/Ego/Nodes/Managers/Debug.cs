@@ -14,11 +14,9 @@ public class Debug : Node
         base.Start();
         
         ImGuiDriver = AddChild(new ImGuiDriver(Context.Get<RendererApi>()!.Get<Renderer>()!, Context.Get<Window>()!));
-
-        Context.EUpdate += Update;
     }
 
-    private void Update()
+    protected override void Update()
     {
         lock(ImGuiDriver)
         {

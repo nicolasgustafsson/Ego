@@ -6,13 +6,7 @@ public class SinusoidalMovement : Node3D
 {
     public Vector3 Movement = new Vector3(1f, 0f, 0f);
     
-    public override void Start()
-    {
-        base.Start();
-        Context.EUpdate += Update;
-    }
-    
-    private void Update()
+    protected override void Update()
     {
         LocalPosition = Movement * (float)Math.Sin(Context.Get<TimeKeeper>()!.ElapsedSeconds);
     }

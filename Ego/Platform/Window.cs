@@ -82,7 +82,7 @@ public class Window : Node
         Windows[aWindow].ECharInput?.Invoke(window, aCodePoint);
     }
 
-    public void Update()
+    public void PollEvents()
     {
         lock(this)
         {

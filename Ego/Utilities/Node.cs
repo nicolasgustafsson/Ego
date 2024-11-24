@@ -43,6 +43,21 @@ public partial class Node
         
     }
     
+    protected void UpdateInternal()
+    {
+        Update();
+        
+        foreach(var child in Children)
+        {
+            child.UpdateInternal();
+        }
+    }
+    
+    protected virtual void Update()
+    {
+        
+    }
+    
     public void Destroy()
     {
         DestroyChildren();

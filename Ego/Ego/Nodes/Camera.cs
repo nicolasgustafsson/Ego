@@ -9,10 +9,9 @@ public class Camera : Node3D
     public override void Start()
     {
         base.Start();
-        Context.EUpdate += Update;
     }
 
-    public void Update()
+    protected override void Update()
     {
         Context.Get<RendererApi>()!.SetCameraView(WorldMatrix);
     }

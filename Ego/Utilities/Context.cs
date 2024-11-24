@@ -1,6 +1,5 @@
 public partial class Context : Node
 {
-    public Action EUpdate = ()=>{};
     public new T? Get<T>() where T : Node
     {
         if (Children.FirstOrDefault(node => node is T) is T nodeOfType)

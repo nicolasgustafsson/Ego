@@ -12,7 +12,6 @@ public class EgoContext : Context
     public AssetManager AssetManager = null!;
     public TreeInspector TreeInspector = null!;
 
-    
     public void Run()
     {
         Time = AddChild(new TimeKeeper());
@@ -26,7 +25,7 @@ public class EgoContext : Context
         
         for(int i = 0; i < 1000 * 100; i++)
         {
-            AddChild(new SinusoidalMovement()).AddChild(new Node()).AddChild(new MeshRenderer());
+            AddChild(new SinusoidalMovement()).AddChild(new Node()); //.AddChild(new MeshRenderer());
         }
         AddChild(new SinusoidalMovement()).AddChild(new Node()).AddChild(new MeshRenderer()).LocalPosition += new Vector3(2f, 2f, 0f);
         AddChild(new Camera()).LocalPosition += new Vector3(0f, 0f, -7.5f);
@@ -37,18 +36,16 @@ public class EgoContext : Context
             watch.Restart();
             
             Task renderFrame = Task.Run(RendererApi.RenderFrame);
-            
-            EUpdate();
 
-            RendererApi.Update();
+            UpdateInternal();
 
-            Console.WriteLine($"Time passed update = {watch.ElapsedMilliseconds}");
+            Console.WriteLine($"Time passed update = {watch.ElapsedMilliseconds}ms");
             
             renderFrame.Wait();
             
-            Window.Update();
+            Window.PollEvents();
 
-            Console.WriteLine($"Time passed total = {watch.ElapsedMilliseconds}");
+            Console.WriteLine($"Time passed total = {watch.ElapsedMilliseconds}ms");
         }
 
         Destroy();
