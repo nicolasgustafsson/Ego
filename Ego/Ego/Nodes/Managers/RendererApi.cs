@@ -5,7 +5,6 @@ namespace Ego;
 
 public class RendererApi : Node
 {
-    public Action<List<MeshRenderData>> ERender = (_) => {};
     private Renderer Renderer = null!;
 
     public List<MeshRenderData> MyRenderData = new();
@@ -42,43 +41,36 @@ public class RendererApi : Node
             Renderer.WaitUntilIdle();
         }
     }
-
-    private static bool firstTime = true;
-    public void Update()
+    
+    public void AddRenderData(MeshRenderData aRenderData)
     {
-        Stopwatch watch = new();
-        watch.Start();
+        MyRenderData.Add(aRenderData);
+    }
+
+    protected override void Update()
+    {
         List<MeshRenderData> renderData = MyPreviousList;
-
-        int previousSize = renderData.Count;
-        renderData.Clear();
-        renderData.EnsureCapacity(previousSize);
-        ERender(renderData);
-
-        
-        if (!firstTime)
-            return;
-        lock(MyRenderData)
+        lock(MyPreviousList)
         {
             MyPreviousList = MyRenderData;
             MyRenderData = renderData;
         }
-
-        firstTime = false;
+        MyRenderData.Clear();
+        MyRenderData.EnsureCapacity(renderData.Count);
     }
     
     public void RenderFrame()
     {
         Stopwatch watch = new();
         watch.Start();
-        lock(MyRenderData)
+        lock(MyPreviousList)
         {
-            Renderer.SetRenderData(MyRenderData);
+            Renderer.SetRenderData(MyPreviousList);
             Renderer.SetCameraView(myCameraView);
         }
         
         Renderer.Render();
-        Console.WriteLine($"Time passed single frame = {watch.ElapsedMilliseconds}");
+        Console.WriteLine($"Time passed single frame = {watch.ElapsedMilliseconds}ms");
     }
     
     public void SetCameraView(Matrix4x4 aView)

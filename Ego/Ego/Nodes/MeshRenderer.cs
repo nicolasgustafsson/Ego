@@ -43,8 +43,13 @@ public class MeshRenderer(string aModelPath = "Models/basicmesh.glb") : Node3D
         base.Start();
         Meshes = Context.Get<AssetManager>()!.GetAsset<MeshCollection>(aModelPath);
         
-        Context.Get<RendererApi>()!.ERender += ERender;
     }
+
+    protected override void Update()
+    {
+        Context.Get<RendererApi>()!.AddRenderData(new(){Mesh = Meshes.Meshes[MeshIndex], WorldMatrix = WorldMatrix});
+    }
+
 
     public override void Inspect()
     {

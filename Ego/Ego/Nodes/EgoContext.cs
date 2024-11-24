@@ -25,7 +25,7 @@ public class EgoContext : Context
         
         for(int i = 0; i < 1000 * 100; i++)
         {
-            AddChild(new SinusoidalMovement()).AddChild(new Node()); //.AddChild(new MeshRenderer());
+            AddChild(new SinusoidalMovement()).AddChild(new Node()).AddChild(new MeshRenderer());
         }
         AddChild(new SinusoidalMovement()).AddChild(new Node()).AddChild(new MeshRenderer()).LocalPosition += new Vector3(2f, 2f, 0f);
         AddChild(new Camera()).LocalPosition += new Vector3(0f, 0f, -7.5f);
