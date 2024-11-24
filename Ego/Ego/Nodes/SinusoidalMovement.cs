@@ -8,7 +8,7 @@ public class SinusoidalMovement : Node3D
     
     protected override void Update()
     {
-        LocalPosition = Movement * (float)Math.Sin(Context.Get<TimeKeeper>()!.ElapsedSeconds);
+        LocalPosition = Movement * (float)Math.Sin(((EgoContext)Context).Time.ElapsedSeconds);
     }
     
     public override void Inspect()

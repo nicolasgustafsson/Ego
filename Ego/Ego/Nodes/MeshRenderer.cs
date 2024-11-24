@@ -47,7 +47,7 @@ public class MeshRenderer(string aModelPath = "Models/basicmesh.glb") : Node3D
 
     protected override void Update()
     {
-        Context.Get<RendererApi>()!.AddRenderData(new(){Mesh = Meshes.Meshes[MeshIndex], WorldMatrix = WorldMatrix});
+        ((EgoContext)Context)!.RendererApi.AddRenderData(new(){Mesh = Meshes.Meshes[MeshIndex], WorldMatrix = WorldMatrix});
     }
 
 
@@ -55,10 +55,5 @@ public class MeshRenderer(string aModelPath = "Models/basicmesh.glb") : Node3D
     {
         base.Inspect();
         ImGui.SliderInt("Mesh Index", ref MeshIndex, 0, Meshes.Meshes.Count - 1);
-    }
-
-    private void ERender(List<MeshRenderData> aRenderData)
-    {
-        aRenderData.Add(new(){ Mesh = Meshes.Meshes[MeshIndex], WorldMatrix = WorldMatrix });
     }
 }

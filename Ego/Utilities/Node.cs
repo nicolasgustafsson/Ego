@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Utilities;
+using Utilities.Interop;
 
 public partial class Node
 {
@@ -30,7 +31,7 @@ public partial class Node
     
     public T? Get<T>() where T : Node
     {
-        return Children.OfType<T>().FirstOrDefault();
+        return xChildren.OfType<T>().FirstOrDefault();
     }
     
     public void RemoveChild<T>(T aChild) where T : Node
@@ -47,7 +48,7 @@ public partial class Node
     {
         Update();
         
-        foreach(var child in Children)
+        foreach(var child in xChildren)
         {
             child.UpdateInternal();
         }

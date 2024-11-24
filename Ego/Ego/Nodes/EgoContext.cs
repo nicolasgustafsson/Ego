@@ -19,7 +19,7 @@ public class EgoContext : Context
         RendererApi = AddChild(new RendererApi(Window));
         Debug = AddChild(new Debug());
         AssetManager = AddChild(new AssetManager());
-        TreeInspector = AddChild(new TreeInspector());
+        //TreeInspector = AddChild(new TreeInspector());
         
         AddChild(new SinusoidalMovement()).AddChild(new Node()).AddChild(new MeshRenderer());
         

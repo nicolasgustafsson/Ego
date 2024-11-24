@@ -100,6 +100,6 @@ public partial class Renderer : Node, IGpuImmediateSubmit
 
     public void SetRenderData(List<MeshRenderData> aRenderData)
     {
-        RenderData = aRenderData; //new(aRenderData);
+        RenderData = aRenderData;
     }
 }
