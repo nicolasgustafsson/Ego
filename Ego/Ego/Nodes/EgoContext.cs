@@ -14,6 +14,8 @@ public class EgoContext : Context
 
     public void Run()
     {
+        Context = this;
+        
         Time = AddChild(new TimeKeeper());
         Window = AddChild(new Window("Game", new Vector2(1920, 1080)));
         RendererApi = AddChild(new RendererApi(Window));
@@ -21,13 +23,13 @@ public class EgoContext : Context
         AssetManager = AddChild(new AssetManager());
         //TreeInspector = AddChild(new TreeInspector());
         
-        AddChild(new SinusoidalMovement()).AddChild(new Node()).AddChild(new MeshRenderer());
+        AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer());
         
         for(int i = 0; i < 1000 * 100; i++)
         {
-            AddChild(new SinusoidalMovement()).AddChild(new Node()).AddChild(new MeshRenderer());
+            AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer());
         }
-        AddChild(new SinusoidalMovement()).AddChild(new Node()).AddChild(new MeshRenderer()).LocalPosition += new Vector3(2f, 2f, 0f);
+        AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer()).LocalPosition += new Vector3(2f, 2f, 0f);
         AddChild(new Camera()).LocalPosition += new Vector3(0f, 0f, -7.5f);
 
         Stopwatch watch = new();

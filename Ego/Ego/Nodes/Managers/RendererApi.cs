@@ -67,9 +67,9 @@ public class RendererApi : Node
         {
             Renderer.SetRenderData(MyPreviousList);
             Renderer.SetCameraView(myCameraView);
+            Renderer.Render();
         }
         
-        Renderer.Render();
         Console.WriteLine($"Time passed single frame = {watch.ElapsedMilliseconds}ms");
     }
     

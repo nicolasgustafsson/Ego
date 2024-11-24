@@ -10,7 +10,7 @@ public partial class Node
     public IReadOnlyList<Node> Children => xChildren;
     public Node? Parent => xParent;
 
-    public Context Context => GetFirstParentOfType<Context>()!;
+    public Context Context = null!;
     
     public T? GetFirstParentOfType<T>() where T : Node
     {
@@ -24,6 +24,7 @@ public partial class Node
     {
         xChildren.Add(aChild);
         aChild.xParent = this;
+        aChild.Context = Context;
 
         aChild.Start();
         return aChild;

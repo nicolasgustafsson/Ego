@@ -1,4 +1,6 @@
-﻿namespace Ego;
+﻿using System.Runtime.CompilerServices;
+
+namespace Ego;
 
 public struct Transform
 {
@@ -9,7 +11,6 @@ public struct Transform
     public Transform()
     {
     }
-    
-    
+
     public Matrix4x4 Matrix => Matrix4x4.CreateScale(Scale) * Matrix4x4.CreateFromQuaternion(Rotation) * Matrix4x4.CreateTranslation(Position);
 }
