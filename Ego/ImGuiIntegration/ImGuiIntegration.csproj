@@ -17,6 +17,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Hexa.NET.GLFW" Version="1.0.4" />
+      <PackageReference Include="Hexa.NET.ImGui" Version="2.2.4" />
+      <PackageReference Include="Hexa.NET.ImGui.Backends" Version="1.0.12" />
+      <PackageReference Include="Hexa.NET.ImGui.Backends.GLFW" Version="1.0.12" />
       <PackageReference Include="Vortice.Vulkan" Version="1.9.2" />
       <PackageReference Include="Vortice.VulkanMemoryAllocator" Version="1.5.0" />
     </ItemGroup>

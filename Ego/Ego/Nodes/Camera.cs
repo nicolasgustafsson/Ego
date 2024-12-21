@@ -1,5 +1,4 @@
-﻿using ImGuiNET;
-using Rendering;
+﻿using Rendering;
 using Quaternion = System.Numerics.Quaternion;
 
 namespace Ego;

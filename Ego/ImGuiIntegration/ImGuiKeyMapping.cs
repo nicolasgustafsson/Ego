@@ -1,4 +1,4 @@
-using ImGuiNET;
+using Hexa.NET.ImGui;
 
 namespace Rendering;
 
@@ -37,25 +37,25 @@ public static class ImGuiKeyMapping
             case KeyboardKey.Slash:
                 return ImGuiKey.Slash;
             case KeyboardKey.Alpha0:
-                return ImGuiKey._0;
+                return ImGuiKey.Key0;
             case KeyboardKey.Alpha1:
-                return ImGuiKey._1;
+                return ImGuiKey.Key1;
             case KeyboardKey.Alpha2:
-                return ImGuiKey._2;
+                return ImGuiKey.Key2;
             case KeyboardKey.Alpha3:
-                return ImGuiKey._3;
+                return ImGuiKey.Key3;
             case KeyboardKey.Alpha4:
-                return ImGuiKey._4;
+                return ImGuiKey.Key4;
             case KeyboardKey.Alpha5:
-                return ImGuiKey._5;
+                return ImGuiKey.Key5;
             case KeyboardKey.Alpha6:
-                return ImGuiKey._6;
+                return ImGuiKey.Key6;
             case KeyboardKey.Alpha7:
-                return ImGuiKey._7;
+                return ImGuiKey.Key7;
             case KeyboardKey.Alpha8:
-                return ImGuiKey._8;
+                return ImGuiKey.Key8;
             case KeyboardKey.Alpha9:
-                return ImGuiKey._9;
+                return ImGuiKey.Key9;
             case KeyboardKey.SemiColon:
                 return ImGuiKey.Semicolon;
             case KeyboardKey.Equal:

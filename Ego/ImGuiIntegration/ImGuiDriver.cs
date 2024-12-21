@@ -5,14 +5,27 @@ using System.Numerics;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using GLFW;
+using Hexa.NET.GLFW;
 using VulkanApi;
-using ImGuiNET;
+using Hexa.NET.ImGui;
+using Hexa.NET.ImGui.Backends.GLFW;
+using Hexa.NET.ImGui.Backends.Vulkan;
+using Hexa.NET.ImGui.Backends.Win32;
 using Platform;
 using Utilities.Interop;
 using Vortice.ShaderCompiler;
 using Vortice.Vulkan;
+using GLFWwindow = Hexa.NET.ImGui.Backends.GLFW.GLFWwindow;
 using Image = VulkanApi.Image;
+using VkDescriptorSet = Vortice.Vulkan.VkDescriptorSet;
+using VkDevice = Vortice.Vulkan.VkDevice;
+using VkImage = Vortice.Vulkan.VkImage;
+using VkImageLayout = Vortice.Vulkan.VkImageLayout;
+using VkPipeline = Hexa.NET.ImGui.Backends.Vulkan.VkPipeline;
+using VkPipelineCache = Hexa.NET.ImGui.Backends.Vulkan.VkPipelineCache;
+using VkPresentModeKHR = Vortice.Vulkan.VkPresentModeKHR;
+using VkRenderPass = Hexa.NET.ImGui.Backends.Vulkan.VkRenderPass;
+using VkSurfaceFormatKHR = Vortice.Vulkan.VkSurfaceFormatKHR;
 using Vulkan = Vortice.Vulkan.Vulkan;
 
 namespace Rendering;
@@ -21,11 +34,11 @@ public class ImGuiDriver : Node, IGpuDestroyable
 {
     class PlatformUserData
     {
-        public GLFW.Cursor StandardCursor;
-        public GLFW.Cursor TextInputCursor;
-        public GLFW.Cursor ResizeNS;
-        public GLFW.Cursor ResizeEW;
-        public GLFW.Cursor Hand;
+        public GLFWcursorPtr StandardCursor;
+        public GLFWcursorPtr TextInputCursor;
+        public GLFWcursorPtr ResizeNS;
+        public GLFWcursorPtr ResizeEW;
+        public GLFWcursorPtr Hand;
 
         public bool WantUpdateMonitors = false;
     }
@@ -68,23 +81,133 @@ public class ImGuiDriver : Node, IGpuDestroyable
     private List<AllocatedBuffer<ushort>> OldIBuffers = new();
     private VkDescriptorSetLayout VertexBufferLayout;
     private VkDescriptorSetLayout IndexBufferLayout;
-    private readonly Platform_CreateWindow _createWindow;
-    private readonly Platform_DestroyWindow _destroyWindow;
-    private readonly Platform_GetWindowPos _getWindowPos;
-    private readonly Platform_ShowWindow _showWindow;
-    private readonly Platform_SetWindowPos _setWindowPos;
-    private readonly Platform_SetWindowSize _setWindowSize;
-    private readonly Platform_GetWindowSize _getWindowSize;
-    private readonly Platform_SetWindowFocus _setWindowFocus;
-    private readonly Platform_GetWindowFocus _getWindowFocus;
-    private readonly Platform_GetWindowMinimized _getWindowMinimized;
-    private readonly Platform_SetWindowTitle _setWindowTitle; 
+    private readonly PlatformCreateWindow _createWindow;
+    private readonly PlatformDestroyWindow _destroyWindow;
+    private readonly PlatformGetWindowPos _getWindowPos;
+    private readonly PlatformShowWindow _showWindow;
+    private readonly PlatformSetWindowPos _setWindowPos;
+    private readonly PlatformSetWindowSize _setWindowSize;
+    private readonly PlatformGetWindowSize _getWindowSize;
+    private readonly PlatformSetWindowFocus _setWindowFocus;
+    private readonly PlatformGetWindowFocus _getWindowFocus;
+    private readonly PlatformGetWindowMinimized _getWindowMinimized;
+    private readonly PlatformSetWindowTitle _setWindowTitle; 
     
     private Stopwatch Stopwatch = new();
     private PlatformUserData PlatformData = new();
 
+    ImGuiImplVulkanInitInfo imguiVulkanInitInfo = new();
+    static void CheckVkResult(VkResult err)
+    {
+        if (err == 0)
+            return;
+    }
+    
+    public delegate void CallbackDelegate(VkResult message);
+    [MethodImplAttribute(MethodImplOptions.InternalCall)]
+    public static extern void setCallback(IntPtr aCallback);
+
+    private CallbackDelegate del;
+
+    private uint SwapchainImageFormat = 0;
+    
     public unsafe ImGuiDriver(Renderer aRenderer, Window aMainWindow)
     {
+        var imGuiContextPtr = ImGui.CreateContext();
+        
+        imGuiContextPtr.IO.ConfigErrorRecovery = 1;
+        imGuiContextPtr.IO.ConfigErrorRecoveryEnableAssert = 0;
+        
+        ImGui.SetCurrentContext(imGuiContextPtr);
+        ImGuiImplGLFW.SetCurrentContext(imGuiContextPtr);
+
+        MainWindow = aMainWindow;
+        
+        //del = CheckVkResult;
+        
+        ImGuiImplGLFW.InitForVulkan(Unsafe.BitCast<Hexa.NET.GLFW.GLFWwindowPtr, Hexa.NET.ImGui.Backends.GLFW.GLFWwindowPtr>(aMainWindow.NativeWindow), true);
+        
+        ImGuiImplVulkan.SetCurrentContext(imGuiContextPtr);
+        
+        DescriptorAllocator = new DescriptorAllocatorGrowable();
+        DescriptorAllocator.InitPool(100, [new(ratio: 1000, type: VkDescriptorType.CombinedImageSampler)]);
+        
+        imguiVulkanInitInfo.Instance = new(Api.ApiInstance.VkInstance.Handle);
+        imguiVulkanInitInfo.PhysicalDevice = new(Gpu.GpuInstance.VkPhysicalDevice.Handle);
+        imguiVulkanInitInfo.Device = new(LogicalDevice.Device.VkDevice.Handle);
+        imguiVulkanInitInfo.QueueFamily = Gpu.GpuInstance.GraphicsFamily;
+        imguiVulkanInitInfo.Queue = new(aRenderer.RenderQueue.VkQueue.Handle);
+        imguiVulkanInitInfo.PipelineCache = VkPipelineCache.Null;
+        imguiVulkanInitInfo.DescriptorPool = new((IntPtr)DescriptorAllocator.AcquirePool().Handle);
+        imguiVulkanInitInfo.UseDynamicRendering = 1;
+        imguiVulkanInitInfo.MinImageCount = Surface.MainWindowSurface.SurfaceCapabilities.minImageCount;
+        imguiVulkanInitInfo.ImageCount = Surface.MainWindowSurface.SurfaceCapabilities.minImageCount + 1;
+        imguiVulkanInitInfo.MSAASamples = 0;
+        imguiVulkanInitInfo.PipelineRenderingCreateInfo = new();
+        
+        imguiVulkanInitInfo.PipelineRenderingCreateInfo.PNext = (void*)null;
+        
+                                                                //VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO
+        imguiVulkanInitInfo.PipelineRenderingCreateInfo.SType = 1000044002;
+        imguiVulkanInitInfo.PipelineRenderingCreateInfo.StencilAttachmentFormat = 0;
+        imguiVulkanInitInfo.PipelineRenderingCreateInfo.ViewMask = 0;
+        imguiVulkanInitInfo.PipelineRenderingCreateInfo.DepthAttachmentFormat = 0;
+        imguiVulkanInitInfo.PipelineRenderingCreateInfo.ColorAttachmentCount = 1;
+
+        SwapchainImageFormat = (uint)aRenderer.Swapchain.ImageFormat;
+        
+        fixed(uint* imageFormat = &SwapchainImageFormat)
+        {
+            imguiVulkanInitInfo.PipelineRenderingCreateInfo.PColorAttachmentFormats = imageFormat;
+        
+            imguiVulkanInitInfo.Allocator = null;
+        
+            fixed(ImGuiImplVulkanInitInfo* info = &imguiVulkanInitInfo)
+            {
+                ImGuiImplVulkan.Init(info);
+                //ImGuiImplVulkan.CreateFontsTexture();
+            }
+        }
+        
+        aRenderer.ERenderImgui += Render;
+        return;
+        
+        //************************************************************
+        //************************************************************
+        //************************************************************
+        //************************************************************
+        //************************************************************
+        //************************************************************
+        
+        //Old imgui manually cobbled together backend after this point
+        
+        //************************************************************
+        //************************************************************
+        //************************************************************
+        //************************************************************
+        //************************************************************
+        //************************************************************
+        
+        /*
+ ImGui_ImplVulkan_InitInfo init_info = {};
+    init_info.Instance = g_Instance;
+    init_info.PhysicalDevice = g_PhysicalDevice;
+    init_info.Device = g_Device;
+    init_info.QueueFamily = g_QueueFamily;
+    init_info.Queue = g_Queue;
+    init_info.PipelineCache = g_PipelineCache;
+    init_info.DescriptorPool = g_DescriptorPool;
+    init_info.RenderPass = wd->RenderPass;
+    init_info.Subpass = 0;
+    init_info.MinImageCount = g_MinImageCount;
+    init_info.ImageCount = wd->ImageCount;
+    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    init_info.Allocator = g_Allocator;
+    init_info.CheckVkResultFn = check_vk_result;
+    ImGui_ImplVulkan_Init(&init_info); 
+         */
+        
+        
         Stopwatch.Start();
         MainWindow = aMainWindow;
         
@@ -101,22 +224,24 @@ public class ImGuiDriver : Node, IGpuDestroyable
         iconRange.Add(59392);
         iconRange.Add(62324);
         iconRange.Add(0);
-        ImFontConfigPtr config = ImGuiNative.ImFontConfig_ImFontConfig();
+        
+        
+        ImFontConfigPtr config = ImGui.ImFontConfig();
         config.MergeMode = true;
         config.SizePixels = 15f;
 
         //config.GlyphOffset = new(0f, 2f);
         
-        io.Fonts.AddFontFromFileTTF("ego-icon-font.ttf", 15f, config, (IntPtr)iconRange.AsSpan().GetPointerUnsafe());
+        io.Fonts.AddFontFromFileTTF("ego-icon-font.ttf", 15f, config.Handle, (uint*)iconRange.AsSpan().GetPointerUnsafe());
         io.Fonts.AddFontDefault();
 
         io.Fonts.Fonts[0].ConfigData.RasterizerMultiply = 1.2f;
+        byte* pixels = null;
+        int width = 0;
+        int height = 0;
+        io.Fonts.GetTexDataAsRGBA32(ref pixels, ref width, ref height);
         
-        io.Fonts.GetTexDataAsRGBA32(out nint pixels, out var width, out var height);
-        
-        FontTexture = new Image(aRenderer, (byte*)pixels.ToPointer(), VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled | VkImageUsageFlags.TransferDst, new VkExtent3D(width, height, 1), false);
-        DescriptorAllocator = new DescriptorAllocatorGrowable();
-        DescriptorAllocator.InitPool(100, [new(ratio: 1000, type: VkDescriptorType.CombinedImageSampler)]);
+        FontTexture = new Image(aRenderer, pixels, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled | VkImageUsageFlags.TransferDst, new VkExtent3D(width, height, 1), false);
         
         Sampler = new(VkFilter.Linear);
 
@@ -126,7 +251,7 @@ public class ImGuiDriver : Node, IGpuDestroyable
 
         AddTexture(FontTexture);
 
-        io.Fonts.SetTexID(FontTexture.GetHandle());
+        io.Fonts.SetTexID(new ImTextureID(FontTexture.GetHandle()));
         
         Pipeline = new GraphicsPipeline.GraphicsPipelineBuilder()
             .AddPushConstant(new VkPushConstantRange { offset = 0, size = sizeof(float) * 4 + sizeof(VkDeviceAddress), stageFlags = VkShaderStageFlags.Vertex })
@@ -169,38 +294,38 @@ public class ImGuiDriver : Node, IGpuDestroyable
         io.BackendFlags |= ImGuiBackendFlags.PlatformHasViewports;
         io.BackendFlags |= ImGuiBackendFlags.RendererHasViewports; 
         
-        platformIo.Platform_CreateWindow = Marshal.GetFunctionPointerForDelegate(_createWindow);
-        platformIo.Platform_DestroyWindow = Marshal.GetFunctionPointerForDelegate(_destroyWindow);
-        platformIo.Platform_ShowWindow = Marshal.GetFunctionPointerForDelegate(_showWindow);
-        platformIo.Platform_SetWindowPos = Marshal.GetFunctionPointerForDelegate(_setWindowPos);
-        platformIo.Platform_SetWindowSize = Marshal.GetFunctionPointerForDelegate(_setWindowSize);
-        platformIo.Platform_SetWindowFocus = Marshal.GetFunctionPointerForDelegate(_setWindowFocus);
-        platformIo.Platform_GetWindowFocus = Marshal.GetFunctionPointerForDelegate(_getWindowFocus);
-        platformIo.Platform_GetWindowMinimized = Marshal.GetFunctionPointerForDelegate(_getWindowMinimized);
-        platformIo.Platform_GetWindowMinimized = Marshal.GetFunctionPointerForDelegate(_getWindowMinimized);
-        platformIo.Platform_SetWindowTitle = Marshal.GetFunctionPointerForDelegate(_setWindowTitle);
+        platformIo.PlatformCreateWindow = (void*)Marshal.GetFunctionPointerForDelegate(_createWindow);
+        platformIo.PlatformDestroyWindow = (void*)Marshal.GetFunctionPointerForDelegate(_destroyWindow);
+        platformIo.PlatformShowWindow = (void*)Marshal.GetFunctionPointerForDelegate(_showWindow);
+        platformIo.PlatformSetWindowPos = (void*)Marshal.GetFunctionPointerForDelegate(_setWindowPos);
+        platformIo.PlatformSetWindowSize = (void*)Marshal.GetFunctionPointerForDelegate(_setWindowSize);
+        platformIo.PlatformSetWindowFocus = (void*)Marshal.GetFunctionPointerForDelegate(_setWindowFocus);
+        platformIo.PlatformGetWindowFocus = (void*)Marshal.GetFunctionPointerForDelegate(_getWindowFocus);
+        platformIo.PlatformGetWindowMinimized = (void*)Marshal.GetFunctionPointerForDelegate(_getWindowMinimized);
+        platformIo.PlatformGetWindowMinimized = (void*)Marshal.GetFunctionPointerForDelegate(_getWindowMinimized);
+        platformIo.PlatformSetWindowTitle = (void*)Marshal.GetFunctionPointerForDelegate(_setWindowTitle);
         
         //I'm not sure why this is needed, but otherwise we get garbage parameters. Copied from the sample program(docking branch)
-        ImGuiNative.ImGuiPlatformIO_Set_Platform_GetWindowPos(platformIo.NativePtr, Marshal.GetFunctionPointerForDelegate(_getWindowPos));
-        ImGuiNative.ImGuiPlatformIO_Set_Platform_GetWindowSize(platformIo.NativePtr, Marshal.GetFunctionPointerForDelegate(_getWindowSize));
+        //ImGui.PlatformIOSetPlatformGetWindowPos(platformIo, Marshal.GetFunctionPointerForDelegate(_getWindowPos));
+        //ImGui.PlatformIOSetPlatformGetWindowSize(platformIo, Marshal.GetFunctionPointerForDelegate(_getWindowSize));
         
         GCHandle handle = GCHandle.Alloc(PlatformData, GCHandleType.Pinned);
-        io.BackendPlatformUserData = GCHandle.ToIntPtr(handle);
-        
+        io.BackendPlatformUserData = (void*)GCHandle.ToIntPtr(handle);
+        /*
         PlatformData.StandardCursor = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.Arrow);
         PlatformData.TextInputCursor = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.Beam);
         PlatformData.ResizeEW = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.ResizeHorizontal);
         PlatformData.ResizeNS = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.ResizeVertical);
         PlatformData.Hand = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.Hand);
+        */
 
         ImGuiViewportPtr mainViewPort = ImGui.GetMainViewport();
         
         AdditionalWindows.Add(aMainWindow);
         UpdateMonitors();
 
-        mainViewPort.PlatformUserData = GCHandle.ToIntPtr(CreateNewWindowUserData(aMainWindow).Pin());
+        mainViewPort.PlatformUserData = (void*)GCHandle.ToIntPtr(CreateNewWindowUserData(aMainWindow).Pin());
         
-        aRenderer.ERenderImgui += Render;
         aRenderer.EPostRender += RenderOtherWindows;
 
         SetupTheme();
@@ -246,9 +371,9 @@ public class ImGuiDriver : Node, IGpuDestroyable
         colors[(int)ImGuiCol.ResizeGripActive]       = new Vector4(0.98f, 0.98f, 0.98f, 0.95f);
         colors[(int)ImGuiCol.Tab]                    = new Vector4(0.23f, 0.26f, 0.32f, 1.00f);
         colors[(int)ImGuiCol.TabHovered]             = new Vector4(0.52f, 0.56f, 0.65f, 0.80f);
-        colors[(int)ImGuiCol.TabActive]              = new Vector4(0.35f, 0.39f, 0.48f, 1.00f);
-        colors[(int)ImGuiCol.TabUnfocused]           = new Vector4(0.23f, 0.26f, 0.32f, 1.00f);
-        colors[(int)ImGuiCol.TabUnfocusedActive]     = new Vector4(0.26f, 0.30f, 0.37f, 1.00f);
+        //colors[(int)ImGuiCol.TabActive]              = new Vector4(0.35f, 0.39f, 0.48f, 1.00f);
+        //colors[(int)ImGuiCol.TabUnfocused]           = new Vector4(0.23f, 0.26f, 0.32f, 1.00f);
+        //colors[(int)ImGuiCol.TabUnfocusedActive]     = new Vector4(0.26f, 0.30f, 0.37f, 1.00f);
         colors[(int)ImGuiCol.DockingPreview]         = new Vector4(0.98f, 0.98f, 0.98f, 0.70f);
         colors[(int)ImGuiCol.DockingEmptyBg]         = new Vector4(0.20f, 0.20f, 0.20f, 1.00f);
         colors[(int)ImGuiCol.PlotLines]              = new Vector4(0.61f, 0.61f, 0.61f, 1.00f);
@@ -262,14 +387,14 @@ public class ImGuiDriver : Node, IGpuDestroyable
         colors[(int)ImGuiCol.TableRowBgAlt]          = new Vector4(1.00f, 1.00f, 1.00f, 0.06f);
         colors[(int)ImGuiCol.TextSelectedBg]         = new Vector4(0.98f, 0.98f, 0.98f, 0.35f);
         colors[(int)ImGuiCol.DragDropTarget]         = new Vector4(0.93f, 0.94f, 0.96f, 0.64f);
-        colors[(int)ImGuiCol.NavHighlight]           = new Vector4(0.98f, 0.98f, 0.98f, 1.00f);
+        //colors[(int)ImGuiCol.NavHighlight]           = new Vector4(0.98f, 0.98f, 0.98f, 1.00f);
         colors[(int)ImGuiCol.NavWindowingHighlight]  = new Vector4(1.00f, 1.00f, 1.00f, 0.70f);
         colors[(int)ImGuiCol.NavWindowingDimBg]      = new Vector4(0.80f, 0.80f, 0.80f, 0.20f);
         colors[(int)ImGuiCol.ModalWindowDimBg]       = new Vector4(0.80f, 0.80f, 0.80f, 0.35f);
             
             
         //Orange Highlights
-        colors[(int)ImGuiCol.TabActive]              = new Vector4(0.63f, 0.41f, 0.12f, 1.00f);
+        //colors[(int)ImGuiCol.TabActive]              = new Vector4(0.63f, 0.41f, 0.12f, 1.00f);
         colors[(int)ImGuiCol.TitleBgActive]          = new Vector4(0.79f, 0.51f, 0.15f, 0.36f);
         colors[(int)ImGuiCol.ScrollbarGrabActive]    = new Vector4(0.79f, 0.51f, 0.15f, 0.36f);
         colors[(int)ImGuiCol.SliderGrabActive]       = new Vector4(0.79f, 0.51f, 0.15f, 0.66f);
@@ -277,7 +402,7 @@ public class ImGuiDriver : Node, IGpuDestroyable
         //colors[(int)ImGuiCol.HeaderHovered]          = new Vector4(0.76f, 0.50f, 0.15f, 1.00f);
         colors[(int)ImGuiCol.HeaderActive]           = new Vector4(0.88f, 0.91f, 0.96f, 0.37f);
         //colors[(int)ImGuiCol.TabHovered]             = new Vector4(0.76f, 0.50f, 0.15f, 1.00f);
-        colors[(int)ImGuiCol.TabActive]              = new Vector4(0.72f, 0.47f, 0.13f, 1.00f);
+        //colors[(int)ImGuiCol.TabActive]              = new Vector4(0.72f, 0.47f, 0.13f, 1.00f);
         colors[(int)ImGuiCol.ScrollbarGrabActive]    = new Vector4(0.79f, 0.51f, 0.15f, 0.81f);
     }
     
@@ -295,9 +420,9 @@ public class ImGuiDriver : Node, IGpuDestroyable
         return newDescriptorSet;
     }
     
-    private VkDescriptorSet GetOrAddDescriptor(nint aImage)
+    private VkDescriptorSet GetOrAddDescriptor(ImTextureID aImage)
     {
-        return GetOrAddDescriptor(ImageRegistry.PointersToImages[aImage]);
+        return GetOrAddDescriptor(ImageRegistry.PointersToImages[(nint)aImage.Handle]);
     }
     
     private VkDescriptorSet GetOrAddDescriptor(Image aImage)
@@ -382,35 +507,36 @@ public class ImGuiDriver : Node, IGpuDestroyable
         var platformIo = ImGui.GetPlatformIO();
         PlatformData.WantUpdateMonitors = false;
 
-        Marshal.FreeHGlobal(platformIo.NativePtr->Monitors.Data);
-
-        int monitorCount = Glfw.Monitors.Length;
+        /*
+        Marshal.FreeHGlobal((IntPtr)platformIo.Monitors.Data)Glfwint monitorCount = Glfw.Monitors.Length;
         IntPtr data = Marshal.AllocHGlobal(Unsafe.SizeOf<ImGuiPlatformMonitor>() * Glfw.Monitors.Length);
-        platformIo.NativePtr->Monitors = new ImVector(monitorCount, monitorCount, data);
+        platformIo.Monitors = new ImVector<ImGuiPlatformMonitor>(monitorCount, monitorCount, (ImGuiPlatformMonitor*)data);
         
         for(int i = 0; i < monitorCount; i++)
         {
             var glfwMonitor = Glfw.Monitors[i];
             Glfw.GetMonitorPosition(glfwMonitor, out int x, out int y);
             var videoMode = Glfw.GetVideoMode(glfwMonitor);
-            ImGuiPlatformMonitorPtr monitorPtr = platformIo.Monitors[i];
+            //problem
+             ImGuiPlatformMonitor monitorPtr = platformIo.Monitors[i];
 
             monitorPtr.MainPos = monitorPtr.WorkPos = new Vector2(x, y);
             monitorPtr.MainSize = monitorPtr.WorkSize = new Vector2(videoMode.Width, videoMode.Height);
 
             PointF contentScale = glfwMonitor.ContentScale;
             monitorPtr.DpiScale = contentScale.X;
-            monitorPtr.PlatformHandle = glfwMonitor.GetHandle();
-        }
+            monitorPtr.PlatformHandle = (void*)glfwMonitor.GetHandle();
+        }*/
     }
    
-    private void CreateWindow(ImGuiViewportPtr vp)
+    private unsafe void CreateWindow(ImGuiViewport* vp)
     {
+        /*
         Glfw.WindowHint(Hint.Visible, false);
         Glfw.WindowHint(Hint.Floating, false);
         Glfw.WindowHint(Hint.FocusOnShow, false);
-        Glfw.WindowHint(Hint.Decorated, ((int)(vp.Flags & ImGuiViewportFlags.NoDecoration) == 0));
-        Glfw.WindowHint(Hint.Floating, ((int)(vp.Flags & ImGuiViewportFlags.TopMost) == 1));
+        Glfw.WindowHint(Hint.Decorated, ((int)(vp->Flags & ImGuiViewportFlags.NoDecoration) == 0));
+        Glfw.WindowHint(Hint.Floating, ((int)(vp->Flags & ImGuiViewportFlags.TopMost) == 1));
         
         var window = AddChild(new Window("Irrelevant", new Vector2(200, 200)));
 
@@ -418,7 +544,7 @@ public class ImGuiDriver : Node, IGpuDestroyable
 
         AdditionalWindows.Add(window);
 
-        vp.PlatformUserData = GCHandle.ToIntPtr(guid.Pin());
+        vp->PlatformUserData = (void*)GCHandle.ToIntPtr(guid.Pin());
         
         window.EKeyboardKey += KeyDown;
         window.ECharInput += CharInput;
@@ -452,6 +578,7 @@ public class ImGuiDriver : Node, IGpuDestroyable
 
             userData.FrameData.Add(newFrame);
         }
+        */
     }
     
     private void ResizeWindow(WindowUserData aUserData)
@@ -477,16 +604,16 @@ public class ImGuiDriver : Node, IGpuDestroyable
         aUserData.DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(aUserData.Swapchain.Extents.width, aUserData.Swapchain.Extents.height, 1), false);
     }
 
-    private void DestroyWindow(ImGuiViewportPtr vp)
+    private unsafe void DestroyWindow(ImGuiViewport* vp)
     {
-        if (vp.PlatformUserData != IntPtr.Zero)
+        if (vp->PlatformUserData != null)
         {
             var data = GetWindowUserDataFromViewport(vp);
             data.Window.Destroy();
-            var handle = GCHandle.FromIntPtr(vp.PlatformUserData);
+            var handle = GCHandle.FromIntPtr((IntPtr)vp->PlatformUserData);
             WindowUserDatas.Remove((Guid)(handle.Target!));
             handle.Free();
-            vp.PlatformUserData = IntPtr.Zero;
+            vp->PlatformUserData = null;
             
             LogicalDevice.Device.WaitUntilIdle();
             data.Swapchain?.Destroy();
@@ -504,74 +631,78 @@ public class ImGuiDriver : Node, IGpuDestroyable
         }
     }
     
-    private WindowUserData GetWindowUserDataFromViewport(ImGuiViewportPtr aViewport)
+    private unsafe WindowUserData GetWindowUserDataFromViewport(ImGuiViewport* aViewport)
     {
-        System.Guid guid = (System.Guid)(GCHandle.FromIntPtr(aViewport.PlatformUserData).Target)!;
+        System.Guid guid = (System.Guid)(GCHandle.FromIntPtr((IntPtr)aViewport->PlatformUserData).Target)!;
 
         return WindowUserDatas[guid];
     }
 
-    private void ShowWindow(ImGuiViewportPtr vp)
+    private unsafe void ShowWindow(ImGuiViewport* vp)
     {
         var data = GetWindowUserDataFromViewport(vp);
 
         data.Window.Show();
     }
 
-    private unsafe void GetWindowPos(ImGuiViewportPtr vp, Vector2* outPos)
+    private unsafe Vector2* GetWindowPos(Vector2* outPos, ImGuiViewport* vp)
     {
         var data = GetWindowUserDataFromViewport(vp);
         
         var position = data.Window.GetWindowPosition();
 
         *outPos = new Vector2(position.x, position.y);
+
+        return outPos;
     }
 
-    private void SetWindowPos(ImGuiViewportPtr vp, Vector2 pos)
+    private unsafe void SetWindowPos(ImGuiViewport* vp, Vector2 pos)
     {
         var data = GetWindowUserDataFromViewport(vp);
         data.Window.SetWindowPosition((int)pos.X, (int)pos.Y);
     }
 
-    private void SetWindowSize(ImGuiViewportPtr vp, Vector2 size)
+    private unsafe void SetWindowSize(ImGuiViewport* vp, Vector2 size)
     {
         var data = GetWindowUserDataFromViewport(vp);
         data.Window.SetWindowSize((int)size.X, (int)size.Y);
     }
 
-    private unsafe void GetWindowSize(ImGuiViewportPtr vp, Vector2* outSize)
+    private unsafe Vector2* GetWindowSize(Vector2* outSize, ImGuiViewport* vp)
     {
         var data = GetWindowUserDataFromViewport(vp);
         
         var size = data.Window.GetWindowSize();
 
         *outSize = new Vector2(size.width, size.height);
+
+        return outSize;
     } 
    
-    private void SetWindowFocus(ImGuiViewportPtr vp)
+    private unsafe void SetWindowFocus(ImGuiViewport* vp)
     {
         var data = GetWindowUserDataFromViewport(vp);
 
         data.Window.FocusWindow();
     }
 
-    private byte GetWindowFocus(ImGuiViewportPtr vp)
+    private unsafe byte GetWindowFocus(ImGuiViewport* vp)
     {
         var data = GetWindowUserDataFromViewport(vp);
 
         return (byte)(data.Window.IsFocused ? 1 : 0);
     }
 
-    private byte GetWindowMinimized(ImGuiViewportPtr vp)
+    private unsafe byte GetWindowMinimized(ImGuiViewport* vp)
     {
         var data = GetWindowUserDataFromViewport(vp);
         return (byte)(data!.Window.IsMinimized ? 1 : 0);
     }
 
-    private unsafe void SetWindowTitle(ImGuiViewportPtr vp, IntPtr title)
+    private unsafe void SetWindowTitle(ImGuiViewport* vp, byte* title)
     {
         var data = GetWindowUserDataFromViewport(vp);
-        byte* titlePtr = (byte*)title;
+        byte* titlePtr = title;
         int count = 0;
         while (titlePtr[count] != 0)
         {
@@ -580,24 +711,24 @@ public class ImGuiDriver : Node, IGpuDestroyable
         data.Window.SetTitle(System.Text.Encoding.ASCII.GetString(titlePtr, count));
     }
     
-    private void UpdateMouseCursor()
+    private unsafe void UpdateMouseCursor()
     {
         ImGuiMouseCursor imgui_cursor = ImGui.GetMouseCursor();
         var platformIo = ImGui.GetPlatformIO();
         for (int n = 0; n < platformIo.Viewports.Size; n++)
         {
             var viewport = platformIo.Viewports[n];
-            var data = GetWindowUserDataFromViewport(viewport);
+            var data = GetWindowUserDataFromViewport(viewport.Handle);
             
             switch(imgui_cursor)
             {
                 case ImGuiMouseCursor.TextInput:
                     data.Window.SetCursor(PlatformData.TextInputCursor);
                     break;
-                case ImGuiMouseCursor.ResizeEW:
+                case ImGuiMouseCursor.ResizeEw:
                     data.Window.SetCursor(PlatformData.ResizeEW);
                     break;
-                case ImGuiMouseCursor.ResizeNS:
+                case ImGuiMouseCursor.ResizeNs:
                     data.Window.SetCursor(PlatformData.ResizeNS);
                     break;
                 case ImGuiMouseCursor.Hand:
@@ -612,26 +743,38 @@ public class ImGuiDriver : Node, IGpuDestroyable
     
     public void Begin()
     {
-        SetFrameData();
-        UpdateMouseCursor();
+        //SetFrameData();
+        //UpdateMouseCursor();
+
+        ImGuiImplVulkan.NewFrame();
+        ImGuiImplGLFW.NewFrame();
         ImGui.NewFrame();
     }
-    
+
     public void End()
     {
         ImGui.EndFrame();
-        ImGui.Render();
+        lock(this)
+        {
+            ImGui.Render();
+        }
         ImGui.UpdatePlatformWindows();
+        ImGui.RenderPlatformWindowsDefault();
     }
     
     public unsafe void Render(CommandBufferHandle cmd)
     {
+        lock(this)
+        {
+            ImGuiImplVulkan.RenderDrawData(ImGui.GetDrawData(), cmd.VkCommandBuffer.Handle, VkPipeline.Null);
+        }
+        return;
         ImDrawDataPtr drawData;
         lock(this)
         {
             drawData = ImGui.GetDrawData();
         
-            if (drawData.NativePtr == null)
+            if (drawData.Handle == null)
                 return;
         
             RenderDrawData(cmd, drawData);
@@ -679,23 +822,23 @@ public class ImGuiDriver : Node, IGpuDestroyable
         
         for(int i = 0; i < aDrawDataPtr.CmdListsCount; i++)
         {
-            ref var cmdList = ref aDrawDataPtr.CmdLists[i];
+            var cmdList = aDrawDataPtr.CmdLists[i];
             ulong vertexChunkSize = (ulong) cmdList.VtxBuffer.Size * (ulong) sizeof(ImDrawVertCorrected);
             ulong indexChunkSize = (ulong) cmdList.IdxBuffer.Size * sizeof(ushort);
 
-            Span<ImDrawVert> vertices = new Span<ImDrawVert>(cmdList.VtxBuffer.Data.ToPointer(), cmdList.VtxBuffer.Size);
+            Span<ImDrawVert> vertices = new Span<ImDrawVert>(cmdList.VtxBuffer.Data, cmdList.VtxBuffer.Size);
             corrected.Clear();
             corrected.EnsureCapacity(vertices.Length);
 
             foreach(ImDrawVert vert in vertices)
             {
-                Color color = Color.FromArgb((int)vert.col);
-                corrected.Add(new() { Position = vert.pos, UV = vert.uv, Color = new Vector4(color.B / 255f, color.G / 255f, color.R / 255f, color.A / 255f) });
+                Color color = Color.FromArgb((int)vert.Col);
+                corrected.Add(new() { Position = vert.Pos, UV = vert.Uv, Color = new Vector4(color.B / 255f, color.G / 255f, color.R / 255f, color.A / 255f) });
             }
             
             Span<ImDrawVertCorrected> verticesReal = corrected.AsSpan();
             
-            Span<ushort> indices = new Span<ushort>(cmdList.IdxBuffer.Data.ToPointer(), cmdList.IdxBuffer.Size);
+            Span<ushort> indices = new Span<ushort>(cmdList.IdxBuffer.Data, cmdList.IdxBuffer.Size);
 
             vertexBuffer.SetWriteData(verticesReal, vtxOffset);
             indexBuffer.SetWriteData(indices, idxOffset);
@@ -732,7 +875,7 @@ public class ImGuiDriver : Node, IGpuDestroyable
         var indexOffset = 0;
         for (var n = 0; n < aDrawDataPtr.CmdListsCount; n++)
         {
-            ref var cmdList = ref aDrawDataPtr.CmdLists[n];
+            var cmdList = aDrawDataPtr.CmdLists[n];
             for (var i = 0; i < cmdList.CmdBuffer.Size; i++)
             {
                 var cmdItem = cmdList.CmdBuffer[i];
@@ -776,6 +919,8 @@ public class ImGuiDriver : Node, IGpuDestroyable
     public override unsafe void OnDestroy()
     {
         LogicalDevice.Device.WaitUntilIdle();
+
+        return;
         FontTexture.Destroy();
         DescriptorAllocator.Destroy();
         Sampler.Destroy();
@@ -816,7 +961,7 @@ public class ImGuiDriver : Node, IGpuDestroyable
             {
                 var viewport = platformIo.Viewports[i];
 
-                if (viewport.NativePtr == ImGui.GetMainViewport().NativePtr)
+                if (viewport == ImGui.GetMainViewport())
                     continue;
                 
                 var viewportData = GetWindowUserDataFromViewport(viewport);

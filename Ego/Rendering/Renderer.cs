@@ -5,7 +5,6 @@ global using static VulkanApi.MemoryAllocator;
 global using static VulkanApi.Gpu;
 
 using VulkanApi;
-using ImGuiNET;
 using SharpGLTF.Schema2;
 using Vortice.ShaderCompiler;
 using Vortice.Vulkan;
@@ -15,8 +14,8 @@ namespace Rendering;
 
 public partial class Renderer : Node, IGpuImmediateSubmit
 {
-    private Swapchain Swapchain = null!;
-    private RenderQueue RenderQueue = null!;
+    public Swapchain Swapchain = null!;
+    public RenderQueue RenderQueue = null!;
     private Image RenderImage = null!;
     private Image DepthImage = null!;
     private DescriptorAllocatorGrowable GlobalDescriptorAllocator = new();

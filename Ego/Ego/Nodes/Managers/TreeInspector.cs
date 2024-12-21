@@ -1,5 +1,6 @@
 
-using ImGuiNET;
+
+using Hexa.NET.ImGui;
 
 namespace Ego;
 
@@ -25,7 +26,7 @@ public class TreeInspector : Node
         var pos = ImGui.GetCursorPos();
         float y0 = ImGui.GetCursorScreenPos().Y + (float)(int)aYOffset; 
         
-        ImGuiListClipperPtr clipper = new(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
+        ImGuiListClipperPtr clipper = new(ImGui.ImGuiListClipper());
 
         var draw_list = ImGui.GetWindowDrawList();
         
@@ -60,7 +61,7 @@ public class TreeInspector : Node
         bool parentActive = ImGui.IsWindowFocused();
         
         if (parentActive)
-            ImGui.PushStyleColor(ImGuiCol.Header, ImGui.GetStyleColorVec4(ImGuiCol.TabActive)[0]);
+            ImGui.PushStyleColor(ImGuiCol.Header, ImGui.GetStyleColorVec4(ImGuiCol.HeaderActive)[0]);
 
         float minX = ImGui.GetCursorScreenPos().X;
         float maxX = minX + ImGui.GetContentRegionAvail().X;
@@ -117,7 +118,7 @@ public class TreeInspector : Node
         
         if (aNode == InspectedNode)
         {
-            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, ImGui.GetStyleColorVec4(ImGuiCol.TabActive)[0]);
+            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, ImGui.GetStyleColorVec4(ImGuiCol.HeaderActive)[0]);
             var color = ImGui.GetStyleColorVec4(ImGuiCol.ScrollbarGrabActive)[0];
 
             color.W = 1f;

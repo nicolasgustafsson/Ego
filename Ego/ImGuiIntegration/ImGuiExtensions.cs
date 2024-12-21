@@ -1,7 +1,7 @@
 ﻿
 using System.Numerics;
+using Hexa.NET.ImGui;
 using VulkanApi;
-using ImGuiNET;
 
 public static unsafe partial class ImGuiEx
 {
@@ -10,6 +10,6 @@ public static unsafe partial class ImGuiEx
         nint handle = aImage.GetHandle();
         Vector2 size = aSize ?? new Vector2(aImage.Extent.width, aImage.Extent.height);
         
-        ImGui.Image(handle, size);
+        ImGui.Image(new(handle), size);
     }
 }

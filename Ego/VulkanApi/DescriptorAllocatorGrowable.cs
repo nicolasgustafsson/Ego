@@ -90,7 +90,7 @@ public unsafe class DescriptorAllocatorGrowable : IGpuDestroyable
         SetsPerPool = (uint)(SetsPerPool * 1.5f).AtMost(MaxPoolSize);
     }
     
-    private VkDescriptorPool AcquirePool()
+    public VkDescriptorPool AcquirePool()
     {
         if (!ReadyPools.IsEmpty())
         {
@@ -105,7 +105,7 @@ public unsafe class DescriptorAllocatorGrowable : IGpuDestroyable
     {
         List<VkDescriptorPoolSize> sizes = Ratios.Select(ratio => new VkDescriptorPoolSize(ratio.Type, (uint)(ratio.Ratio * (float)SetsPerPool))).ToList();
         VkDescriptorPoolCreateInfo createInfo = new();
-        createInfo.flags = VkDescriptorPoolCreateFlags.None;
+        createInfo.flags = VkDescriptorPoolCreateFlags.FreeDescriptorSet;
         createInfo.maxSets = SetsPerPool;
         createInfo.poolSizeCount = (uint)Ratios.Count;
         createInfo.pPoolSizes = sizes.AsSpan().GetPointerUnsafe();

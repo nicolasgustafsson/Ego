@@ -25,7 +25,7 @@ public class EgoContext : Context
         
         AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer());
         
-        for(int i = 0; i < 1000 * 100; i++)
+        for(int i = 0; i < 10 * 10; i++)
         {
             AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer());
         }
@@ -41,13 +41,13 @@ public class EgoContext : Context
 
             UpdateInternal();
 
-            Console.WriteLine($"Time passed update = {watch.ElapsedMilliseconds}ms");
+//            Console.WriteLine($"Time passed update = {watch.ElapsedMilliseconds}ms");
             
             renderFrame.Wait();
             
             Window.PollEvents();
 
-            Console.WriteLine($"Time passed total = {watch.ElapsedMilliseconds}ms");
+//            Console.WriteLine($"Time passed total = {watch.ElapsedMilliseconds}ms");
         }
 
         Destroy();

@@ -10,12 +10,16 @@
         <PackageId>Platform</PackageId>
         <Company>Platform</Company>
         <Product>Platform</Product>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Configurations>Debug;Release;Development</Configurations>
         <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="glfw-net" Version="3.3.1" PrivateAssets="compile" />
+      <PackageReference Include="Hexa.NET.GLFW" Version="1.0.4" />
+      <PackageReference Include="Hexa.NET.ImGui" Version="2.2.4" />
+      <PackageReference Include="Hexa.NET.ImGui.Backends" Version="1.0.12" />
+      <PackageReference Include="Hexa.NET.ImGui.Backends.GLFW" Version="1.0.12" />
     </ItemGroup>
 
     <ItemGroup>

@@ -22,15 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="glfw.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="glfw.so">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="glfwWayland.so">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+      <PackageReference Include="Hexa.NET.ImGui" Version="2.2.4" />
     </ItemGroup>
 
 </Project>

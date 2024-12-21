@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using Ego;
-using ImGuiNET;
 using Rendering;
 
 namespace Ego;
