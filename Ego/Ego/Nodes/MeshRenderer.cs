@@ -2,7 +2,7 @@
 using Rendering;
 namespace Ego;
 
-public class MeshCollection : EgoNode, IAsset
+public class MeshCollection : Node, IAsset
 {
     public List<Mesh> Meshes = null!;
     protected override string Name => FileName;
@@ -32,7 +32,7 @@ public class MeshCollection : EgoNode, IAsset
     }
 }
 
-public class MeshRenderer(string aModelPath = "Models/basicmesh.glb") : EgoNode3D
+public class MeshRenderer(string aModelPath = "Models/basicmesh.glb") : Node3D
 {
     private MeshCollection Meshes = null!;
 

@@ -3,15 +3,13 @@ using Rendering;
 
 namespace Ego;
 
-public class RendererApi : BaseNode
+public class RendererApi : Node
 {
     private Renderer Renderer = null!;
 
     public List<MeshRenderData> MyRenderData = new();
     public List<MeshRenderData> MyPreviousList = new();
     private Matrix4x4 myCameraView = new();
-    private bool myWantsToDie = false;
-    private bool myCanDie = false;
     
     public RendererApi(Window aWindow)
     {
@@ -29,7 +27,6 @@ public class RendererApi : BaseNode
             lock(Renderer.MainWindow)
             {
                 base.DestroyChildren();
-                myWantsToDie = true;
             }
         }
     }

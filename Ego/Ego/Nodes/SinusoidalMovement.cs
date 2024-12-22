@@ -2,9 +2,9 @@
 
 namespace Ego;
 
-public class SinusoidalMovement : EgoNode3D
+public class SinusoidalMovement : Node3D
 {
-    public Vector3 Movement = new Vector3(1f, 0f, 0f);
+    private Vector3 Movement = new(1f, 0f, 0f);
     
     protected override void Update()
     {

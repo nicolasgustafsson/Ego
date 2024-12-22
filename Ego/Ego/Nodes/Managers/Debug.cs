@@ -3,7 +3,7 @@ using Rendering;
 
 namespace Ego;
 
-public class Debug : BaseNode
+public class Debug : Node
 {
     private ImGuiDriver ImGuiDriver = null!;
 

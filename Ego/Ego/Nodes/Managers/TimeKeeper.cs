@@ -2,7 +2,7 @@
 
 namespace Ego;
 
-public class TimeKeeper : BaseNode
+public class TimeKeeper : Node
 {
     private Stopwatch Stopwatch = new();
 

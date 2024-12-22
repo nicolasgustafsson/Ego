@@ -1,6 +1,6 @@
 namespace Ego;
 
-public class EgoNode : BaseNode, IEngineContext
+public class Node : BaseNode, IEngineContext
 {
     //TODO: These can be source generated? 
     public TimeKeeper Time => ((EgoContext)Context).Time;

@@ -1,14 +1,13 @@
 ﻿using ImGuiNET;
-using SharpGLTF.Runtime;
 using Utilities;
 
 namespace Ego;
 
-public class EgoNode3D : EgoNode
+public class Node3D : Node
 {
     private Transform Transform = new();
 
-    public Matrix4x4 WorldMatrix => Transform.Matrix * ((Parent as EgoNode3D)?.WorldMatrix ?? Matrix4x4.Identity);
+    public Matrix4x4 WorldMatrix => Transform.Matrix * ((Parent as Node3D)?.WorldMatrix ?? Matrix4x4.Identity);
     public Matrix4x4 LocalMatrix => Transform.Matrix;
     
     public Vector3 LocalPosition
@@ -29,7 +28,7 @@ public class EgoNode3D : EgoNode
         set => Transform.Scale = value;
     }
     
-    private static EgoNode3D? LastInspectedNode;
+    private static Node3D? LastInspectedNode;
     
     public override void Inspect()
     {

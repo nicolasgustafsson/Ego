@@ -1,8 +1,6 @@
-using Utilities;
-
 namespace Ego;
 
-public class AssetManager : BaseNode
+public class AssetManager : Node
 {
     private Dictionary<string, BaseNode> Assets = new();
     

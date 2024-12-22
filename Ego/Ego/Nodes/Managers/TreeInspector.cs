@@ -1,9 +1,8 @@
-
 using ImGuiNET;
 
 namespace Ego;
 
-public class TreeInspector : BaseNode
+public class TreeInspector : Node
 {
     private BaseNode? InspectedNode = null;
     private BaseNode? PreviousInspectedNode = null;
@@ -17,7 +16,7 @@ public class TreeInspector : BaseNode
     public override void Start()
     {
         base.Start();
-        Context.Get<Debug>()!.EDebug += EDebug;
+        Debug.EDebug += EDebug;
     }
 
     unsafe void DrawRowsBackground(int aRowCount, float aLineHeight, float aMinX, float aMaxX, float aYOffset, uint aEvenColor, uint aOddColor)

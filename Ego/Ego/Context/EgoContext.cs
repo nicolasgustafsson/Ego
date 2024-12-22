@@ -1,6 +1,4 @@
 ﻿using System.Diagnostics;
-using Rendering;
-using Serilog;
 
 namespace Ego;
 
@@ -27,14 +25,14 @@ public class EgoContext : Context, IEngineContext
         AssetManager = AddChild(new AssetManager());
         TreeInspector = AddChild(new TreeInspector());
         
-        AddChild(new SinusoidalMovement()).AddChild(new EgoNode3D()).AddChild(new MeshRenderer());
+        AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer());
         
         for(int i = 0; i < 1000 * 100; i++)
         {
             //AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer());
         }
         
-        AddChild(new SinusoidalMovement()).AddChild(new EgoNode3D()).AddChild(new MeshRenderer()).LocalPosition += new Vector3(2f, 2f, 0f);
+        AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer()).LocalPosition += new Vector3(2f, 2f, 0f);
         AddChild(new Camera()).LocalPosition += new Vector3(0f, 0f, -7.5f);
 
         Stopwatch watch = new();
