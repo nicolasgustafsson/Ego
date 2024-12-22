@@ -1,18 +1,16 @@
 ﻿using System.Numerics;
-using System.Reflection.Metadata.Ecma335;
-using Utilities;
 
-public partial class Node
+public partial class BaseNode
 {
-    private List<Node> xChildren { get; set; } = new();
-    private Node? xParent = null;
+    private List<BaseNode> xChildren { get; set; } = new();
+    private BaseNode? xParent = null;
     
-    public IReadOnlyList<Node> Children => xChildren;
-    public Node? Parent => xParent;
+    public IReadOnlyList<BaseNode> Children => xChildren;
+    public BaseNode? Parent => xParent;
 
     public Context Context = null!;
     
-    public T? GetFirstParentOfType<T>() where T : Node
+    public T? GetFirstParentOfType<T>() where T : BaseNode
     {
         if (Parent != null && Parent is not T)
             return Parent.GetFirstParentOfType<T>();
@@ -20,7 +18,7 @@ public partial class Node
         return Parent as T;
     }
     
-    public T AddChild<T>(T aChild) where T : Node
+    public T AddChild<T>(T aChild) where T : BaseNode
     {
         xChildren.Add(aChild);
         aChild.xParent = this;
@@ -30,12 +28,12 @@ public partial class Node
         return aChild;
     }
     
-    public T? Get<T>() where T : Node
+    public T? Get<T>() where T : BaseNode
     {
         return xChildren.OfType<T>().FirstOrDefault();
     }
     
-    public void RemoveChild<T>(T aChild) where T : Node
+    public void RemoveChild<T>(T aChild) where T : BaseNode
     {
         xChildren.Remove(aChild);
     }

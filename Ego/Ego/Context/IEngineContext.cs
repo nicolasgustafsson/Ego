@@ -2,10 +2,10 @@ namespace Ego;
 
 public interface IEngineContext
 {
-    public TimeKeeper Time { get; set; }
-    public Window Window { get; set; }
-    public Debug Debug{ get; set; }
-    public RendererApi RendererApi { get; set; }
-    public AssetManager AssetManager { get; set; }
-    public TreeInspector TreeInspector { get; set; }
+    public TimeKeeper Time { get; }
+    public Window Window { get;  }
+    public Debug Debug{ get; }
+    public RendererApi RendererApi { get; }
+    public AssetManager AssetManager { get; }
+    public TreeInspector TreeInspector { get; }
 }

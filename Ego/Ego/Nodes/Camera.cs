@@ -4,13 +4,8 @@ using Quaternion = System.Numerics.Quaternion;
 
 namespace Ego;
 
-public class Camera : Node3D
+public class Camera : EgoNode3D
 {
-    public override void Start()
-    {
-        base.Start();
-    }
-
     protected override void Update()
     {
         Context.Get<RendererApi>()!.SetCameraView(WorldMatrix);

@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Ego;
+﻿namespace Ego;
 
 public struct Transform
 {

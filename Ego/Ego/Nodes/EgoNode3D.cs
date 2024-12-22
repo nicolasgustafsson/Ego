@@ -4,11 +4,11 @@ using Utilities;
 
 namespace Ego;
 
-public class Node3D : Node
+public class EgoNode3D : EgoNode
 {
     private Transform Transform = new();
 
-    public Matrix4x4 WorldMatrix => Transform.Matrix * ((Parent as Node3D)?.WorldMatrix ?? Matrix4x4.Identity);
+    public Matrix4x4 WorldMatrix => Transform.Matrix * ((Parent as EgoNode3D)?.WorldMatrix ?? Matrix4x4.Identity);
     public Matrix4x4 LocalMatrix => Transform.Matrix;
     
     public Vector3 LocalPosition
@@ -29,7 +29,7 @@ public class Node3D : Node
         set => Transform.Scale = value;
     }
     
-    private static Node3D? LastInspectedNode;
+    private static EgoNode3D? LastInspectedNode;
     
     public override void Inspect()
     {

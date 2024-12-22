@@ -13,7 +13,7 @@ using Image = VulkanApi.Image;
 
 namespace Rendering;
 
-public partial class Renderer : Node, IGpuImmediateSubmit
+public partial class Renderer : BaseNode, IGpuImmediateSubmit
 {
     private Swapchain Swapchain = null!;
     private RenderQueue RenderQueue = null!;

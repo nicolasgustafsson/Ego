@@ -1,6 +1,6 @@
-public partial class Context : Node
+public partial class Context : BaseNode
 {
-    public new T? Get<T>() where T : Node
+    public new T? Get<T>() where T : BaseNode
     {
         if (Children.FirstOrDefault(node => node is T) is T nodeOfType)
             return nodeOfType;

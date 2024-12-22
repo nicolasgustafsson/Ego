@@ -43,7 +43,7 @@ public class ComputePipeline : Pipeline
             
             if (shader == null)
             {
-                Console.WriteLine("Could not create shader!");
+                Log.Information("Could not create shader!");
                 throw new Exception();
             }
 

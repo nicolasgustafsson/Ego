@@ -3,7 +3,7 @@ using Rendering;
 
 namespace Ego;
 
-public class RendererApi : Node
+public class RendererApi : BaseNode
 {
     private Renderer Renderer = null!;
 

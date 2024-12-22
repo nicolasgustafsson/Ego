@@ -3,10 +3,10 @@ using ImGuiNET;
 
 namespace Ego;
 
-public class TreeInspector : Node
+public class TreeInspector : BaseNode
 {
-    private Node? InspectedNode = null;
-    private Node? PreviousInspectedNode = null;
+    private BaseNode? InspectedNode = null;
+    private BaseNode? PreviousInspectedNode = null;
 
     private ImGuiTreeNodeFlags Flags = ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick;
     private Vector4 EvenColor = new Vector4(1f, 1f, 1f, 0.0392f);
@@ -101,7 +101,7 @@ public class TreeInspector : Node
         ImGui.End();
     }
     
-    private unsafe int Tree(Node aNode, int rows = 0)
+    private unsafe int Tree(BaseNode aNode, int rows = 0)
     {
         var flags = Flags;
         if (InspectedNode == aNode)

@@ -3,6 +3,7 @@ using System.Drawing;
 using Vortice.Vulkan;
 using static Vortice.Vulkan.Vulkan;
 using System.Runtime.InteropServices;
+using Serilog;
 using VulkanApi;
 using Vortice.ShaderCompiler;
 
@@ -17,7 +18,7 @@ public partial class Renderer
     
     private void InitVulkan(Window aWindow)
     {
-        Console.WriteLine("Creating renderer...");
+        Log.Information("Creating renderer...");
         
         CreateApi(aWindow);
 
@@ -50,7 +51,7 @@ public partial class Renderer
 
         InitializePipelines();
         
-        Console.WriteLine("Renderer successfully created!");
+        Log.Information("Renderer successfully created!");
     }
 
     private unsafe void CreateDefaultImages()
@@ -305,12 +306,12 @@ public partial class Renderer
     
     public override void OnDestroy()
     {
-        Console.WriteLine("Destroying renderer...");
+        Log.Information("Destroying renderer...");
 
         Device.WaitUntilIdle();
         
         CleanupQueue.Flush();
         
-        Console.WriteLine("Renderer successfully destroyed!");
+        Log.Information("Renderer successfully destroyed!");
     }
 }

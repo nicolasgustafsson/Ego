@@ -54,7 +54,7 @@ public class GraphicsPipeline : Pipeline
             
             if (shader == null)
             {
-                Console.WriteLine("Could not create shader!");
+                Log.Information("Could not create shader!");
                 throw new Exception();
             }
 
@@ -73,7 +73,7 @@ public class GraphicsPipeline : Pipeline
             
             if (shader == null)
             {
-                Console.WriteLine("Could not create shader!");
+                Log.Information("Could not create shader!");
                 throw new Exception();
             }
 

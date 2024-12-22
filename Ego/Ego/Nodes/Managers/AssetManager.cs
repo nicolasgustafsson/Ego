@@ -2,11 +2,11 @@ using Utilities;
 
 namespace Ego;
 
-public class AssetManager : Node
+public class AssetManager : BaseNode
 {
-    private Dictionary<string, Node> Assets = new();
+    private Dictionary<string, BaseNode> Assets = new();
     
-    public T GetAsset<T>(string aPath) where T : Node, IAsset, new()
+    public T GetAsset<T>(string aPath) where T : BaseNode, IAsset, new()
     {
         if (TryGetAsset<T>(aPath) is {} loadedAsset)
             return loadedAsset;
@@ -14,14 +14,14 @@ public class AssetManager : Node
         return LoadAsset<T>(aPath);
     }
     
-    private T? TryGetAsset<T>(string aPath) where T : Node
+    private T? TryGetAsset<T>(string aPath) where T : BaseNode
     {
-        Assets.TryGetValue(aPath, out Node? aValue);
+        Assets.TryGetValue(aPath, out BaseNode? aValue);
 
         return (T?)aValue;
     }
     
-    private T LoadAsset<T>(string aPath) where T : Node, IAsset, new()
+    private T LoadAsset<T>(string aPath) where T : BaseNode, IAsset, new()
     {
         var child = AddChild(new T());
 

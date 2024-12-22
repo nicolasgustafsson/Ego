@@ -2,7 +2,7 @@
 using Rendering;
 namespace Ego;
 
-public class MeshCollection : Node, IAsset
+public class MeshCollection : EgoNode, IAsset
 {
     public List<Mesh> Meshes = null!;
     protected override string Name => FileName;
@@ -13,9 +13,9 @@ public class MeshCollection : Node, IAsset
     {
         FileName = Path.GetFileNameWithoutExtension(aPath);
         
-        lock(Context.Get<RendererApi>()!.MyRenderData)
+        lock(RendererApi.MyRenderData)
         {
-            Meshes = Mesh.LoadGltf(Context.Get<RendererApi>()!.Get<Renderer>()!, aPath);
+            Meshes = Mesh.LoadGltf(RendererApi.Get<Renderer>()!, aPath);
         }
     }
 
@@ -23,7 +23,7 @@ public class MeshCollection : Node, IAsset
     {
         base.OnDestroy();
 
-        Context.Get<RendererApi>()!.WaitUntilIdle();
+        RendererApi.WaitUntilIdle();
         
         foreach(var mesh in Meshes)
         {
@@ -32,7 +32,7 @@ public class MeshCollection : Node, IAsset
     }
 }
 
-public class MeshRenderer(string aModelPath = "Models/basicmesh.glb") : Node3D
+public class MeshRenderer(string aModelPath = "Models/basicmesh.glb") : EgoNode3D
 {
     private MeshCollection Meshes = null!;
 
@@ -41,13 +41,13 @@ public class MeshRenderer(string aModelPath = "Models/basicmesh.glb") : Node3D
     public override void Start()
     {
         base.Start();
-        Meshes = Context.Get<AssetManager>()!.GetAsset<MeshCollection>(aModelPath);
+        Meshes = AssetManager.GetAsset<MeshCollection>(aModelPath);
         
     }
 
     protected override void Update()
     {
-        ((EgoContext)Context)!.RendererApi.AddRenderData(new(){Mesh = Meshes.Meshes[MeshIndex], WorldMatrix = WorldMatrix});
+        RendererApi.AddRenderData(new(){Mesh = Meshes.Meshes[MeshIndex], WorldMatrix = WorldMatrix});
     }
 
 

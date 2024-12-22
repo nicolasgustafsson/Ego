@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using GLFW;
 
-public class Window : Node
+public class Window : BaseNode
 {
     private static readonly ErrorCallback errorCallback = GlfwError;
     private static readonly MouseCallback mouseScrollCallback = MouseScrollCallback;
@@ -108,7 +108,7 @@ public class Window : Node
     }
     private static void GlfwError(ErrorCode code, IntPtr message)
     {
-        Console.WriteLine(PtrToStringUTF8(message));
+        Log.Information(PtrToStringUTF8(message));
     }
     
     public static string PtrToStringUTF8(IntPtr ptr)

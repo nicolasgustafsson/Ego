@@ -1,4 +1,6 @@
 ﻿
+using Serilog;
+
 namespace Utilities;
 
 public static class Development
@@ -14,7 +16,7 @@ public static class Development
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Log.Information(e.ToString());
             }
         }
     }
@@ -29,7 +31,7 @@ public static class Development
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Log.Information(e.ToString());
             }
         }
     }

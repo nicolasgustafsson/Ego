@@ -17,7 +17,7 @@ using Vulkan = Vortice.Vulkan.Vulkan;
 
 namespace Rendering;
 
-public class ImGuiDriver : Node, IGpuDestroyable
+public class ImGuiDriver : BaseNode, IGpuDestroyable
 {
     class PlatformUserData
     {
