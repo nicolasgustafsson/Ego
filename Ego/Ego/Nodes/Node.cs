@@ -1,12 +1,12 @@
 namespace Ego;
 
-public class Node : BaseNode, IEngineContext
+public class Node : BaseNode, IEgoContext
 {
     //TODO: These can be source generated? 
-    public TimeKeeper Time => ((EgoContext)Context).Time;
-    public Window Window => ((EgoContext)Context).Window;
-    public Debug Debug => ((EgoContext)Context).Debug;
-    public RendererApi RendererApi => ((EgoContext)Context).RendererApi;
-    public AssetManager AssetManager => ((EgoContext)Context).AssetManager;
-    public TreeInspector TreeInspector => ((EgoContext)Context).TreeInspector;
+    public TimeKeeper Time => ((IEgoContext)Context).Time;
+    public Window Window => ((IEgoContext)Context).Window;
+    public Debug Debug => ((IEgoContext)Context).Debug;
+    public RendererApi RendererApi => ((IEgoContext)Context).RendererApi;
+    public AssetManager AssetManager => ((IEgoContext)Context).AssetManager;
+    public TreeInspector TreeInspector => ((IEgoContext)Context).TreeInspector;
 }

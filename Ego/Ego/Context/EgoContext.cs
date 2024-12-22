@@ -2,7 +2,7 @@
 
 namespace Ego;
 
-public class EgoContext : Context, IEngineContext
+public class EgoContext : Context, IEgoContext
 {
     public TimeKeeper Time { get; set; } = null!;
     public Window Window { get; set; } = null!;
@@ -13,7 +13,7 @@ public class EgoContext : Context, IEngineContext
     
     public void Run()
     {
-        using var log = new Serilog.LoggerConfiguration().WriteTo.Console().CreateLogger();
+        using var log = new LoggerConfiguration().WriteTo.Console().CreateLogger();
         Log.Logger = log;
         
         Context = this;
