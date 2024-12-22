@@ -1,4 +1,4 @@
-namespace Utilities.CommonExtensions;
+namespace Utilities;
 
 public static class ListExtensions
 {

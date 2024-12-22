@@ -12,6 +12,7 @@
         <AssemblyName>Ego</AssemblyName>
         <RootNamespace>Ego</RootNamespace>
         <Platforms>AnyCPU</Platforms>
+        <LangVersion>preview</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>

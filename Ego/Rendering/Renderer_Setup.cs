@@ -1,4 +1,4 @@
-global using Utilities.CommonExtensions;
+global using Utilities;
 using System.Drawing;
 using Vortice.Vulkan;
 using static Vortice.Vulkan.Vulkan;

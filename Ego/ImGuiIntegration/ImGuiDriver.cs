@@ -9,7 +9,7 @@ using GLFW;
 using VulkanApi;
 using ImGuiNET;
 using Platform;
-using Utilities.Interop;
+using Utilities;
 using Vortice.ShaderCompiler;
 using Vortice.Vulkan;
 using Image = VulkanApi.Image;

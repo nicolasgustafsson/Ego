@@ -1,6 +1,6 @@
 ﻿using ImGuiNET;
 using SharpGLTF.Runtime;
-using Utilities.CommonExtensions;
+using Utilities;
 
 namespace Ego;
 

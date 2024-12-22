@@ -1,5 +1,4 @@
 ﻿using VulkanApi;
-using Utilities.Interop;
 using Vortice.ShaderCompiler;
 using Vortice.Vulkan;
 

@@ -1,6 +1,5 @@
 ﻿using System.Runtime.InteropServices;
-
-namespace Utilities.Interop;
+namespace Utilities;
 
 public static class Interop
 { 

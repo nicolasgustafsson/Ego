@@ -1,8 +1,6 @@
 ﻿global using static VulkanApi.Api;
 global using static Vortice.Vulkan.Vulkan;
 global using Vortice.Vulkan;
-global using Utilities.Interop;
-global using Utilities.CommonExtensions;
 using System.Runtime.InteropServices;
 
 namespace VulkanApi;

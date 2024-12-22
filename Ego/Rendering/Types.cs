@@ -2,7 +2,7 @@
 global using VkDeviceAddress = ulong;
 using System.Runtime.InteropServices;
 using Rendering;
-using Utilities.Interop;
+using Utilities;
 using Vortice.ShaderCompiler;
 using Vortice.Vulkan;
 

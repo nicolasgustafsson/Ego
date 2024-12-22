@@ -70,7 +70,7 @@ public class RendererApi : Node
             Renderer.Render();
         }
         
-        Console.WriteLine($"Time passed single frame = {watch.ElapsedMilliseconds}ms");
+        Log.Information($"Time passed single frame = {watch.ElapsedMilliseconds}ms");
     }
     
     public void SetCameraView(Matrix4x4 aView)

@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace Utilities.CommonExtensions;
+namespace Utilities;
 
 public static class MatrixExtensions
 {
