@@ -2,9 +2,9 @@ namespace Ego;
 
 public class AssetManager : Node
 {
-    private Dictionary<string, BaseNode> Assets = new();
+    private Dictionary<string, Node> Assets = new();
     
-    public T GetAsset<T>(string aPath) where T : BaseNode, IAsset, new()
+    public T GetAsset<T>(string aPath) where T : Node, IAsset, new()
     {
         if (TryGetAsset<T>(aPath) is {} loadedAsset)
             return loadedAsset;
@@ -12,14 +12,14 @@ public class AssetManager : Node
         return LoadAsset<T>(aPath);
     }
     
-    private T? TryGetAsset<T>(string aPath) where T : BaseNode
+    private T? TryGetAsset<T>(string aPath) where T : Node
     {
-        Assets.TryGetValue(aPath, out BaseNode? aValue);
+        Assets.TryGetValue(aPath, out Node? aValue);
 
         return (T?)aValue;
     }
     
-    private T LoadAsset<T>(string aPath) where T : BaseNode, IAsset, new()
+    private T LoadAsset<T>(string aPath) where T : Node, IAsset, new()
     {
         var child = AddChild(new T());
 

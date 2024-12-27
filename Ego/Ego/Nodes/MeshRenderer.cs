@@ -15,7 +15,7 @@ public class MeshCollection : Node, IAsset
         
         lock(RendererApi.MyRenderData)
         {
-            Meshes = Mesh.LoadGltf(RendererApi.Get<Renderer>()!, aPath);
+            Meshes = Mesh.LoadGltf(RendererApi.Renderer!, aPath);
         }
     }
 

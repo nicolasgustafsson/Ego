@@ -13,7 +13,7 @@ public class Debug : Node
     {
         base.Start();
         
-        ImGuiDriver = AddChild(new ImGuiDriver(Context.Get<RendererApi>()!.Get<Renderer>()!, Context.Get<Window>()!));
+        ImGuiDriver = new ImGuiDriver(RendererApi.Renderer, Window);
     }
 
     protected override void Update()

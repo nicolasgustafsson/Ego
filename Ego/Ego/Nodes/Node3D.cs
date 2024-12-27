@@ -28,8 +28,6 @@ public class Node3D : Node
         set => Transform.Scale = value;
     }
     
-    private static Node3D? LastInspectedNode;
-    
     public override void Inspect()
     {
         var position = LocalPosition;

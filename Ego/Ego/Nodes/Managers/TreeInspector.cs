@@ -4,8 +4,8 @@ namespace Ego;
 
 public class TreeInspector : Node
 {
-    private BaseNode? InspectedNode = null;
-    private BaseNode? PreviousInspectedNode = null;
+    private Node? InspectedNode = null;
+    private Node? PreviousInspectedNode = null;
 
     private ImGuiTreeNodeFlags Flags = ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick;
     private Vector4 EvenColor = new Vector4(1f, 1f, 1f, 0.0392f);
@@ -100,7 +100,7 @@ public class TreeInspector : Node
         ImGui.End();
     }
     
-    private unsafe int Tree(BaseNode aNode, int rows = 0)
+    private unsafe int Tree(Node aNode, int aRows = 0)
     {
         var flags = Flags;
         if (InspectedNode == aNode)
@@ -109,10 +109,10 @@ public class TreeInspector : Node
         if (aNode.Children.Count == 0)
             flags |= ImGuiTreeNodeFlags.Leaf;
 
-        if (rows == 0)
+        if (aRows == 0)
             flags |= ImGuiTreeNodeFlags.DefaultOpen;
         
-        rows++;
+        aRows++;
         
         if (aNode == InspectedNode)
         {
@@ -149,13 +149,13 @@ public class TreeInspector : Node
         if (wasOpened)
         {
             foreach(var child in aNode.Children)
-                rows = Tree(child, rows);
+                aRows = Tree(child, aRows);
         }
         
         if (wasOpened)
             ImGui.TreePop();
 
-        return rows;
+        return aRows;
     }
 
     public override char GetIcon()

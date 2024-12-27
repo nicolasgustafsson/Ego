@@ -5,7 +5,7 @@ namespace Ego;
 
 public class RendererApi : Node
 {
-    private Renderer Renderer = null!;
+    public Renderer Renderer = null!;
 
     public List<MeshRenderData> MyRenderData = new();
     public List<MeshRenderData> MyPreviousList = new();
@@ -13,7 +13,7 @@ public class RendererApi : Node
     
     public RendererApi(Window aWindow)
     {
-        Renderer = AddChild(new Renderer(aWindow));
+        Renderer = new Renderer(aWindow);
     }
     
     public override void Start()

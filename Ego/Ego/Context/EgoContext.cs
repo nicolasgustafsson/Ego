@@ -2,14 +2,14 @@
 
 namespace Ego;
 
-public class EgoContext : Context, IEgoContext
+public class EgoContext : Node, IEgoContext
 {
-    public TimeKeeper Time { get; set; } = null!;
-    public Window Window { get; set; } = null!;
-    public Debug Debug { get; set; } = null!;
-    public RendererApi RendererApi { get; set; } = null!;
-    public AssetManager AssetManager { get; set; } = null!;
-    public TreeInspector TreeInspector { get; set; } = null!;
+    public new TimeKeeper Time { get; set; } = null!;
+    public new Window Window { get; set; } = null!;
+    public new Debug Debug { get; set; } = null!;
+    public new RendererApi RendererApi { get; set; } = null!;
+    public new AssetManager AssetManager { get; set; } = null!;
+    public new TreeInspector TreeInspector { get; set; } = null!;
     
     public void Run()
     {
@@ -19,7 +19,7 @@ public class EgoContext : Context, IEgoContext
         Context = this;
         
         Time = AddChild(new TimeKeeper());
-        Window = AddChild(new Window("Game", new Vector2(1920, 1080)));
+        Window = new Window("Game", new Vector2(1920, 1080));
         RendererApi = AddChild(new RendererApi(Window));
         Debug = AddChild(new Debug());
         AssetManager = AddChild(new AssetManager());

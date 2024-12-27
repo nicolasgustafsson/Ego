@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using GLFW;
 
-public class Window : BaseNode
+public class Window
 {
     private static readonly ErrorCallback errorCallback = GlfwError;
     private static readonly MouseCallback mouseScrollCallback = MouseScrollCallback;
@@ -151,7 +151,7 @@ public class Window : BaseNode
         return (x, y);
     }
 
-    public override void OnDestroy()
+    public void OnDestroy()
     {
         NativeWindow.Close();
         Windows.Remove(NativeWindow.Handle);

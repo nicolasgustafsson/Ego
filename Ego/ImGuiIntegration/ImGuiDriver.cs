@@ -17,7 +17,7 @@ using Vulkan = Vortice.Vulkan.Vulkan;
 
 namespace Rendering;
 
-public class ImGuiDriver : BaseNode, IGpuDestroyable
+public class ImGuiDriver : IGpuDestroyable
 {
     class PlatformUserData
     {
@@ -412,7 +412,7 @@ public class ImGuiDriver : BaseNode, IGpuDestroyable
         Glfw.WindowHint(Hint.Decorated, ((int)(vp.Flags & ImGuiViewportFlags.NoDecoration) == 0));
         Glfw.WindowHint(Hint.Floating, ((int)(vp.Flags & ImGuiViewportFlags.TopMost) == 1));
         
-        var window = AddChild(new Window("Irrelevant", new Vector2(200, 200)));
+        var window = new Window("Irrelevant", new Vector2(200, 200));
 
         var guid = CreateNewWindowUserData(window);
 
@@ -482,7 +482,7 @@ public class ImGuiDriver : BaseNode, IGpuDestroyable
         if (vp.PlatformUserData != IntPtr.Zero)
         {
             var data = GetWindowUserDataFromViewport(vp);
-            data.Window.Destroy();
+            data.Window.OnDestroy();
             var handle = GCHandle.FromIntPtr(vp.PlatformUserData);
             WindowUserDatas.Remove((Guid)(handle.Target!));
             handle.Free();
@@ -773,7 +773,7 @@ public class ImGuiDriver : BaseNode, IGpuDestroyable
         OldIBuffers.Add(indexBuffer);
     }
 
-    public override unsafe void OnDestroy()
+    public unsafe void OnDestroy()
     {
         LogicalDevice.Device.WaitUntilIdle();
         FontTexture.Destroy();
@@ -873,5 +873,10 @@ public class ImGuiDriver : BaseNode, IGpuDestroyable
                 viewportData.FrameNumber++;
             }
         }
+    }
+
+    public void Destroy()
+    {
+        OnDestroy();
     }
 }

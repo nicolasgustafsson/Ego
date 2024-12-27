@@ -304,7 +304,7 @@ public partial class Renderer
         CleanupQueue.Add(Swapchain);
     }
     
-    public override void OnDestroy()
+    public void OnDestroy()
     {
         Log.Information("Destroying renderer...");
 
