@@ -9,8 +9,8 @@ public static partial class Program
 {
     public static void Main()
     {
-        EgoContext Context = null!;
-        Context = new();
-        Context.Run();
+        EgoContext contextProvider = null!;
+        contextProvider = new();
+        contextProvider.Run();
     }
 }

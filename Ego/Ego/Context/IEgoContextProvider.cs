@@ -1,6 +1,6 @@
 namespace Ego;
 
-public interface IEgoContext
+public interface IEgoContextProvider
 {
     public TimeKeeper Time { get; }
     public Window Window { get;  }

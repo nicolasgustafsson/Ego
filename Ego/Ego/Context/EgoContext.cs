@@ -2,7 +2,7 @@
 
 namespace Ego;
 
-public class EgoContext : Node, IEgoContext
+public class EgoContext : Node, IEgoContextProvider
 {
     public new TimeKeeper Time { get; set; } = null!;
     public new Window Window { get; set; } = null!;
@@ -16,7 +16,7 @@ public class EgoContext : Node, IEgoContext
         using var log = new LoggerConfiguration().WriteTo.Console().CreateLogger();
         Log.Logger = log;
         
-        Context = this;
+        MyContext = this;
         
         Time = AddChild(new TimeKeeper());
         Window = new Window("Game", new Vector2(1920, 1080));

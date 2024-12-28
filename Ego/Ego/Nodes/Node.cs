@@ -1,14 +1,14 @@
 namespace Ego;
 
-public class Node : IEgoContext
+public class Node : IEgoContextProvider
 {
     //TODO: These can be source generated? 
-    public TimeKeeper Time => ((IEgoContext)Context).Time;
-    public Window Window => ((IEgoContext)Context).Window;
-    public Debug Debug => ((IEgoContext)Context).Debug;
-    public RendererApi RendererApi => ((IEgoContext)Context).RendererApi;
-    public AssetManager AssetManager => ((IEgoContext)Context).AssetManager;
-    public TreeInspector TreeInspector => ((IEgoContext)Context).TreeInspector;
+    public TimeKeeper Time => MyContext.Time;
+    public Window Window => MyContext.Window;
+    public Debug Debug => MyContext.Debug;
+    public RendererApi RendererApi => MyContext.RendererApi;
+    public AssetManager AssetManager => MyContext.AssetManager;
+    public TreeInspector TreeInspector => MyContext.TreeInspector;
     
     private List<Node> xChildren { get; set; } = new();
     private Node? xParent = null;
@@ -16,7 +16,7 @@ public class Node : IEgoContext
     public IReadOnlyList<Node> Children => xChildren;
     public Node? Parent => xParent;
 
-    public IEgoContext Context = null!;
+    public IEgoContextProvider MyContext = null!;
     
     public T? GetFirstParentOfType<T>() where T :Node
     {
@@ -30,7 +30,7 @@ public class Node : IEgoContext
     {
         xChildren.Add(aChild);
         aChild.xParent = this;
-        aChild.Context = Context;
+        aChild.MyContext = MyContext;
 
         aChild.Start();
         return aChild;
