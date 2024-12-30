@@ -124,7 +124,7 @@ public class TreeInspector : Node
             ImGui.PushStyleColor(ImGuiCol.HeaderActive, color);
         }
 
-        Vector2 cursorPosition = ImGui.GetCursorPos();
+        Vector2 cursorPosition = ImGui.GetCursorScreenPos();
         
         bool wasOpened = ImGui.TreeNodeEx(aNode.GetName(true), flags, "     " + $"{aNode.GetName()}");
         
@@ -138,7 +138,7 @@ public class TreeInspector : Node
         Vector4? requestedColor = aNode.GetIconColor();
         uint requestedU32Color = requestedColor.HasValue ? ImGui.GetColorU32(requestedColor.Value) : ImGui.GetColorU32(ImGuiCol.Text);
         
-        draw_list.AddText(cursorPosition + ImGui.GetWindowPos() + FramePadding + new Vector2(15f, 0f), requestedU32Color, aNode.GetIcon().ToString());
+        draw_list.AddText(cursorPosition + FramePadding + new Vector2(15f, 0f), requestedU32Color, aNode.GetIcon().ToString());
     
         if (ImGui.IsItemClicked())
         {
