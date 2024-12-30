@@ -6,7 +6,8 @@ public class TimeKeeper : Node
 {
     private Stopwatch Stopwatch = new();
 
-    public float ElapsedSeconds => (float)Stopwatch.Elapsed.TotalSeconds;
+    public TimeSpan DeltaTime => Stopwatch.Elapsed;
+    public double DeltaSeconds => DeltaTime.TotalSeconds;
     
     public TimeKeeper()
     {
