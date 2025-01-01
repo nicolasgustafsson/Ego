@@ -3,7 +3,7 @@
 public struct Transform
 {
     public Quaternion Rotation = Quaternion.Identity;
-    public Position3D Position = Position3D.Zero;
+    public Vector3 Position = Vector3.Zero;
     public Vector3 Scale = Vector3.One;
 
     public Transform()

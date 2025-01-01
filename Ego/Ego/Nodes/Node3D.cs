@@ -10,7 +10,7 @@ public class Node3D : Node
     public Matrix4x4 WorldMatrix => Transform.Matrix * ((Parent as Node3D)?.WorldMatrix ?? Matrix4x4.Identity);
     public Matrix4x4 LocalMatrix => Transform.Matrix;
 
-    public Position3D LocalPosition
+    public Vector3 LocalPosition
     {
         get => Transform.Position;
         set => Transform.Position = value;
@@ -30,9 +30,12 @@ public class Node3D : Node
     
     public override void Inspect()
     {
-        var position = (Vector3)LocalPosition;
-        ImGui.DragFloat3("Position", ref position, 0.1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat);
-        LocalPosition = (Position3D)position;
+        var position = LocalPosition;
+        EmGui.Inspect("Position", ref position);
+        //ImGui.DragFloat3("Position", ref position, 0.1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat);
+        LocalPosition = position;
+        
+        
         var scale = LocalScale;
         
         ImGui.DragFloat3("Scale", ref scale, 0.01f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat);

@@ -145,7 +145,6 @@ public class TreeInspector : Node
             InspectedNode = aNode;
         }
         
-        
         if (wasOpened)
         {
             foreach(var child in aNode.Children)

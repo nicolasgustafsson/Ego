@@ -32,8 +32,8 @@ public class EgoContext : Node, IEgoContextProvider
             AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer());
         }
         
-        AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer()).LocalPosition += new Delta3D(2f, 2f, 0f);
-        AddChild(new Camera()).LocalPosition += new Delta3D(0f, 0f, -7.5f);
+        AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer()).LocalPosition += new Vector3(2f, 2f, 0f);
+        AddChild(new Camera()).LocalPosition += new Vector3(0f, 0f, -7.5f);
 
         Stopwatch watch = new();
         while (!Window.IsClosing)
