@@ -5,32 +5,35 @@ namespace Ego;
 
 public class Debug : Node
 {
-    private ImGuiDriver ImGuiDriver = null!;
+    private ImGuiDriver? ImGuiDriver = null!;
 
     public Action EDebug = () => {};
     
     public override void Start()
     {
         base.Start();
-        
-        ImGuiDriver = new ImGuiDriver(RendererApi.Renderer, Window);
+
+        RendererApi.QueueMessage(api =>
+        {
+            ImGuiDriver = new ImGuiDriver(api.Renderer, Window);
+        });
     }
 
     protected override void Update()
     {
-        lock(ImGuiDriver)
-        {
-            ImGuiDriver.Begin();
-           
-            ImGui.DockSpaceOverViewport(0, null, ImGuiDockNodeFlags.PassthruCentralNode);
+        if (ImGuiDriver == null)
+            return;
+        
+        ImGuiDriver.Begin();
+       
+        ImGui.DockSpaceOverViewport(0, null, ImGuiDockNodeFlags.PassthruCentralNode);
 
-            ImGui.ShowDemoWindow();
-            ImGui.ShowAboutWindow();
+        ImGui.ShowDemoWindow();
+        ImGui.ShowAboutWindow();
 
-            EDebug();
-            
-            ImGuiDriver.End();
-        }
+        EDebug();
+        
+        ImGuiDriver.End();
     }
 
     public override char GetIcon()

@@ -6,9 +6,10 @@ public class Node : IEgoContextProvider
     public TimeKeeper Time => MyContext.Time;
     public Window Window => MyContext.Window;
     public Debug Debug => MyContext.Debug;
-    public RendererApi RendererApi => MyContext.RendererApi;
+    public ParallelBranch<RendererApi> RendererApi => MyContext.RendererApi;
     public AssetManager AssetManager => MyContext.AssetManager;
     public TreeInspector TreeInspector => MyContext.TreeInspector;
+    public MultithreadingManager MultithreadingManager => MyContext.MultithreadingManager;
     
     private List<Node> xChildren { get; set; } = new();
     private Node? xParent = null;
@@ -51,16 +52,21 @@ public class Node : IEgoContextProvider
         
     }
     
-    protected void UpdateInternal()
+    internal virtual void UpdateInternal()
     {
         Update();
-        
+
+        UpdateChildren();
+    }
+
+    internal void UpdateChildren()
+    {
         foreach(var child in xChildren)
         {
             child.UpdateInternal();
         }
     }
-    
+
     protected virtual void Update()
     {
         
@@ -93,9 +99,9 @@ public class Node : IEgoContextProvider
     public string GetName(bool aIncludeUniqueIdentifier = false)
     {
         if (aIncludeUniqueIdentifier)
-            return $"{Name} {GetHashCode()}";
+            return $"{Name}{GetHashCode()}";
         
-        return $"{Name}";
+        return Name;
     }
     
     public virtual char GetIcon()

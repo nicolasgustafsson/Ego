@@ -12,48 +12,54 @@ public class MeshCollection : Node, IAsset
     public void LoadFrom(string aPath)
     {
         FileName = Path.GetFileNameWithoutExtension(aPath);
-        
-        lock(RendererApi.MyRenderData)
+
+        RendererApi.QueueMessage(api =>
         {
-            Meshes = Mesh.LoadGltf(RendererApi.Renderer!, aPath);
-        }
+            Meshes = Mesh.LoadGltf(api.Renderer, aPath);
+        });
     }
 
     public override void OnDestroy()
     {
         base.OnDestroy();
 
-        RendererApi.WaitUntilIdle();
-        
-        foreach(var mesh in Meshes)
+        RendererApi.QueueMessage(api =>
         {
-            mesh.Destroy();
-        }
+            api.WaitUntilIdle();
+            
+            foreach(var mesh in Meshes)
+            {
+                mesh.Destroy();
+            }
+        });
+        
     }
 }
 
-public class MeshRenderer(string aModelPath = "Models/basicmesh.glb") : Node3D
+public class MeshRenderer(string ModelPath = "Models/basicmesh.glb") : Node3D
 {
-    private MeshCollection Meshes = null!;
+    private MeshCollection MeshCollections = null!;
 
     private int MeshIndex = 0;
 
     public override void Start()
     {
         base.Start();
-        Meshes = AssetManager.GetAsset<MeshCollection>(aModelPath);
+        MeshCollections = AssetManager.GetAsset<MeshCollection>(ModelPath);
         
     }
 
     protected override void Update()
     {
-        RendererApi.AddRenderData(new(){Mesh = Meshes.Meshes[MeshIndex], WorldMatrix = WorldMatrix});
+        RendererApi.QueueMessage(api =>
+        {
+            api.AddRenderData(new(){Mesh = MeshCollections.Meshes[MeshIndex], WorldMatrix = WorldMatrix});
+        });
     }
-
 
     public override void Inspect()
     {
         base.Inspect();
-        ImGui.SliderInt("Mesh Index", ref MeshIndex, 0, Meshes.Meshes.Count - 1);
+        ImGui.SliderInt("Mesh Index", ref MeshIndex, 0, MeshCollections.Meshes.Count - 1);
     }
 }

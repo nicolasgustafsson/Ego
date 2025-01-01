@@ -8,7 +8,6 @@ public class RendererApi : Node
     public Renderer Renderer = null!;
 
     public List<MeshRenderData> MyRenderData = new();
-    public List<MeshRenderData> MyPreviousList = new();
     private Matrix4x4 myCameraView = new();
     
     public RendererApi(Window aWindow)
@@ -16,27 +15,9 @@ public class RendererApi : Node
         Renderer = new Renderer(aWindow);
     }
     
-    public override void Start()
-    {
-    }
-
-    protected override void DestroyChildren()
-    {
-        lock(MyRenderData)
-        {
-            lock(Renderer.MainWindow)
-            {
-                base.DestroyChildren();
-            }
-        }
-    }
-    
     public void WaitUntilIdle()
     {
-        lock(MyRenderData)
-        {
-            Renderer.WaitUntilIdle();
-        }
+        Renderer.WaitUntilIdle();
     }
     
     public void AddRenderData(MeshRenderData aRenderData)
@@ -46,26 +27,17 @@ public class RendererApi : Node
 
     protected override void Update()
     {
-        List<MeshRenderData> renderData = MyPreviousList;
-        lock(MyPreviousList)
-        {
-            MyPreviousList = MyRenderData;
-            MyRenderData = renderData;
-        }
+        RenderFrame();
         MyRenderData.Clear();
-        MyRenderData.EnsureCapacity(renderData.Count);
     }
     
     public void RenderFrame()
     {
         Stopwatch watch = new();
         watch.Start();
-        lock(MyPreviousList)
-        {
-            Renderer.SetRenderData(MyPreviousList);
-            Renderer.SetCameraView(myCameraView);
-            Renderer.Render();
-        }
+        Renderer.SetRenderData(MyRenderData);
+        Renderer.SetCameraView(myCameraView);
+        Renderer.Render();
         
         Log.Information($"Time passed single frame = {watch.ElapsedMilliseconds}ms");
     }
