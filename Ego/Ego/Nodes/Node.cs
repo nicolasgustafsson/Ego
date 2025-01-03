@@ -6,7 +6,7 @@ public class Node : IEgoContextProvider
     public TimeKeeper Time => MyContext.Time;
     public Window Window => MyContext.Window;
     public Debug Debug => MyContext.Debug;
-    public ParallelBranch<RendererApi> RendererApi => MyContext.RendererApi;
+    public RendererApi RendererApi => MyContext.RendererApi;
     public AssetManager AssetManager => MyContext.AssetManager;
     public TreeInspector TreeInspector => MyContext.TreeInspector;
     public MultithreadingManager MultithreadingManager => MyContext.MultithreadingManager;

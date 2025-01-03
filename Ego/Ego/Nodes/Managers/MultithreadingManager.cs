@@ -4,22 +4,30 @@ public class MultithreadingManager : Node
 {
     public List<ParallelBranch> Branches = new();
 
-    public void HandleMessages()
-    {
-        foreach(var branch in Branches)
-        {
-            branch.HandleMessages();
-        }
-    }
-    
     public Task RunParallelTasks()
     {
         List<Task> parallels = new(); 
-        foreach(var updateFunc in Branches)
+        foreach(var branch in Branches)
         {
-            parallels.Add(Task.Run(updateFunc.UpdateBranch));
+            parallels.Add(Task.Run(branch.UpdateBranchInternal));
         }
 
         return Task.WhenAll(parallels);
+    }
+
+    public void UpdateSynchronous()
+    {
+        foreach(var branch in Branches)
+        {
+            branch.UpdateSynchronous();
+        }
+    }
+
+    protected override void Update()
+    {
+        foreach(var branch in Branches)
+        {
+            branch.UpdateRoot();
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Ego.Benchmarks;
 
 namespace Ego;
 
@@ -7,7 +8,7 @@ public class EgoContext : Node, IEgoContextProvider
     public new TimeKeeper Time { get; private set; } = null!;
     public new Window Window { get; private set; } = null!;
     public new Debug Debug { get; private set; } = null!;
-    public new ParallelBranch<RendererApi> RendererApi { get; private set; } = null!;
+    public new RendererApi RendererApi { get; private set; } = null!;
     public new AssetManager AssetManager { get; private set; } = null!;
     public new TreeInspector TreeInspector { get; private set; } = null!;
     public new MultithreadingManager MultithreadingManager { get; private set; } = null!;
@@ -24,20 +25,17 @@ public class EgoContext : Node, IEgoContextProvider
         
         Time = AddChild(new TimeKeeper());
         Window = new Window("Game", new Vector2(1920, 1080));
-        RendererApi = AddChild(new ParallelBranch<RendererApi>(new RendererApi(Window)));
+        RendererApi = AddChild(new RendererApi(Window));
         Debug = AddChild(new Debug());
         AssetManager = AddChild(new AssetManager());
         TreeInspector = AddChild(new TreeInspector());
         
         AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer());
-        
-        for(int i = 0; i < 10 * 1; i++)
-        {
-            AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer());
-        }
-        
         AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer()).LocalPosition += new Vector3(2f, 2f, 0f);
         AddChild(new Camera()).LocalPosition += new Vector3(0f, 0f, -7.5f);
+
+        AddChild(new BasicBench());
+        
 
         while (!Window.IsClosing)
         {
@@ -47,13 +45,13 @@ public class EgoContext : Node, IEgoContextProvider
         Destroy();
     }
     
-    public void SingleFrame()
+    private void SingleFrame()
     {
         Stopwatch watch = new();
         
         watch.Restart();
 
-        MultithreadingManager.HandleMessages();
+        MultithreadingManager.UpdateSynchronous();
 
         Task work = MultithreadingManager.RunParallelTasks();
 

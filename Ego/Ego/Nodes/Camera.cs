@@ -4,7 +4,7 @@ public class Camera : Node3D
 {
     protected override void Update()
     {
-        RendererApi.QueueMessage(api => api.SetCameraView(WorldMatrix));
+        RendererApi.SetCameraView(WorldMatrix);
     }
 
     public override char GetIcon()

@@ -13,26 +13,19 @@ public class MeshCollection : Node, IAsset
     {
         FileName = Path.GetFileNameWithoutExtension(aPath);
 
-        RendererApi.QueueMessage(api =>
-        {
-            Meshes = Mesh.LoadGltf(api.Renderer, aPath);
-        });
+        Meshes = Mesh.LoadGltf(RendererApi.Renderer, aPath);
     }
 
     public override void OnDestroy()
     {
         base.OnDestroy();
 
-        RendererApi.QueueMessage(api =>
-        {
-            api.WaitUntilIdle();
-            
-            foreach(var mesh in Meshes)
-            {
-                mesh.Destroy();
-            }
-        });
+        RendererApi.WaitUntilIdle();
         
+        foreach(var mesh in Meshes)
+        {
+            mesh.Destroy();
+        }
     }
 }
 
@@ -51,10 +44,7 @@ public class MeshRenderer(string ModelPath = "Models/basicmesh.glb") : Node3D
 
     protected override void Update()
     {
-        RendererApi.QueueMessage(api =>
-        {
-            api.AddRenderData(new(){Mesh = MeshCollections.Meshes[MeshIndex], WorldMatrix = WorldMatrix});
-        });
+        RendererApi.RegisterMesh(new(){Mesh = MeshCollections.Meshes[MeshIndex], WorldMatrix = WorldMatrix});
     }
 
     public override void Inspect()

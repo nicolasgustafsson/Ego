@@ -1,7 +1,14 @@
 namespace Ego;
 
 //Handles multithreading!
-public abstract class ParallelBranch : Node, IEgoContextProvider
+public abstract class ParallelBranch : Node
+{
+    public abstract void UpdateBranchInternal();
+    public abstract void UpdateSynchronous();
+    public abstract void UpdateRoot();
+}
+
+public abstract class ParallelBranch<TClass> : ParallelBranch, IEgoContextProvider where TClass : ParallelBranch<TClass>
 {
     private new MultithreadingManager MultithreadingManager = null!;
     
@@ -24,52 +31,29 @@ public abstract class ParallelBranch : Node, IEgoContextProvider
         MultithreadingManager.Branches.Remove(this);
     }
 
-    internal override void UpdateInternal()
-    {
-    }
+    private List<Action<TClass>> Messages = new();
 
-    protected sealed override void Update()
-    {
-    }
-
-    public abstract void HandleMessages();
-    
-    public void UpdateBranch()
-    {
-        UpdateChildren();
-    }
-}
-
-public class ParallelBranch<T> : ParallelBranch where T : Node
-{
-    private List<Action<T>> Messages = new();
-
-    private T BranchRoot = null!;
-    
-    public ParallelBranch(T aBranchRoot)
-    {
-        BranchRoot = aBranchRoot;
-    }
-    
-    public override void Start()
-    {
-        base.Start();
-
-        AddChild(BranchRoot);
-    }
-
-    public void QueueMessage(Action<T> aMessage)
+    public void QueueMessage(Action<TClass> aMessage)
     {
         Messages.Add(aMessage);
     }
 
-    public override void HandleMessages()
+    public void HandleMessages()
     {
-        foreach (Action<T> message in Messages)
+        foreach (Action<TClass> message in Messages)
         {
-            message(BranchRoot);
+            message((TClass)this);
         }
 
         Messages.Clear();
     }
+    
+    public sealed override void UpdateBranchInternal()
+    {
+        HandleMessages();
+        UpdateBranch();
+        UpdateChildren();
+    }
+    
+    public abstract void UpdateBranch();
 }

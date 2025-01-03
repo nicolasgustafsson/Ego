@@ -13,10 +13,7 @@ public class Debug : Node
     {
         base.Start();
 
-        RendererApi.QueueMessage(api =>
-        {
-            ImGuiDriver = new ImGuiDriver(api.Renderer, Window);
-        });
+        ImGuiDriver = new ImGuiDriver(RendererApi.Renderer, Window);
     }
 
     protected override void Update()

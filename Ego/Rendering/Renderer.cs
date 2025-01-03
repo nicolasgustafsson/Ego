@@ -55,7 +55,7 @@ public partial class Renderer : IGpuImmediateSubmit
     public Action<CommandBufferHandle> ERenderImgui = delegate {};
     public Action EPostRender = delegate {};
 
-    private List<MeshRenderData> RenderData = new();
+    private List<MeshRenderData> MeshRenderData = new();
 
     public Window MainWindow;
 
@@ -81,25 +81,17 @@ public partial class Renderer : IGpuImmediateSubmit
         ImmediateFence.Wait();
     }
 
-    public void Render()
+    public void Render(RenderData aRenderData)
     {
         if (MainWindow.IsMinimized)
             return;
-        
+
+
+        MeshRenderData = aRenderData.MeshRenders;
+        SceneData.View = aRenderData.CameraView;
         RenderResult result = RenderInternal();
         
         if (result == RenderResult.ResizeNeeded)
             Resize();
-    }
-
-
-    public void SetCameraView(Matrix4x4 aCameraView)
-    {
-        SceneData.View = aCameraView;
-    }
-
-    public void SetRenderData(List<MeshRenderData> aRenderData)
-    {
-        RenderData = aRenderData;
     }
 }

@@ -609,9 +609,11 @@ public class ImGuiDriver : IGpuDestroyable
             }
         }
     }
-    
+
+    private Lock myLock = new();
     public void Begin()
     {
+        myLock.Enter();
         SetFrameData();
         UpdateMouseCursor();
         ImGui.NewFrame();
@@ -622,15 +624,18 @@ public class ImGuiDriver : IGpuDestroyable
         ImGui.EndFrame();
         ImGui.Render();
         ImGui.UpdatePlatformWindows();
+        myLock.Exit();
     }
+
+    private ImDrawDataPtr myDrawData;
     
     public unsafe void Render(CommandBufferHandle cmd)
     {
-        ImDrawDataPtr drawData;
-        lock(this)
+        lock(myLock)
         {
-            drawData = ImGui.GetDrawData();
+            var drawData = ImGui.GetDrawData();
         
+            
             if (drawData.NativePtr == null)
                 return;
         

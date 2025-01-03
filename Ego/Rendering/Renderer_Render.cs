@@ -81,7 +81,7 @@ public partial class Renderer
 
         cmd.BindPipeline(TrianglePipeline);
 
-        foreach(var renderData in RenderData)
+        foreach(var renderData in MeshRenderData)
         {
             VkDescriptorSet descriptorSet = CurrentFrame.FrameDescriptors.Allocate(SingleTextureLayout);
 

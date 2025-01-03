@@ -3,12 +3,11 @@ using Rendering;
 
 namespace Ego;
 
-public class RendererApi : Node
+public class RendererApi : ParallelBranch<RendererApi>
 {
     public Renderer Renderer = null!;
 
-    public List<MeshRenderData> MyRenderData = new();
-    private Matrix4x4 myCameraView = new();
+    public DoubleBuffer<RenderData> RenderData = new(new(), new());
     
     public RendererApi(Window aWindow)
     {
@@ -20,33 +19,42 @@ public class RendererApi : Node
         Renderer.WaitUntilIdle();
     }
     
-    public void AddRenderData(MeshRenderData aRenderData)
+    public void RegisterMesh(MeshRenderData aRenderData)
     {
-        MyRenderData.Add(aRenderData);
+        RenderData.Producer.MeshRenders.Add(aRenderData);
     }
 
     protected override void Update()
     {
-        RenderFrame();
-        MyRenderData.Clear();
     }
     
     public void RenderFrame()
     {
         Stopwatch watch = new();
         watch.Start();
-        Renderer.SetRenderData(MyRenderData);
-        Renderer.SetCameraView(myCameraView);
-        Renderer.Render();
+
+        Renderer.Render(RenderData.Consumer);
         
         Log.Information($"Time passed single frame = {watch.ElapsedMilliseconds}ms");
     }
     
     public void SetCameraView(Matrix4x4 aView)
     {
-        lock(MyRenderData)
-        {
-            myCameraView = aView;
-        }
+        RenderData.Producer.CameraView = aView;
+    }
+
+    public override void UpdateSynchronous()
+    {
+        RenderData.Swap();
+        RenderData.Producer.MeshRenders.Clear();
+    }
+
+    public override void UpdateRoot()
+    {
+    }
+
+    public override void UpdateBranch()
+    {
+        RenderFrame();
     }
 }
