@@ -19,7 +19,7 @@ public class RendererApi : ParallelBranch<RendererApi>
         Renderer.WaitUntilIdle();
     }
     
-    public void RegisterMesh(MeshRenderData aRenderData)
+    public void RenderMesh(MeshRenderData aRenderData)
     {
         RenderData.Producer.MeshRenders.Add(aRenderData);
     }
@@ -27,8 +27,8 @@ public class RendererApi : ParallelBranch<RendererApi>
     protected override void Update()
     {
     }
-    
-    public void RenderFrame()
+
+    private void RenderFrame()
     {
         Stopwatch watch = new();
         watch.Start();

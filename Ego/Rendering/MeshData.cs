@@ -14,13 +14,13 @@ public struct GeoSurface
 }
 
 
-public class Mesh : IGpuDestroyable
+public class MeshData : IGpuDestroyable
 {
     public string Name;
     public List<GeoSurface> Surfaces;
     public MeshBuffers MeshBuffers;
 
-    private Mesh(string aName, List<GeoSurface> WindowSurfaces, MeshBuffers aMeshBuffers)
+    private MeshData(string aName, List<GeoSurface> WindowSurfaces, MeshBuffers aMeshBuffers)
     {
         Name = aName;
         Surfaces = WindowSurfaces;
@@ -32,14 +32,14 @@ public class Mesh : IGpuDestroyable
         MeshBuffers.Destroy();
     }
     
-    public static List<Mesh> LoadGltf(Renderer aRenderer, string aFilePath)
+    public static List<MeshData> LoadGltf(Renderer aRenderer, string aFilePath)
     {
         var model = ModelRoot.Load(aFilePath);
         
         if (model == null)
             return new();
 
-        List<Mesh> meshes = new();
+        List<MeshData> meshes = new();
 
         List<UInt32> indices = new();
         List<Vertex> vertices = new();
@@ -85,7 +85,7 @@ public class Mesh : IGpuDestroyable
                 surfaces.Add(newSurface);
             }
 
-            meshes.Add(new Mesh(mesh.Name, surfaces, new MeshBuffers(aRenderer, GlobalAllocator, indices, vertices)));
+            meshes.Add(new MeshData(mesh.Name, surfaces, new MeshBuffers(aRenderer, GlobalAllocator, indices, vertices)));
             
         }
         return meshes;

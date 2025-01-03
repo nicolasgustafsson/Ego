@@ -2,6 +2,6 @@
 
 public struct MeshRenderData
 {
-    public Mesh Mesh;
+    public MeshData MyMeshData;
     public Matrix4x4 WorldMatrix;
 }

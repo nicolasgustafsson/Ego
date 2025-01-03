@@ -86,7 +86,6 @@ public partial class Renderer : IGpuImmediateSubmit
         if (MainWindow.IsMinimized)
             return;
 
-
         MeshRenderData = aRenderData.MeshRenders;
         SceneData.View = aRenderData.CameraView;
         RenderResult result = RenderInternal();

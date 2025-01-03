@@ -101,13 +101,13 @@ public partial class Renderer
 
             MeshPushConstants pushConstants = new();
             pushConstants.WorldMatrix = world * view * projection;
-            pushConstants.VertexBufferAddress = renderData.Mesh.MeshBuffers.VertexBufferAddress;
+            pushConstants.VertexBufferAddress = renderData.MyMeshData.MeshBuffers.VertexBufferAddress;
 
             cmd.SetPushConstants(pushConstants, TrianglePipeline.VkLayout, VkShaderStageFlags.Vertex);
 
-            cmd.BindIndexBuffer(renderData.Mesh.MeshBuffers.IndexRawBuffer);
+            cmd.BindIndexBuffer(renderData.MyMeshData.MeshBuffers.IndexRawBuffer);
 
-            cmd.DrawIndexed(renderData.Mesh.Surfaces[0].Count);
+            cmd.DrawIndexed(renderData.MyMeshData.Surfaces[0].Count);
         }
        
         cmd.EndRendering();

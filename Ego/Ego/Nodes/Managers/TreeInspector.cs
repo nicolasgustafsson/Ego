@@ -125,8 +125,10 @@ public class TreeInspector : Node
         }
 
         Vector2 cursorPosition = ImGui.GetCursorScreenPos();
-        
-        bool wasOpened = ImGui.TreeNodeEx(aNode.GetName(true), flags, "     " + $"{aNode.GetName()}");
+
+        ImGui.PushID(aNode.GetHashCode());
+        bool wasOpened = ImGui.TreeNodeEx(aNode.GetName(), flags, "     " + $"{aNode.GetName()}");
+        ImGui.PopID();
         
         if (aNode == InspectedNode)
         {
