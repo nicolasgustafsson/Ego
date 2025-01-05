@@ -83,6 +83,8 @@ public unsafe class Api : IGpuDestroyable
         vkDestroyDebugUtilsMessengerEXT(VkInstance, DebugMessenger);
         vkDestroyInstance(VkInstance);
     }
+
+    public static bool SilenceValidationErrors = false;
     
     [UnmanagedCallersOnly]
     private static uint DebugMessengerCallback(VkDebugUtilsMessageSeverityFlagsEXT messageSeverity,
@@ -90,9 +92,11 @@ public unsafe class Api : IGpuDestroyable
         VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
         void* userData)
     {
-        string message = new((sbyte*)pCallbackData->pMessage);
-        
-        Console.WriteLine($"[Vulkan]: {messageTypes}: {messageSeverity} - {message}");
+        if (!SilenceValidationErrors)
+        {
+            string message = new((sbyte*)pCallbackData->pMessage);
+            Console.WriteLine($"[Vulkan]: {messageTypes}: {messageSeverity} - {message}");
+        }
         
         return VK_FALSE;
     }

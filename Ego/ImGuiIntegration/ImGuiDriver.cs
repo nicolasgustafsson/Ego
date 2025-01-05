@@ -128,6 +128,8 @@ public class ImGuiDriver : Node, IGpuDestroyable
         ImGuiImplGLFW.InitForVulkan(Unsafe.BitCast<Hexa.NET.GLFW.GLFWwindowPtr, Hexa.NET.ImGui.Backends.GLFW.GLFWwindowPtr>(aMainWindow.NativeWindow), true);
         
         ImGuiImplVulkan.SetCurrentContext(imGuiContextPtr);
+
+        bool useDynamicRendering = false;
         
         DescriptorAllocator = new DescriptorAllocatorGrowable();
         DescriptorAllocator.InitPool(100, [new(ratio: 1000, type: VkDescriptorType.CombinedImageSampler)]);
@@ -139,34 +141,40 @@ public class ImGuiDriver : Node, IGpuDestroyable
         imguiVulkanInitInfo.Queue = new(aRenderer.RenderQueue.VkQueue.Handle);
         imguiVulkanInitInfo.PipelineCache = VkPipelineCache.Null;
         imguiVulkanInitInfo.DescriptorPool = new((IntPtr)DescriptorAllocator.AcquirePool().Handle);
-        imguiVulkanInitInfo.UseDynamicRendering = 1;
+        imguiVulkanInitInfo.UseDynamicRendering = useDynamicRendering ? (byte)1 : (byte)0;
         imguiVulkanInitInfo.MinImageCount = Surface.MainWindowSurface.SurfaceCapabilities.minImageCount;
         imguiVulkanInitInfo.ImageCount = Surface.MainWindowSurface.SurfaceCapabilities.minImageCount + 1;
         imguiVulkanInitInfo.MSAASamples = 0;
-        imguiVulkanInitInfo.PipelineRenderingCreateInfo = new();
-        
-        imguiVulkanInitInfo.PipelineRenderingCreateInfo.PNext = (void*)null;
-        
-                                                                //VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO
-        imguiVulkanInitInfo.PipelineRenderingCreateInfo.SType = 1000044002;
-        imguiVulkanInitInfo.PipelineRenderingCreateInfo.StencilAttachmentFormat = 0;
-        imguiVulkanInitInfo.PipelineRenderingCreateInfo.ViewMask = 0;
-        imguiVulkanInitInfo.PipelineRenderingCreateInfo.DepthAttachmentFormat = 0;
-        imguiVulkanInitInfo.PipelineRenderingCreateInfo.ColorAttachmentCount = 1;
-
         SwapchainImageFormat = (uint)aRenderer.Swapchain.ImageFormat;
+        
+        
         
         fixed(uint* imageFormat = &SwapchainImageFormat)
         {
-            imguiVulkanInitInfo.PipelineRenderingCreateInfo.PColorAttachmentFormats = imageFormat;
-        
-            imguiVulkanInitInfo.Allocator = null;
-        
-            fixed(ImGuiImplVulkanInitInfo* info = &imguiVulkanInitInfo)
-            {
-                ImGuiImplVulkan.Init(info);
-                //ImGuiImplVulkan.CreateFontsTexture();
-            }
+                if (useDynamicRendering)
+                {
+                    imguiVulkanInitInfo.PipelineRenderingCreateInfo = new();
+                    imguiVulkanInitInfo.PipelineRenderingCreateInfo.PNext = (void*)null;
+                    
+                                                                            //VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO
+                    imguiVulkanInitInfo.PipelineRenderingCreateInfo.SType = 1000044002;
+                    imguiVulkanInitInfo.PipelineRenderingCreateInfo.StencilAttachmentFormat = 0;
+                    imguiVulkanInitInfo.PipelineRenderingCreateInfo.ViewMask = 0;
+                    imguiVulkanInitInfo.PipelineRenderingCreateInfo.DepthAttachmentFormat = 0;
+                    imguiVulkanInitInfo.PipelineRenderingCreateInfo.ColorAttachmentCount = 1;
+                    
+                    imguiVulkanInitInfo.PipelineRenderingCreateInfo.PColorAttachmentFormats = imageFormat;
+                }
+                
+                imguiVulkanInitInfo.Allocator = null;
+            
+                fixed(ImGuiImplVulkanInitInfo* info = &imguiVulkanInitInfo)
+                {
+                    //Api.SilenceValidationErrors = true;
+                    ImGuiImplVulkan.Init(info);
+                    Api.SilenceValidationErrors = false;
+                    ImGuiImplVulkan.CreateFontsTexture();
+                }
         }
         
         aRenderer.ERenderImgui += Render;
@@ -766,7 +774,9 @@ public class ImGuiDriver : Node, IGpuDestroyable
     {
         lock(this)
         {
+            Api.SilenceValidationErrors = true;
             ImGuiImplVulkan.RenderDrawData(ImGui.GetDrawData(), cmd.VkCommandBuffer.Handle, VkPipeline.Null);
+            Api.SilenceValidationErrors = false;
         }
         return;
         ImDrawDataPtr drawData;
@@ -920,10 +930,11 @@ public class ImGuiDriver : Node, IGpuDestroyable
     {
         LogicalDevice.Device.WaitUntilIdle();
 
-        return;
-        FontTexture.Destroy();
+        ImGuiImplVulkan.Shutdown();
         DescriptorAllocator.Destroy();
+        return;
         Sampler.Destroy();
+        FontTexture.Destroy();
         
         Vulkan.vkDestroyDescriptorSetLayout(LogicalDevice.Device.VkDevice, Layout);
 

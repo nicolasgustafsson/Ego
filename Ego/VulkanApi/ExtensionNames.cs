@@ -30,6 +30,7 @@ public static partial class Defaults
 
     public static List<string> DeviceExtensions =
     [
+        "VK_KHR_dynamic_rendering",
         ExtensionNames.Device.Swapchain,
         ExtensionNames.Device.Synchronization2,
     ];
