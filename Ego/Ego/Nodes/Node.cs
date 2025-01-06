@@ -10,6 +10,7 @@ public class Node : IEgoContextProvider
     public AssetManager AssetManager => MyContext.AssetManager;
     public TreeInspector TreeInspector => MyContext.TreeInspector;
     public MultithreadingManager MultithreadingManager => MyContext.MultithreadingManager;
+    public PerformanceMonitor PerformanceMonitor => MyContext.PerformanceMonitor;
     
     private List<Node> xChildren { get; set; } = new();
     private Node? xParent = null;

@@ -30,8 +30,8 @@ public class PerformanceMonitor : Node
     }
 
 
-    private int FrameCount = 180;
-    public PerformanceMonitor(int aFrameCount = 180)
+    private int FrameCount = 1000;
+    public PerformanceMonitor(int aFrameCount = 1000)
     {
         FrameCount = aFrameCount;
     }
@@ -43,22 +43,39 @@ public class PerformanceMonitor : Node
     
     private void Trace(TimeSpan passedTime, string aName)
     {
-        Traces.TryAdd(aName, new(FrameCount));
+        lock(this)
+        {
+            Traces.TryAdd(aName, new(FrameCount));
 
-        Traces[aName].Add(passedTime);
+            Traces[aName].Add(passedTime);
+        }
     }
 
     public override void Inspect()
     {
         //ImGui.Begin("Performance Monitor");
+        string totalFps = (1d / Time.DeltaTime.TotalSeconds).ToString("0.0") + " fps";
+        ImGui.Text(totalFps);
         
-        foreach(KeyValuePair<string, RingBuffer<TimeSpan>> help in Traces)
+        lock(Traces)
         {
-            var ms = help.Value.AsArray().Select(val => (float)val.TotalMilliseconds).ToArray();
+            foreach(KeyValuePair<string, RingBuffer<TimeSpan>> help in Traces)
+            {
+                var ms = help.Value.AsArray().Select(val => (float)val.TotalMilliseconds).ToArray();
 
-            ImGui.PlotLines(help.Key, ref ms[0], help.Value.Size);
+                float currentFrameMs = ms.Last();
+
+                string formattedFrameMs = help.Key + ": " + currentFrameMs.ToString("0.00") + "ms";
+
+                float min = ms.Min();
+                float max = ms.Max();
+                float average = ms.Average();
+
+                ImGui.PushID(help.Key);
+                ImGui.PlotLines($"Min: {min:N1}ms\nMax: {max:N1}ms\nAverage: {average:N1}ms", ref ms[0], help.Value.Size, graph_size: new Vector2(0, 100), values_offset:0, overlay_text:formattedFrameMs, scale_min:0, scale_max:20);
+                ImGui.PopID();
+            }
         }
-
         //ImGui.End();
     }
 }

@@ -16,6 +16,11 @@ public class EgoContext : Node, IEgoContextProvider
     
     public void Run<T>() where T : Node, new()
     {
+        Run<T>(new());
+    }
+    
+    public void Run<T>(EngineInitSettings aSettings) where T : Node, new()
+    {
         using Logger log = new LoggerConfiguration().WriteTo.Console().CreateLogger();
         Log.Logger = log;
         
@@ -25,12 +30,14 @@ public class EgoContext : Node, IEgoContextProvider
         MultithreadingManager = AddChild(new MultithreadingManager());
         
         Time = AddChild(new TimeKeeper());
-        Window = new Window("Game", new Vector2(1920, 1080));
-        RendererApi = AddChild(new RendererApi(Window));
+        Window = new Window(aSettings.Name, aSettings.WindowSize);
+        RendererApi = AddChild(new RendererApi(Window, aSettings.RendererInitSettings));
         Debug = AddChild(new Debug());
         AssetManager = AddChild(new AssetManager());
         TreeInspector = AddChild(new TreeInspector());
-        PerformanceMonitor = AddChild(new PerformanceMonitor(180));
+        PerformanceMonitor = AddChild(new PerformanceMonitor());
+        
+        AddChild(new T());
 
         while (!Window.IsClosing)
         {

@@ -9,6 +9,11 @@ using Vortice.ShaderCompiler;
 
 namespace Rendering;
 
+public struct RendererInitSettings()
+{
+    public VkPresentModeKHR PresentMode = VkPresentModeKHR.Fifo;
+}
+
 public partial class Renderer
 {
     private void Init(Window aWindow)
@@ -95,7 +100,6 @@ public partial class Renderer
     {
         Device.WaitUntilIdle();
 
-        CleanupQueue.RunDeletor(Swapchain);
         CleanupQueue.RunDeletor(RenderImage);
         CleanupQueue.RunDeletor(DepthImage);
         
@@ -103,11 +107,17 @@ public partial class Renderer
             CleanupQueue.RunDeletor(imageView);
 
         ImageViews.Clear();
-        
-        CreateSwapchain();
+
+        RecreateSwapchain();
         CreateImageViews();
         CreateRenderImage();
         UpdateRenderImageDescriptorSet();
+    }
+    
+    public void RecreateSwapchain()
+    {
+        CleanupQueue.RunDeletor(Swapchain);
+        CreateSwapchain();
     }
 
     private void CreateImmediateCommandBuffer()

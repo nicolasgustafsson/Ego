@@ -430,7 +430,7 @@ public class ImGuiDriver : IGpuDestroyable
         var userData = WindowUserDatas[guid];
         userData.Surface = Api.ApiInstance.CreateSurface(window);
         VkSurfaceFormatKHR surfaceFormat = Gpu.GpuInstance.GetSurfaceFormat(VkFormat.B8G8R8A8Unorm, VkColorSpaceKHR.SrgbNonLinear);
-        VkPresentModeKHR presentMode = Gpu.GpuInstance.GetPresentMode(VkPresentModeKHR.FifoRelaxed);
+        VkPresentModeKHR presentMode = Gpu.GpuInstance.GetPresentMode(VkPresentModeKHR.Mailbox);
 
         userData.Swapchain = new Swapchain(surfaceFormat, presentMode, userData.Surface.GetSwapbufferExtent(), userData.Surface);
         userData.ImageViews = userData.Swapchain.CreateImageViews();

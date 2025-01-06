@@ -11,13 +11,14 @@ public abstract class ParallelBranch : Node
 public abstract class ParallelBranch<TClass> : ParallelBranch, IEgoContextProvider where TClass : ParallelBranch<TClass>
 {
     private new MultithreadingManager MultithreadingManager = null!;
+    private new PerformanceMonitor PerformanceMonitor = null!;
     
     public override void Start()
     {
         MultithreadingManager = MyContext.MultithreadingManager;
         
-        //Ensure Context is null here so we don't do things outside the branch
-        MyContext = null!;
+        //Ensure Context is this here so we don't do things outside the branch
+        //MyContext = null!;
         
         base.Start();
         

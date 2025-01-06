@@ -9,4 +9,5 @@ public interface IEgoContextProvider
     public AssetManager AssetManager { get; }
     public TreeInspector TreeInspector { get; }
     public MultithreadingManager MultithreadingManager { get; }
+    public PerformanceMonitor PerformanceMonitor { get;}
 }

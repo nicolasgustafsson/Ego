@@ -3,7 +3,7 @@ global using static VulkanApi.Api;
 global using static VulkanApi.Surface;
 global using static VulkanApi.MemoryAllocator;
 global using static VulkanApi.Gpu;
-
+using GLFW;
 using VulkanApi;
 using ImGuiNET;
 using SharpGLTF.Schema2;
@@ -59,8 +59,15 @@ public partial class Renderer : IGpuImmediateSubmit
 
     public Window MainWindow;
 
-    public Renderer(Window aWindow)
+    public Renderer(Window aWindow) : this(aWindow, new())
     {
+        
+    }
+    
+    public Renderer(Window aWindow, RendererInitSettings aSettings)
+    {
+        PreferredPresentMode = aSettings.PresentMode;
+        
         MainWindow = aWindow;
         Init(aWindow);
     }
@@ -92,5 +99,11 @@ public partial class Renderer : IGpuImmediateSubmit
         
         if (result == RenderResult.ResizeNeeded)
             Resize();
+    }
+    
+    public void SetPresentMode(VkPresentModeKHR aPresentMode)
+    {
+        PreferredPresentMode = aPresentMode;
+        RecreateSwapchain();
     }
 }

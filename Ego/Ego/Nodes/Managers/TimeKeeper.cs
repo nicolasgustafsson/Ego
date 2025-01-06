@@ -4,13 +4,21 @@ namespace Ego;
 
 public class TimeKeeper : Node
 {
-    private Stopwatch Stopwatch = new();
+    private Stopwatch DeltaTimeStopwatch = new();
 
-    public TimeSpan DeltaTime => Stopwatch.Elapsed;
+    public TimeSpan DeltaTime { get; private set; }
+    public TimeSpan ElapsedTime { get; private set; }
     public double DeltaSeconds => DeltaTime.TotalSeconds;
     
     public TimeKeeper()
     {
-        Stopwatch.Start();
+        DeltaTimeStopwatch.Start();
+    }
+    
+    protected override void Update()
+    {
+        DeltaTime = DeltaTimeStopwatch.Elapsed;
+        ElapsedTime += DeltaTime;
+        DeltaTimeStopwatch.Restart();
     }
 }
