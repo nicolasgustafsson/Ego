@@ -61,7 +61,7 @@ public class Node : IEgoContextProvider
 
     internal void UpdateChildren()
     {
-        foreach(var child in xChildren)
+        foreach(Node child in xChildren)
         {
             child.UpdateInternal();
         }
@@ -85,7 +85,7 @@ public class Node : IEgoContextProvider
     
     protected virtual void DestroyChildren()
     {
-        foreach (var child in Children.Reverse())
+        foreach (Node child in Children.Reverse())
             child.Destroy();
     }
     

@@ -21,12 +21,12 @@ public class TreeInspector : Node
 
     unsafe void DrawRowsBackground(int aRowCount, float aLineHeight, float aMinX, float aMaxX, float aYOffset, uint aEvenColor, uint aOddColor)
     {
-        var pos = ImGui.GetCursorPos();
+        Vector2 pos = ImGui.GetCursorPos();
         float y0 = ImGui.GetCursorScreenPos().Y + (float)(int)aYOffset; 
         
         ImGuiListClipperPtr clipper = new(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
 
-        var draw_list = ImGui.GetWindowDrawList();
+        ImDrawListPtr draw_list = ImGui.GetWindowDrawList();
         
         clipper.Begin(aRowCount, aLineHeight);
         while (clipper.Step())
@@ -72,7 +72,7 @@ public class TreeInspector : Node
         
         int rowCount = Tree(Parent!);
 
-        var afterPos = ImGui.GetCursorPos();
+        Vector2 afterPos = ImGui.GetCursorPos();
 
         ImGui.SetCursorPos(cursorPosition);
         DrawRowsBackground(rowCount, lineHeight, minX, maxX, yOffset, ImGui.GetColorU32(EvenColor), ImGui.GetColorU32(OddColor));
@@ -102,7 +102,7 @@ public class TreeInspector : Node
     
     private unsafe int Tree(Node aNode, int aRows = 0)
     {
-        var flags = Flags;
+        ImGuiTreeNodeFlags flags = Flags;
         if (InspectedNode == aNode)
             flags |= ImGuiTreeNodeFlags.Selected;
 
@@ -117,7 +117,7 @@ public class TreeInspector : Node
         if (aNode == InspectedNode)
         {
             ImGui.PushStyleColor(ImGuiCol.HeaderHovered, ImGui.GetStyleColorVec4(ImGuiCol.TabActive)[0]);
-            var color = ImGui.GetStyleColorVec4(ImGuiCol.ScrollbarGrabActive)[0];
+            Vector4 color = ImGui.GetStyleColorVec4(ImGuiCol.ScrollbarGrabActive)[0];
 
             color.W = 1f;
             
@@ -135,7 +135,7 @@ public class TreeInspector : Node
             ImGui.PopStyleColor();
             ImGui.PopStyleColor();
         }
-        var draw_list = ImGui.GetWindowDrawList();
+        ImDrawListPtr draw_list = ImGui.GetWindowDrawList();
 
         Vector4? requestedColor = aNode.GetIconColor();
         uint requestedU32Color = requestedColor.HasValue ? ImGui.GetColorU32(requestedColor.Value) : ImGui.GetColorU32(ImGuiCol.Text);
@@ -149,7 +149,7 @@ public class TreeInspector : Node
         
         if (wasOpened)
         {
-            foreach(var child in aNode.Children)
+            foreach(Node child in aNode.Children)
                 aRows = Tree(child, aRows);
         }
         

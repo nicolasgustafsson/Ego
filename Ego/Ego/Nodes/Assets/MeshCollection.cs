@@ -21,7 +21,7 @@ public class MeshCollection : Node, IAsset
 
         RendererApi.WaitUntilIdle();
         
-        foreach(var mesh in Meshes)
+        foreach(MeshData mesh in Meshes)
         {
             mesh.Destroy();
         }

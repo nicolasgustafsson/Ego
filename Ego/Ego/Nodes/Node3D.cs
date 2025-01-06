@@ -30,13 +30,13 @@ public class Node3D : Node
     
     public override void Inspect()
     {
-        var position = LocalPosition;
+        Vector3 position = LocalPosition;
         EmGui.Inspect("Position", ref position);
         //ImGui.DragFloat3("Position", ref position, 0.1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat);
         LocalPosition = position;
         
         
-        var scale = LocalScale;
+        Vector3 scale = LocalScale;
         
         ImGui.DragFloat3("Scale", ref scale, 0.01f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat);
 
@@ -61,7 +61,7 @@ public class Node3D : Node
                 Ypr.Z += 360f;
             
                 
-            var YprRadians = Ypr;
+            Vector3 YprRadians = Ypr;
             YprRadians.X = Ypr.X.ToRadians();
             YprRadians.Y = Ypr.Y.ToRadians();
             YprRadians.Z = Ypr.Z.ToRadians();

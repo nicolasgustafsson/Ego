@@ -1,4 +1,4 @@
-namespace Ego.Benchmarks;
+namespace Ego;
 
 public class BasicBench : Node
 {

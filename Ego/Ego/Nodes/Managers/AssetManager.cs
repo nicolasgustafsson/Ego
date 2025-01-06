@@ -21,7 +21,7 @@ public class AssetManager : Node
     
     private T LoadAsset<T>(string aPath) where T : Node, IAsset, new()
     {
-        var child = AddChild(new T());
+        T child = AddChild(new T());
 
         child.LoadFrom(aPath);
 

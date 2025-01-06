@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using Ego.Benchmarks;
+using Serilog.Core;
 
 namespace Ego;
 
@@ -12,10 +12,11 @@ public class EgoContext : Node, IEgoContextProvider
     public new AssetManager AssetManager { get; private set; } = null!;
     public new TreeInspector TreeInspector { get; private set; } = null!;
     public new MultithreadingManager MultithreadingManager { get; private set; } = null!;
+    public new PerformanceMonitor PerformanceMonitor { get; private set; } = null!;
     
-    public void Run()
+    public void Run<T>() where T : Node, new()
     {
-        using var log = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+        using Logger log = new LoggerConfiguration().WriteTo.Console().CreateLogger();
         Log.Logger = log;
         
         MyContext = this;
@@ -29,13 +30,7 @@ public class EgoContext : Node, IEgoContextProvider
         Debug = AddChild(new Debug());
         AssetManager = AddChild(new AssetManager());
         TreeInspector = AddChild(new TreeInspector());
-        
-        AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer());
-        AddChild(new SinusoidalMovement()).AddChild(new Node3D()).AddChild(new MeshRenderer()).LocalPosition += new Vector3(2f, 2f, 0f);
-        AddChild(new Camera()).LocalPosition += new Vector3(0f, 0f, -7.5f);
-
-        AddChild(new BasicBench());
-        
+        PerformanceMonitor = AddChild(new PerformanceMonitor(180));
 
         while (!Window.IsClosing)
         {
@@ -47,9 +42,7 @@ public class EgoContext : Node, IEgoContextProvider
     
     private void SingleFrame()
     {
-        Stopwatch watch = new();
-        
-        watch.Restart();
+        var trace = PerformanceMonitor.StartTrace();
 
         MultithreadingManager.UpdateSynchronous();
 
@@ -57,12 +50,12 @@ public class EgoContext : Node, IEgoContextProvider
 
         UpdateInternal();
 
-        Log.Information($"Time passed update = {watch.ElapsedMilliseconds}ms");
+        trace.Trace("Update");
         
         work.Wait();
         
         Window.PollEvents();
 
-        Log.Information($"Time passed total = {watch.ElapsedMilliseconds}ms");
+        trace.Trace("Total");
     }
 }

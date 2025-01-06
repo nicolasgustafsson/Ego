@@ -7,7 +7,7 @@ public class MultithreadingManager : Node
     public Task RunParallelTasks()
     {
         List<Task> parallels = new(); 
-        foreach(var branch in Branches)
+        foreach(ParallelBranch branch in Branches)
         {
             parallels.Add(Task.Run(branch.UpdateBranchInternal));
         }
@@ -17,7 +17,7 @@ public class MultithreadingManager : Node
 
     public void UpdateSynchronous()
     {
-        foreach(var branch in Branches)
+        foreach(ParallelBranch branch in Branches)
         {
             branch.UpdateSynchronous();
         }
@@ -25,7 +25,7 @@ public class MultithreadingManager : Node
 
     protected override void Update()
     {
-        foreach(var branch in Branches)
+        foreach(ParallelBranch branch in Branches)
         {
             branch.UpdateRoot();
         }
