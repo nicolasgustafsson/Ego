@@ -63,21 +63,10 @@ public class RendererApi : ParallelBranch<RendererApi>
     {
         base.Inspect();
 
-        if (ImGui.BeginCombo("VSync", Renderer.PreferredPresentMode.ToString()))
+        VkPresentModeKHR currentPresentMode = Renderer.PreferredPresentMode;
+        if (EmGui.Inspect("VSync", ref currentPresentMode))
         {
-            foreach(var presentMode in (VkPresentModeKHR[])Enum.GetValues(typeof(VkPresentModeKHR)))
-            {
-                bool selected = presentMode == Renderer.PreferredPresentMode;
-                if (ImGui.Selectable(presentMode.ToString()))
-                {
-                    SetPresentMode(presentMode);
-                }
-                if (selected)
-                {
-                    ImGui.SetItemDefaultFocus();
-                }
-            }
-            ImGui.EndCombo();
+            SetPresentMode(currentPresentMode);
         }
     }
 

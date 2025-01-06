@@ -22,6 +22,6 @@ public class RingBuffer<T>
     
     public T[] AsArray()
     {
-        return Buffer.Skip(Index).Concat(Buffer.Take(Index)).ToArray();
+        return Buffer.TakeLast(Size - Index).Concat(Buffer.Take(Index)).ToArray();
     }
 }

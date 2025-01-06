@@ -30,8 +30,8 @@ public class PerformanceMonitor : Node
     }
 
 
-    private int FrameCount = 1000;
-    public PerformanceMonitor(int aFrameCount = 1000)
+    private int FrameCount = 100;
+    public PerformanceMonitor(int aFrameCount = 100)
     {
         FrameCount = aFrameCount;
     }
@@ -72,7 +72,7 @@ public class PerformanceMonitor : Node
                 float average = ms.Average();
 
                 ImGui.PushID(help.Key);
-                ImGui.PlotLines($"Min: {min:N1}ms\nMax: {max:N1}ms\nAverage: {average:N1}ms", ref ms[0], help.Value.Size, graph_size: new Vector2(0, 100), values_offset:0, overlay_text:formattedFrameMs, scale_min:0, scale_max:20);
+                ImGui.PlotLines($"Min: {min:N1}ms\nMax: {max:N1}ms\nAverage: {average:N1}ms", ref ms[0], help.Value.Size, graph_size: new Vector2(0, 100), values_offset:0, overlay_text:formattedFrameMs, scale_min:0, scale_max:50);
                 ImGui.PopID();
             }
         }
