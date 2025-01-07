@@ -1,24 +1,27 @@
+
+using Newtonsoft.Json;
+
 namespace Ego;
 
 public class Node : IEgoContextProvider
 {
     //TODO: These can be source generated? 
-    public TimeKeeper Time => MyContext.Time;
-    public Window Window => MyContext.Window;
-    public Debug Debug => MyContext.Debug;
-    public RendererApi RendererApi => MyContext.RendererApi;
-    public AssetManager AssetManager => MyContext.AssetManager;
-    public TreeInspector TreeInspector => MyContext.TreeInspector;
-    public MultithreadingManager MultithreadingManager => MyContext.MultithreadingManager;
-    public PerformanceMonitor PerformanceMonitor => MyContext.PerformanceMonitor;
+    [JsonIgnore] public TimeKeeper Time => MyContext.Time;
+    [JsonIgnore] public Window Window => MyContext.Window;
+    [JsonIgnore] public Debug Debug => MyContext.Debug;
+    [JsonIgnore] public RendererApi RendererApi => MyContext.RendererApi;
+    [JsonIgnore] public AssetManager AssetManager => MyContext.AssetManager;
+    [JsonIgnore] public TreeInspector TreeInspector => MyContext.TreeInspector;
+    [JsonIgnore] public MultithreadingManager MultithreadingManager => MyContext.MultithreadingManager;
+    [JsonIgnore] public PerformanceMonitor PerformanceMonitor => MyContext.PerformanceMonitor;
     
     private List<Node> xChildren { get; set; } = new();
-    private Node? xParent = null;
+    [JsonIgnore] private Node? xParent = null;
     
     public IReadOnlyList<Node> Children => xChildren;
-    public Node? Parent => xParent;
+    [JsonIgnore] public Node? Parent => xParent;
 
-    public IEgoContextProvider MyContext = null!;
+    [JsonIgnore] public IEgoContextProvider MyContext = null!;
     
     public T? GetFirstParentOfType<T>() where T :Node
     {
@@ -28,13 +31,15 @@ public class Node : IEgoContextProvider
         return Parent as T;
     }
     
-    public T AddChild<T>(T aChild) where T : Node
+    public T AddChild<T>(T aChild, bool aStart = true) where T : Node
     {
         xChildren.Add(aChild);
         aChild.xParent = this;
         aChild.MyContext = MyContext;
 
-        aChild.Start();
+        if (aStart)
+            aChild.Start();
+        
         return aChild;
     }
     
