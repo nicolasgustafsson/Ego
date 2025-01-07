@@ -1,5 +1,5 @@
 ﻿
-public static class GameTest
+public static class Game
 {
     public static void Yipee()
     {
