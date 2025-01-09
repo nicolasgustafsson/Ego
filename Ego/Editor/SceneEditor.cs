@@ -8,10 +8,15 @@ public class SceneEditor : Node
     public override void Inspect()
     {
         base.Inspect();
+        
+        if (ImGui.Button("Help"))
+        {
+            WorkingScene.TrySerialize();
+        }
 
         if (ImGui.Button("Duplicate"))
         {
-            WorkingScene.SaveTree(Children.Last());
+            WorkingScene.SaveTree(Editor.GameAssembly, Children.Last());
             var node = WorkingScene.Spawn(Editor.GameAssembly);
             AddChild(node);
         }
@@ -19,7 +24,7 @@ public class SceneEditor : Node
     
     public void SerializeScene()
     {
-        WorkingScene.SaveTree(Children.Last());
+        WorkingScene.SaveTree(Editor.GameAssembly, Children.Last());
         Children.Last().Destroy();
     }
     

@@ -11,17 +11,17 @@ public class MeshRenderer(string ModelPath = "Models/basicmesh.glb") : Node3D
     public override void Start()
     {
         base.Start();
-        MeshCollection = AssetManager.GetAsset<MeshCollection>(ModelPath);
+        MeshCollection = AssetManager.GetAsset<MeshCollection>(ModelPath); 
     }
 
     protected override void Update()
     {
-        RendererApi.RenderMesh(new(){MyMeshData = MeshCollection.Meshes[MeshIndex], WorldMatrix = WorldMatrix});
+        RendererApi.RenderMesh(new(){MyMeshData = MeshCollection.Meshes[MeshIndex], WorldMatrix = WorldMatrix}); 
     }
 
     public override void Inspect()
     {
-        base.Inspect();
+        base.Inspect(); 
         ImGui.SliderInt("Mesh Index", ref MeshIndex, 0, MeshCollection.Meshes.Count - 1);
     }
 }

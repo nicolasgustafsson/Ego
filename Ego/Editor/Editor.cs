@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using ImGuiNET;
 using McMaster.NETCore.Plugins;
+using MessagePack;
 
 namespace Editor;
 
@@ -16,33 +17,25 @@ public class Editor : Node
 
     public override void Start()
     {
+        Directory.SetCurrentDirectory("C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\TestGame\\bin\\net9.0\\");
         base.Start();
         Debug.EDebug += DebugWindow;
+        MessagePackSerializer.DefaultOptions = MessagePack.Resolvers.ContractlessStandardResolver.Options;
         
         LoadBinary(BinaryPath);
+        
         SceneEditor = AddChild(new SceneEditor());
+        CreateTestNode();
+
     }
     
     private void UpdateAssembly()
     {
-        if (GameAssembly != null)
-        {
-            var alc = AssemblyLoadContext.GetLoadContext(GameAssembly);
-            
-            GameAssembly = MyPluginLoader!.LoadDefaultAssembly();
-            Log.Information($"Loaded Assembly {GameAssembly.FullName}");
-            
-            //alc.Unloading += (_) => FinalizeHotReload();
-            alc.Unload();
-            GC.Collect();
-            FinalizeHotReload();
-        }
-        else
-        {
-            GameAssembly = MyPluginLoader!.LoadDefaultAssembly();
-            Log.Information($"Loaded Assembly {GameAssembly.FullName}");
-        }
+        GameAssembly = MyPluginLoader!.LoadDefaultAssembly();
         
+        GameAssembly!.GetExportedTypes().FirstOrDefault(type => type.Name == "Serialization").GetMethod("SetAssembly").Invoke(null, new[]{GameAssembly});
+        
+        Log.Information($"Loaded Assembly {GameAssembly.FullName}");
     }
 
     public override void OnDestroy()
@@ -81,14 +74,14 @@ public class Editor : Node
         Log.Information($"Destroying Scene...");
         SceneEditor.SerializeScene();
         UpdateAssembly();
-    }
-    private void FinalizeHotReload()
-    {
         Log.Information($"Reload complete!");
         Log.Information($"Recreating Scene...");
         SceneEditor.DeserializeScene();
         Log.Information($"Scene reconstruction complete!");
         Log.Information($"Hot Reload Finished!");
+    }
+    private void FinalizeHotReload()
+    {
     }
 
     private void DebugWindow()

@@ -5,5 +5,5 @@ public class ContainerNode<T>(T ContainedObject) : Node
 {
     public required T ContainedObject;
     
-    
+     
 }

@@ -1,34 +1,36 @@
-
-using Newtonsoft.Json;
+using System.Runtime.Serialization;
+using MessagePack;
 
 namespace Ego;
 
-public class Node : IEgoContextProvider
+[Node]
+public partial class Node : IEgoContextProvider
 {
     //TODO: These can be source generated? 
-    [JsonIgnore] public TimeKeeper Time => MyContext.Time;
-    [JsonIgnore] public Window Window => MyContext.Window;
-    [JsonIgnore] public Debug Debug => MyContext.Debug;
-    [JsonIgnore] public RendererApi RendererApi => MyContext.RendererApi;
-    [JsonIgnore] public AssetManager AssetManager => MyContext.AssetManager;
-    [JsonIgnore] public TreeInspector TreeInspector => MyContext.TreeInspector;
-    [JsonIgnore] public MultithreadingManager MultithreadingManager => MyContext.MultithreadingManager;
-    [JsonIgnore] public PerformanceMonitor PerformanceMonitor => MyContext.PerformanceMonitor;
-    
-    private List<Node> xChildren { get; set; } = new();
-    [JsonIgnore] private Node? xParent = null;
-    
-    public IReadOnlyList<Node> Children => xChildren;
-    [JsonIgnore] public Node? Parent => xParent;
+    [IgnoreMember] public TimeKeeper Time => MyContext.Time;
+    [IgnoreMember] public Window Window => MyContext.Window;
+    [IgnoreMember] public Debug Debug => MyContext.Debug;
+    [IgnoreMember] public RendererApi RendererApi => MyContext.RendererApi;
+    [IgnoreMember] public AssetManager AssetManager => MyContext.AssetManager;
+    [IgnoreMember] public TreeInspector TreeInspector => MyContext.TreeInspector;
+    [IgnoreMember] public MultithreadingManager MultithreadingManager => MyContext.MultithreadingManager;
+    [IgnoreMember] public PerformanceMonitor PerformanceMonitor => MyContext.PerformanceMonitor;
 
-    [JsonIgnore] public IEgoContextProvider MyContext = null!;
-    
+    private List<Node> xChildren { get; set; } = new();
+    [IgnoreMember] private Node? xParent = null;
+
+
+    public IReadOnlyList<Node> Children => xChildren; 
+    [IgnoreMember] public Node? Parent => xParent;
+
+    [IgnoreMember] public IEgoContextProvider MyContext = null!; 
+     
     public T? GetFirstParentOfType<T>() where T :Node
     {
         if (Parent != null && Parent is not T)
             return Parent.GetFirstParentOfType<T>();
 
-        return Parent as T;
+        return Parent as T; 
     }
     
     public T AddChild<T>(T aChild, bool aStart = true) where T : Node

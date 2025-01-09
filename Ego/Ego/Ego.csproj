@@ -20,6 +20,7 @@
       <ProjectReference Include="../Rendering/Rendering.csproj" />
       <ProjectReference Include="../Utilities/Utilities.csproj" />
         <ProjectReference Include="../Platform/Platform.csproj" />
+        <ProjectReference Include="..\SourceGenerator\SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -35,7 +36,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="MessagePack" Version="3.1.1" />
     </ItemGroup>
 
 </Project>
