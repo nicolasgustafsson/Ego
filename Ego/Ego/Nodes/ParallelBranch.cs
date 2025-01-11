@@ -15,7 +15,7 @@ public abstract class ParallelBranch<TClass> : ParallelBranch, IEgoContextProvid
     
     public override void Start()
     {
-        MultithreadingManager = MyContext.MultithreadingManager;
+        MultithreadingManager = MyContext.MultithreadingManager; 
         
         //Ensure Context is this here so we don't do things outside the branch
         //MyContext = null!;

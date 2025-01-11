@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace SourceGenerator;
 
-public readonly record struct SerializedMember(string TypeName, string MemberName, Accessibility Accessibility, RefKind RefKind, bool ShouldInspect, bool IsProperty)
+public readonly record struct SerializedMember(string TypeName, string MemberName, Accessibility Accessibility, RefKind RefKind, bool ShouldInspect, bool IsProperty, EquatableArray<string> Aliases, string Debug)
 {
     public readonly string TypeName = TypeName;
     public readonly string MemberName = MemberName;
@@ -14,11 +14,31 @@ public readonly record struct SerializedMember(string TypeName, string MemberNam
     public readonly bool IsProperty = IsProperty;
     public bool IsField => !IsProperty;
     public readonly bool ShouldInspect = ShouldInspect;
+    public readonly EquatableArray<string> Aliases = Aliases;
+    public readonly string Debug = Debug;
         
     public string GetSerializedDeclaration()
     {
-        return $"public SerializedMember<{TypeName}> {MemberName} {{ get {{ return field; }} set {{ field = value; }} }}";
+        return $"public SerializedMember<{TypeName}> {MemberName} {{ get {{ return field; }} set {{ field = value; }} }}" + GetAliasDeclarations();
     }
+    
+    public string GetAliasDeclarations()
+    {
+        StringBuilder aliases = new();
+        foreach(string alias in Aliases)
+        {
+            aliases.AppendLine();
+            aliases.Append(GetAliasDeclaration(alias));
+        }
+
+        return aliases.ToString();
+    }
+    
+    public string GetAliasDeclaration(string Alias)
+    {
+        return $"public SerializedMember<{TypeName}> {Alias} {{ get {{ return field; }} set {{ field = value; }} }}";
+    }
+    
     public string GetPartialDeclaration()
     {
         if (IsField)
@@ -41,7 +61,25 @@ public readonly record struct SerializedMember(string TypeName, string MemberNam
 
     public string GetPrepToNodeConverter()
     {
-        return $"if ({MemberName}.IsInitialized == true) aNode.{MemberName} = {MemberName};";
+        return $"if ({MemberName}.IsInitialized == true) aNode.{MemberName} = {MemberName};" + GetAliasPrepToNodeConverters();
+    }
+    
+    
+    public string GetAliasPrepToNodeConverters()
+    {
+        StringBuilder aliases = new();
+        foreach(string alias in Aliases)
+        {
+            aliases.AppendLine();
+            aliases.Append(GetPrepToNodeConverterAlias(alias));
+        }
+
+        return aliases.ToString();
+    }
+    
+    public string GetPrepToNodeConverterAlias(string Alias)
+    {
+        return $"else if ({Alias}.IsInitialized == true) aNode.{MemberName} = {Alias};";
     }
     
     public string GetNodeToPrepConverter()
@@ -59,6 +97,11 @@ public readonly record struct SerializedMember(string TypeName, string MemberNam
                  """; 
         
         return $"EmGui.Inspect(\"{MemberName}\", ref {MemberName});";
+    }
+    
+    public string GetDebugString()
+    {
+        return "//" + Debug;
     }
 }
 
@@ -84,6 +127,17 @@ public readonly record struct NodeToSerialize(string Name, string Namespace, Equ
         foreach(SerializedMember member in Members)
         {
             text.Append(member.GetSerializedDeclaration());
+            text.AppendLine();
+        }
+        return text.ToString();
+    }
+    
+    private string GetDebug()
+    {
+        StringBuilder text = new();
+        foreach (SerializedMember member in Members)
+        {
+            text.Append(member.GetDebugString());
             text.AppendLine();
         }
         return text.ToString();
@@ -221,6 +275,9 @@ namespace {{Namespace}};
 public partial class {{Name}}
 {
 
+//Debug
+    {{GetDebug()}}
+//End Debug
     {{GetPartialMemberDeclarations()}}
     
     {{GetInspectionCode()}}

@@ -83,7 +83,7 @@ public partial class Node : IEgoContextProvider
     
     public void Destroy()
     {
-        DestroyChildren();
+        DestroyChildren(); 
         
         OnDestroy();
         

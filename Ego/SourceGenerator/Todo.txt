@@ -1,7 +1,5 @@
 
 Todo:
-Handle default values
-Renaming variables functionality
 Serialize but not inspect
 Serialize entire scenes
 Analyzer for better [Inspect] and require [Node] on nodes(alternatively, remove need for [Node])
@@ -9,6 +7,8 @@ Serialize non-node types
 Inspect non-node types 
 
 Todo done:
+Renaming variables functionality
+Handle default values
 Handle order between properties and fields
 Inspection Groups(per class)
 Inspect with inheritance

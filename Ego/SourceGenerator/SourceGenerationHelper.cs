@@ -9,7 +9,7 @@ public static class SourceGenerationHelper
     public const string InspectAttribute = @"
 namespace Ego
 {
-    [System.AttributeUsage(System.AttributeTargets.Property | AttributeTargets.Field, Inherited = true)]
+    [System.AttributeUsage(System.AttributeTargets.Property | AttributeTargets.Field)]
     internal class InspectAttribute : System.Attribute
     {
         
@@ -20,13 +20,25 @@ namespace Ego
     public const string NodeAttribute = @"
 namespace Ego
 {
-    [System.AttributeUsage(System.AttributeTargets.Class, Inherited = true)]
+    [System.AttributeUsage(System.AttributeTargets.Class)]
     internal class NodeAttribute : System.Attribute
     {
         
     }
 }";
 
+    
+    public const string AliasAttributeName = "AliasAttribute";
+    public const string AliasAttribute = @"
+namespace Ego
+{
+    [System.AttributeUsage(System.AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
+    internal class AliasAttribute(string Alias)
+        : System.Attribute
+    {
+        public string Alias = Alias;
+    }
+}";
 }
 
 
