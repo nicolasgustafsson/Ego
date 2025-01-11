@@ -18,6 +18,6 @@ public partial class Node3D : Node
 
     public override Vector4? GetIconColor()
     {
-        return new Vector4(0.95f, 0.5f, 0.5f, 1f);
+        return new Vector4(0.95f, 0.5f, 0.5f, 1f); 
     }
 }

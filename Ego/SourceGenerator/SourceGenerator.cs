@@ -50,7 +50,7 @@ public class SourceGenerator : IIncrementalGenerator
 
                         return new SerializedMember(typeName, member.Name, member.DeclaredAccessibility, refKind, true, propertySymbol != null);
                     }).ToArray()), 
-                    typeSymbol.Name == "Node", 
+                    typeSymbol.Name == "Node",  
                     typeSymbol.BaseType!.Name,
                     hasInspect);
  

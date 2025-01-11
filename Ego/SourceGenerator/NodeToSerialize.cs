@@ -15,9 +15,9 @@ public readonly record struct SerializedMember(string TypeName, string MemberNam
     public bool IsField => !IsProperty;
     public readonly bool ShouldInspect = ShouldInspect;
         
-    public string GetDeclaration()
+    public string GetSerializedDeclaration()
     {
-        return $"public {TypeName} {MemberName} {{ get {{ return field; }} set {{ field = value; }} }}";
+        return $"public SerializedMember<{TypeName}> {MemberName} {{ get {{ return field; }} set {{ field = value; }} }}";
     }
     public string GetPartialDeclaration()
     {
@@ -41,17 +41,17 @@ public readonly record struct SerializedMember(string TypeName, string MemberNam
 
     public string GetPrepToNodeConverter()
     {
-        return $"aNode.{MemberName} = {MemberName};";
+        return $"if ({MemberName}.IsInitialized == true) aNode.{MemberName} = {MemberName};";
     }
     
     public string GetNodeToPrepConverter()
     {
-        return $"{MemberName} = aNode.{MemberName};";
+        return $"{MemberName} = new(true, aNode.{MemberName});";
     }
     
     public string GetInspectCall()
     {
-        if (IsProperty)
+        if (IsProperty) 
             return $$"""
                  var _{{MemberName}} = {{MemberName}};
                  EmGui.Inspect("{{MemberName}}", ref _{{MemberName}});
@@ -83,7 +83,7 @@ public readonly record struct NodeToSerialize(string Name, string Namespace, Equ
         StringBuilder text = new();
         foreach(SerializedMember member in Members)
         {
-            text.Append(member.GetDeclaration());
+            text.Append(member.GetSerializedDeclaration());
             text.AppendLine();
         }
         return text.ToString();

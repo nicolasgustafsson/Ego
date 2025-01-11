@@ -92,7 +92,7 @@ public partial class Node : IEgoContextProvider
         Parent?.RemoveChild(this);
     }
     
-    protected virtual void DestroyChildren()
+    protected virtual void DestroyChildren() 
     {
         foreach (Node child in Children.Reverse())
             child.Destroy();
