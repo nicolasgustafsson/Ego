@@ -13,7 +13,8 @@ public class Editor : Node
     private PluginLoader? MyPluginLoader;
     string BinaryPath = "C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\TestGame\\bin\\net9.0\\TestGame.dll";
 
-    private SceneEditor SceneEditor;
+    private SceneEditor SceneEditor = null!;
+    private bool WantsHotReload = false;
 
     public override void Start()
     {
@@ -33,9 +34,9 @@ public class Editor : Node
     {
         GameAssembly = MyPluginLoader!.LoadDefaultAssembly();
         
-        GameAssembly!.GetExportedTypes().FirstOrDefault(type => type.Name == "Serialization").GetMethod("SetAssembly").Invoke(null, new[]{GameAssembly});
-        
         Log.Information($"Loaded Assembly {GameAssembly.FullName}");
+
+        NodeTypeDatabase.Build(GameAssembly);
     }
 
     public override void OnDestroy()
@@ -56,7 +57,7 @@ public class Editor : Node
                 config.EnableHotReload = true;
             });
 
-            plugin.Reloaded += (_,_) => HotReload();
+            plugin.Reloaded += (_, _) => WantsHotReload = true;
             
             MyPluginLoader = plugin;
 
@@ -68,20 +69,25 @@ public class Editor : Node
         }
     }
 
+    protected override void Update()
+    {
+        base.Update();
+        if (WantsHotReload)
+            HotReload();
+    }
+
     private void HotReload()
     {
+        WantsHotReload = false;
         Log.Information($"Hot Reload Started");
         Log.Information($"Destroying Scene...");
         SceneEditor.SerializeScene();
         UpdateAssembly();
-        Log.Information($"Reload complete!");
+        Log.Information($"Assemblies Updated!");
         Log.Information($"Recreating Scene...");
         SceneEditor.DeserializeScene();
         Log.Information($"Scene reconstruction complete!");
         Log.Information($"Hot Reload Finished!");
-    }
-    private void FinalizeHotReload()
-    {
     }
 
     private void DebugWindow()
@@ -121,7 +127,7 @@ public class Editor : Node
 
     private void CreateTestNode()
     {
-        Type? gameTestType = GameAssembly!.GetExportedTypes().FirstOrDefault(type => type.Name == "TestNode");
+        Type? gameTestType = GameAssembly!.GetExportedTypes().FirstOrDefault(type => type.Name == "TestNodeXD");
 
         if (gameTestType != null)
         {

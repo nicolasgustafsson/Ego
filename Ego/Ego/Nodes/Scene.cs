@@ -5,48 +5,19 @@ namespace Ego;
 
 public class Scene : Node, IAsset
 {
-    string Json = "";
-    private byte[] blob = null!;
-    
-    private System.Type Type = null!;
+    private SerializedNode SerializedNode;
     
     public void LoadFrom(string aPath)
     {
     }
     
-    public void TrySerialize()
+    public void SaveTree(Node aSceneRoot)
     {
-        Node hello = new();
-        MessagePackSerializer.Typeless.Deserialize(MessagePackSerializer.Typeless.Serialize(hello));
-        
+        SerializedNode = aSceneRoot.Serialize();
     }
     
-    public void SaveTree(Assembly aGameAssembly, Node aSceneRoot)
+    public Node SpawnTree()
     {
-        /*
-        JsonSerializerSettings settings = new JsonSerializerSettings();
-        settings.TypeNameHandling = TypeNameHandling.All;
-        Json = JsonConvert.SerializeObject(aSceneRoot, aSceneRoot.GetType(), settings);
-        
-        //Json = Newtonsoft.Json.JsonSerializer.Serialize(aSceneRoot, options);
-        */
-        Type = aSceneRoot.GetType();
-        //blob = MessagePackSerializer.Typeless.Serialize(aSceneRoot);
-        blob = (aGameAssembly!.GetExportedTypes().FirstOrDefault(type => type.Name == "Serialization")!.GetMethod("Serialize")!.Invoke(null, new[]{aSceneRoot}) as byte[])!;
-    }
-    
-    public Node Spawn(Assembly aGameAssembly)
-    {
-        
-        /*
-        JsonSerializerSettings settings = new JsonSerializerSettings();
-        settings.TypeNameHandling = TypeNameHandling.All;
-        JsonConverter converter;
-        return (JsonConvert.DeserializeObject(Json, aGameAssembly.GetType(Type.Name), settings) as Node)!; //(JsonSerializer.Deserialize(Json, Type) as Node)!;
-        */
-        
-        //return (MessagePackSerializer.Typeless.Deserialize(blob) as Node)!;
-        return (aGameAssembly!.GetExportedTypes().FirstOrDefault(type => type.Name == "Serialization")!.GetMethod("Deserialize")!.Invoke(null, new[]{blob}) as Node)!;
-        return new();
+        return SerializedNode.Deserialize(NodeTypeDatabase);
     }
 }

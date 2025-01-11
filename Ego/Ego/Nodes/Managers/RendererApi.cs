@@ -59,10 +59,8 @@ public class RendererApi : ParallelBranch<RendererApi>
         RenderFrame();
     }
 
-    public override void Inspect()
+    public void Inspect()
     {
-        base.Inspect();
-
         VkPresentModeKHR currentPresentMode = Renderer.PreferredPresentMode;
         if (EmGui.Inspect("VSync", ref currentPresentMode))
         {

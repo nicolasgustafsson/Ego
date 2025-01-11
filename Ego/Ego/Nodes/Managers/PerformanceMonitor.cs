@@ -4,7 +4,8 @@ using Vortice.ShaderCompiler;
 
 namespace Ego;
 
-public class PerformanceMonitor : Node
+[Node]
+public partial class PerformanceMonitor : Node
 {
     private Dictionary<string, RingBuffer<TimeSpan>> Traces = new();
     //Not super accurate. its ok; this is mostly for overview, not profiling.
@@ -51,7 +52,7 @@ public class PerformanceMonitor : Node
         }
     }
 
-    public override void Inspect()
+    public void Inspect()
     {
         //ImGui.Begin("Performance Monitor");
         string totalFps = (1d / Time.DeltaTime.TotalSeconds).ToString("0.0") + " fps";

@@ -22,8 +22,37 @@ public class SourceGenerator : IIncrementalGenerator
             {
                 ITypeSymbol typeSymbol = (syntaxContext.TargetSymbol as ITypeSymbol)!;
 
-                IEnumerable<IPropertySymbol> members = typeSymbol.GetMembers().Where(member => member.GetAttributes().Any(data => data.AttributeClass!.Name == SourceGenerationHelper.InspectAttributeName)).OfType<IPropertySymbol>();
-                NodeToSerialize node = new(typeSymbol.Name, typeSymbol.ContainingNamespace.Name, new(members.Select(member => new SerializedMember(member.Type.Name, member.Name)).ToArray()));
+                IEnumerable<ISymbol> members = typeSymbol.GetMembers().
+                    Where(member => member.GetAttributes().Any(data => data.AttributeClass!.Name == SourceGenerationHelper.InspectAttributeName)).
+                    Where(member => member is IPropertySymbol or IFieldSymbol);
+                
+                bool hasInspect = typeSymbol.GetMembers().OfType<IMethodSymbol>().Any(method => method.Name == "Inspect");
+                
+                NodeToSerialize node = new(
+                    typeSymbol.Name, 
+                    typeSymbol.ContainingNamespace.Name, 
+                    new(members.Select(member =>
+                    {
+                        IFieldSymbol? fieldSymbol = member as IFieldSymbol;
+                        IPropertySymbol? propertySymbol = member as IPropertySymbol;
+
+                        string typeName = "";
+                        if (fieldSymbol != null)
+                            typeName = fieldSymbol.Type.Name;
+                        if (propertySymbol != null)
+                            typeName = propertySymbol.Type.Name;
+                        
+                        RefKind refKind = RefKind.None;
+                        if (fieldSymbol != null)
+                            refKind = fieldSymbol.RefKind;
+                        if (propertySymbol != null)
+                            refKind = propertySymbol.RefKind;
+
+                        return new SerializedMember(typeName, member.Name, member.DeclaredAccessibility, refKind, true, propertySymbol != null);
+                    }).ToArray()), 
+                    typeSymbol.Name == "Node", 
+                    typeSymbol.BaseType!.Name,
+                    hasInspect);
  
                 return node;
             });

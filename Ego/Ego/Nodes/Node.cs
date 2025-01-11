@@ -7,23 +7,24 @@ namespace Ego;
 public partial class Node : IEgoContextProvider
 {
     //TODO: These can be source generated? 
-    [IgnoreMember] public TimeKeeper Time => MyContext.Time;
-    [IgnoreMember] public Window Window => MyContext.Window;
-    [IgnoreMember] public Debug Debug => MyContext.Debug;
-    [IgnoreMember] public RendererApi RendererApi => MyContext.RendererApi;
-    [IgnoreMember] public AssetManager AssetManager => MyContext.AssetManager;
-    [IgnoreMember] public TreeInspector TreeInspector => MyContext.TreeInspector;
-    [IgnoreMember] public MultithreadingManager MultithreadingManager => MyContext.MultithreadingManager;
-    [IgnoreMember] public PerformanceMonitor PerformanceMonitor => MyContext.PerformanceMonitor;
+    public TimeKeeper Time => MyContext.Time;
+    public Window Window => MyContext.Window;
+    public Debug Debug => MyContext.Debug;
+    public RendererApi RendererApi => MyContext.RendererApi;
+    public AssetManager AssetManager => MyContext.AssetManager;
+    public TreeInspector TreeInspector => MyContext.TreeInspector;
+    public MultithreadingManager MultithreadingManager => MyContext.MultithreadingManager;
+    public PerformanceMonitor PerformanceMonitor => MyContext.PerformanceMonitor;
+    public NodeTypeDatabase NodeTypeDatabase => MyContext.NodeTypeDatabase;
 
     private List<Node> xChildren { get; set; } = new();
-    [IgnoreMember] private Node? xParent = null;
+    private Node? xParent = null;
 
 
     public IReadOnlyList<Node> Children => xChildren; 
-    [IgnoreMember] public Node? Parent => xParent;
+    public Node? Parent => xParent;
 
-    [IgnoreMember] public IEgoContextProvider MyContext = null!; 
+    public IEgoContextProvider MyContext = null!; 
      
     public T? GetFirstParentOfType<T>() where T :Node
     {
@@ -120,10 +121,5 @@ public partial class Node : IEgoContextProvider
     public virtual Vector4? GetIconColor()
     {
         return null;
-    }
-
-    public virtual void Inspect()
-    {
-        
     }
 }

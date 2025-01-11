@@ -3,7 +3,8 @@ using Serilog.Core;
 
 namespace Ego;
 
-public class EgoContext : Node, IEgoContextProvider
+[Node]
+public partial class EgoContext : Node, IEgoContextProvider
 {
     public new TimeKeeper Time { get; private set; } = null!;
     public new Window Window { get; private set; } = null!;
@@ -13,7 +14,8 @@ public class EgoContext : Node, IEgoContextProvider
     public new TreeInspector TreeInspector { get; private set; } = null!;
     public new MultithreadingManager MultithreadingManager { get; private set; } = null!;
     public new PerformanceMonitor PerformanceMonitor { get; private set; } = null!;
-    
+    public new NodeTypeDatabase NodeTypeDatabase { get; private set; } = null!;
+
     public void Run<T>() where T : Node, new()
     {
         Run<T>(new());
@@ -25,6 +27,8 @@ public class EgoContext : Node, IEgoContextProvider
         Log.Logger = log;
         
         MyContext = this;
+        
+        NodeTypeDatabase = AddChild(new NodeTypeDatabase());
 
         //Important that this is high up - it's Update will launch off any parallel tasks
         MultithreadingManager = AddChild(new MultithreadingManager());

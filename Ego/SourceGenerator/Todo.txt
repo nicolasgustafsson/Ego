@@ -1,0 +1,23 @@
+
+Todo:
+Handle default values
+Renaming variables functionality
+Serialize but not inspect
+Serialize entire scenes
+Analyzer for better [Inspect] and require [Node] on nodes(alternatively, remove need for [Node])
+Serialize non-node types
+Inspect non-node types 
+
+Todo done:
+Handle order between properties and fields
+Inspection Groups(per class)
+Inspect with inheritance
+Handle fields
+Serialize/Deserialize with inheritance
+Handle access modifiers(private/protected/internal/public)
+Node Type Database
+Fix/Hide Warnings in generated code
+Serialize different node types(not just explicitly TestNode)
+Don't have serialization code in Game Project
+Fix hot reload crash(cause reloading assembly on different thread?)
+

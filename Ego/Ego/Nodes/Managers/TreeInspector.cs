@@ -92,7 +92,7 @@ public class TreeInspector : Node
         {
             if (InspectedNode != PreviousInspectedNode)
                 ImGui.GetStateStorage().Clear();
-            InspectedNode.Inspect();
+            InspectedNode.GeneratedInspect();
 
             PreviousInspectedNode = InspectedNode;
         }
@@ -103,7 +103,7 @@ public class TreeInspector : Node
     private unsafe int Tree(Node aNode, int aRows = 0)
     {
         ImGuiTreeNodeFlags flags = Flags;
-        if (InspectedNode == aNode)
+        if (InspectedNode == aNode) 
             flags |= ImGuiTreeNodeFlags.Selected;
 
         if (aNode.Children.Count == 0)

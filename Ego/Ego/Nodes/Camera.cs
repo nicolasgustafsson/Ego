@@ -10,6 +10,6 @@ public class Camera : Node3D
 
     public override char GetIcon()
     {
-        return (char)59403;    
+        return (char)59403;
     }
 }

@@ -10,11 +10,4 @@ public class SinusoidalMovement : Node3D
     {
         LocalPosition = Movement * (float)Math.Sin(Time.ElapsedTime.TotalSeconds);
     }
-    
-    public override void Inspect()
-    {
-        base.Inspect();
-
-        ImGui.SliderFloat3("Movement", ref Movement, -10f, 10f);
-    }
 }

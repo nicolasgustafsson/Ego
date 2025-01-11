@@ -1,5 +1,8 @@
-﻿namespace Ego;
+﻿using MessagePack;
 
+namespace Ego;
+
+[MessagePackObject(keyAsPropertyName:true)]
 public struct Transform
 {
     public Quaternion Rotation = Quaternion.Identity;

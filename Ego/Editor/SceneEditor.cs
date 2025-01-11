@@ -2,35 +2,35 @@
 
 namespace Editor;
 
-public class SceneEditor : Node
+[Node]
+public partial class SceneEditor : Node
 {
     private Scene WorkingScene = new();
-    public override void Inspect()
+    
+    public override void Start()
     {
-        base.Inspect();
-        
-        if (ImGui.Button("Help"))
-        {
-            WorkingScene.TrySerialize();
-        }
-
+        AddChild(WorkingScene);
+    }
+    
+    public void Inspect()
+    {
         if (ImGui.Button("Duplicate"))
         {
-            WorkingScene.SaveTree(Editor.GameAssembly, Children.Last());
-            var node = WorkingScene.Spawn(Editor.GameAssembly);
+            WorkingScene.SaveTree(Children.Last());
+            var node = WorkingScene.SpawnTree();
             AddChild(node);
         }
     }
     
     public void SerializeScene()
     {
-        WorkingScene.SaveTree(Editor.GameAssembly, Children.Last());
+        WorkingScene.SaveTree(Children.Last());
         Children.Last().Destroy();
     }
     
     public void DeserializeScene()
     {
-        var node = WorkingScene.Spawn(Editor.GameAssembly);
+        var node = WorkingScene.SpawnTree();
         AddChild(node);
     }
 }

@@ -27,7 +27,7 @@ public class MultithreadingManager : Node
     {
         foreach(ParallelBranch branch in Branches)
         {
-            branch.UpdateRoot();
+            branch.UpdateRoot(); 
         }
     }
 }
