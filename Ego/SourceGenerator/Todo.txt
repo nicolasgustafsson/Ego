@@ -1,12 +1,13 @@
 
 Todo:
-Serialize but not inspect
 Serialize entire scenes
 Analyzer for better [Inspect] and require [Node] on nodes(alternatively, remove need for [Node])
-Serialize non-node types
-Inspect non-node types 
+Add Alias attribute on rename(analyzer, or likely rider/vs plugin)
 
 Todo done:
+Serialize non-node types
+Inspect non-node types 
+Serialize but not inspect
 Renaming variables functionality
 Handle default values
 Handle order between properties and fields

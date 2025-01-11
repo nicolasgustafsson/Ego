@@ -39,6 +39,16 @@ namespace Ego
         public string Alias = Alias;
     }
 }";
+    
+    public const string SerializeAttributeName = "SerializeAttribute";
+    public const string SerializeAttribute = @"
+namespace Ego
+{
+    [System.AttributeUsage(System.AttributeTargets.Property | AttributeTargets.Field)]
+    internal class SerializeAttribute() : System.Attribute
+    {
+    }
+}";
 }
 
 

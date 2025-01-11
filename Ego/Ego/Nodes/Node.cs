@@ -6,6 +6,8 @@ namespace Ego;
 [Node]
 public partial class Node : IEgoContextProvider
 {
+    [Serialize] System.Guid Guid = new();
+    
     //TODO: These can be source generated? 
     public TimeKeeper Time => MyContext.Time;
     public Window Window => MyContext.Window;

@@ -1,5 +1,9 @@
 Todo:
 Scene Tree imgui
 right click to add node
+Handle clicking different node (and not setting variable)
+Compile game on startup
+Compile on file change
+Inspect lists
 
 Done:

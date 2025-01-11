@@ -14,6 +14,7 @@ public class SourceGenerator : IIncrementalGenerator
         context.RegisterPostInitializationOutput(ctx => ctx.AddSource("Ego." + SourceGenerationHelper.InspectAttributeName + ".generated.cs", SourceText.From(SourceGenerationHelper.InspectAttribute, Encoding.UTF8)));
         context.RegisterPostInitializationOutput(ctx => ctx.AddSource("Ego." + SourceGenerationHelper.NodeAttributeName + ".generated.cs", SourceText.From(SourceGenerationHelper.NodeAttribute, Encoding.UTF8)));
         context.RegisterPostInitializationOutput(ctx => ctx.AddSource("Ego." + SourceGenerationHelper.AliasAttributeName + ".generated.cs", SourceText.From(SourceGenerationHelper.AliasAttribute, Encoding.UTF8)));
+        context.RegisterPostInitializationOutput(ctx => ctx.AddSource("Ego." + SourceGenerationHelper.SerializeAttributeName + ".generated.cs", SourceText.From(SourceGenerationHelper.SerializeAttribute, Encoding.UTF8)));
         
         //Not sure how to make this more incremental. Docs suggest against using IncrementalValuesProvider for ISymbol and ISyntaxNode. https://github.com/dotnet/roslyn/blob/main/docs/features/incremental-generators.cookbook.md#pipeline-model-design
         IncrementalValuesProvider<NodeToSerialize> nodeTypesToSerialize = context.SyntaxProvider.ForAttributeWithMetadataName(
@@ -24,7 +25,7 @@ public class SourceGenerator : IIncrementalGenerator
                 ITypeSymbol typeSymbol = (syntaxContext.TargetSymbol as ITypeSymbol)!;
 
                 IEnumerable<ISymbol> members = typeSymbol.GetMembers().
-                    Where(member => member.GetAttributes().Any(data => data.AttributeClass!.Name == SourceGenerationHelper.InspectAttributeName)).
+                    Where(member => member.GetAttributes().Any(data => data.AttributeClass!.Name == SourceGenerationHelper.InspectAttributeName || data.AttributeClass!.Name == SourceGenerationHelper.SerializeAttributeName)).
                     Where(member => member is IPropertySymbol or IFieldSymbol);
                 
                 bool hasInspect = typeSymbol.GetMembers().OfType<IMethodSymbol>().Any(method => method.Name == "Inspect");
@@ -49,11 +50,13 @@ public class SourceGenerator : IIncrementalGenerator
                         if (propertySymbol != null)
                             refKind = propertySymbol.RefKind;
 
+                        bool hasInspectAttribute = member.GetAttributes().Any(data => data.AttributeClass!.Name == SourceGenerationHelper.InspectAttributeName);
+
                         var aliases = member.GetAttributes().Where(attribute => attribute.AttributeClass!.Name == "AliasAttribute").ToList();
 
-                        var aliasStrings = aliases.Select(alias => alias.ConstructorArguments.First().Value.ToString());// alias.NamedArguments.First().Value.ToString());
+                        var aliasStrings = aliases.Select(alias => alias.ConstructorArguments.First().Value!.ToString());
                         
-                        return new SerializedMember(typeName, member.Name, member.DeclaredAccessibility, refKind, true, propertySymbol != null, new EquatableArray<string>(aliasStrings.ToArray()), $"Atttributes for {member.Name}: {member.GetAttributes().Select(attribute => attribute.AttributeClass.Name).First().ToString()}");
+                        return new SerializedMember(typeName, member.Name, member.DeclaredAccessibility, refKind, hasInspectAttribute, propertySymbol != null, new EquatableArray<string>(aliasStrings.ToArray()), "");
                     }).ToArray()),  
                     typeSymbol.Name == "Node",  
                     typeSymbol.BaseType!.Name,

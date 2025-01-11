@@ -1,3 +1,4 @@
+using System.Reflection;
 using Ego;
 using ImGuiNET;
 using Utilities;
@@ -6,6 +7,31 @@ public static partial class EmGui
 {
     public static bool Inspect(string aName, ref object aObject)
     {
+        if (aObject is string aString)
+        {
+            bool changed = Inspect(aName, ref aString);
+            aObject = aString;
+            return changed;
+        }
+        if (aObject is Vector3 aVector3)
+        {
+            bool changed = Inspect(aName, ref aVector3);
+            aObject = aVector3;
+            return changed;
+        }
+        
+        if (aObject is int aInt)
+        {
+            bool changed = Inspect(aName, ref aInt);
+            aObject = aInt;
+            return changed;
+        }
+        if (aObject is Transform aTransform)
+        {
+            bool changed = Inspect(aName, ref aTransform);
+            aObject = aTransform;
+            return changed;
+        }
         
         return false;
     }
@@ -84,8 +110,38 @@ public static partial class EmGui
         {
             return InspectEnum<T>(aName, ref aVar);
         }
+        
+        //ref object hello = aVar
 
-        return false;
+        object cloned = aVar;
+
+        bool changed = DynamicInspect(aName, ref cloned);
+
+        aVar = (T)cloned;
+
+        return changed;
+    }
+    
+    public static bool DynamicInspect(string aName, ref object aVar)
+    {
+        bool changed = false;
+        if (ImGui.TreeNodeEx(aName, ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            foreach(var member in aVar.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public))
+            {
+                var val = member.GetValue(aVar)!;
+
+                changed |= Inspect(member.Name, ref val);
+                
+                //changed |= (bool)(typeof(EmGui).GetMethod("Inspect", new System.Type[]{val.GetType()})!.Invoke(null, new []{member.Name, val})!);//Inspect(member.Name, ref val);
+                
+                member.SetValue(aVar, val);
+            }
+
+            ImGui.TreePop();
+        }
+
+        return changed;
     }
     
     public static bool InspectEnum<T>(string aName, ref T aEnum)

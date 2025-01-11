@@ -89,6 +89,9 @@ public readonly record struct SerializedMember(string TypeName, string MemberNam
     
     public string GetInspectCall()
     {
+        if (!ShouldInspect)
+            return "";
+        
         if (IsProperty) 
             return $$"""
                  var _{{MemberName}} = {{MemberName}};
