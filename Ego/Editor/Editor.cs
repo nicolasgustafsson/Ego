@@ -127,7 +127,7 @@ public class Editor : Node
 
     private void CreateTestNode()
     {
-        Type? gameTestType = GameAssembly!.GetExportedTypes().FirstOrDefault(type => type.Name == "TestNodeXD");
+        Type? gameTestType = GameAssembly!.GetExportedTypes().FirstOrDefault(type => type.Name == "Root");
 
         if (gameTestType != null)
         {
