@@ -1,6 +1,7 @@
 namespace Ego;
 
-public class AssetManager : Node
+[Node(HideInEditor = true)]
+public partial class AssetManager : Node
 {
     private Dictionary<string, Node> Assets = new();
     

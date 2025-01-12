@@ -3,7 +3,8 @@ using Rendering;
 
 namespace Ego;
 
-public class Debug : Node
+[Node(HideInEditor = true)]
+public partial class Debug : Node
 {
     private ImGuiDriver? ImGuiDriver = null!;
 

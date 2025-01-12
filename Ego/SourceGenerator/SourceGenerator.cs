@@ -12,7 +12,6 @@ public class SourceGenerator : IIncrementalGenerator
     {
         //Add Marker classes
         context.RegisterPostInitializationOutput(ctx => ctx.AddSource("Ego." + SourceGenerationHelper.InspectAttributeName + ".generated.cs", SourceText.From(SourceGenerationHelper.InspectAttribute, Encoding.UTF8)));
-        context.RegisterPostInitializationOutput(ctx => ctx.AddSource("Ego." + SourceGenerationHelper.NodeAttributeName + ".generated.cs", SourceText.From(SourceGenerationHelper.NodeAttribute, Encoding.UTF8)));
         context.RegisterPostInitializationOutput(ctx => ctx.AddSource("Ego." + SourceGenerationHelper.AliasAttributeName + ".generated.cs", SourceText.From(SourceGenerationHelper.AliasAttribute, Encoding.UTF8)));
         context.RegisterPostInitializationOutput(ctx => ctx.AddSource("Ego." + SourceGenerationHelper.SerializeAttributeName + ".generated.cs", SourceText.From(SourceGenerationHelper.SerializeAttribute, Encoding.UTF8)));
         

@@ -3,7 +3,7 @@ using Serilog.Core;
 
 namespace Ego;
 
-[Node]
+[Node(HideInEditor = true)]
 public partial class EgoContext : Node, IEgoContextProvider
 {
     public new TimeKeeper Time { get; private set; } = null!;

@@ -3,21 +3,28 @@ using MessagePack;
 
 namespace Ego;
 
-public class Scene : Node, IAsset
+[Node(HideInEditor = true)]
+public partial class Scene : Node, IAsset
 {
-    private SerializedNode SerializedNode;
-    
+    private SceneBranchNode? SerializedTree;
+
+    public override void Start()
+    {
+        base.Start();
+        Log.Information("Started {Scene}", this);
+    }
+
     public void LoadFrom(string aPath)
     {
     }
     
-    public void SaveTree(Node aSceneRoot)
+    public void SerializeTree(Node aNode)
     {
-        SerializedNode = aSceneRoot.Serialize();
+        SerializedTree = aNode.SerializeTree();
     }
     
-    public Node SpawnTree()
+    public Node DeserializeTree()
     {
-        return SerializedNode.Deserialize(NodeTypeDatabase);
+        return DeserializeTree(SerializedTree!, false);
     }
 }

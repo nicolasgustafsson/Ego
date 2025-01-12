@@ -1,8 +1,7 @@
-
 Todo:
-Serialize entire scenes
-Analyzer for better [Inspect] and require [Node] on nodes(alternatively, remove need for [Node])
-Add Alias attribute on rename(analyzer, or likely rider/vs plugin)
+Serialize nodes as guids
+Analyzer for require [Node] on nodes(alternatively, remove need for [Node])
+Add Alias attribute on rename(analyzer, or more likely rider/vs plugin)
 
 Todo done:
 Serialize non-node types

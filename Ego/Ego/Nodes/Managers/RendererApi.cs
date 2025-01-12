@@ -5,12 +5,17 @@ using Vortice.Vulkan;
 
 namespace Ego;
 
-public class RendererApi : ParallelBranch<RendererApi>
+[Node(HideInEditor = true)]
+public partial class RendererApi : ParallelBranch<RendererApi>
 {
     public Renderer Renderer = null!;
 
     public DoubleBuffer<RenderData> RenderData = new(new(), new());
     
+    public RendererApi()
+    {
+        
+    }
     public RendererApi(Window aWindow, RendererInitSettings aRendererSettings)
     {
         Renderer = new Renderer(aWindow, aRendererSettings);

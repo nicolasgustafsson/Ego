@@ -1,7 +1,9 @@
 ﻿using System.Reflection;
+using MessagePack;
 
 namespace Ego;
 
+[MessagePackObject(true)]
 public readonly record struct SerializedNode(string NodeTypeHash, byte[] Data)
 {
     public readonly string NodeTypeHash = NodeTypeHash;

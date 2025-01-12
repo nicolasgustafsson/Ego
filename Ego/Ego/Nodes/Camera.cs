@@ -1,6 +1,7 @@
 ﻿namespace Ego;
 
-public class Camera : Node3D
+[Node]
+public partial class Camera : Node3D
 {
     protected override void Update()
     {

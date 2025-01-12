@@ -2,7 +2,7 @@
 
 namespace Editor;
 
-[Node]
+[Node(HideInEditor = true)]
 public partial class SceneEditor : Node
 {
     private Scene WorkingScene = new();
@@ -16,21 +16,31 @@ public partial class SceneEditor : Node
     {
         if (ImGui.Button("Duplicate"))
         {
-            WorkingScene.SaveTree(Children.Last());
-            var node = WorkingScene.SpawnTree();
+            WorkingScene.SerializeTree(Children.Last());
+            var node = WorkingScene.DeserializeTree();
             AddChild(node);
         }
     }
     
     public void SerializeScene()
     {
-        WorkingScene.SaveTree(Children.Last());
+        WorkingScene.SerializeTree(Children.Last());
         Children.Last().Destroy();
     }
     
     public void DeserializeScene()
     {
-        var node = WorkingScene.SpawnTree();
+        var node = WorkingScene.DeserializeTree();
         AddChild(node);
+    }
+    
+    public void Save()
+    {
+        
+    }
+    
+    public void Load()
+    {
+        
     }
 }

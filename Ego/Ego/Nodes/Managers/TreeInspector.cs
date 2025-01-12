@@ -1,3 +1,4 @@
+using System.Reflection;
 using ImGuiNET;
 
 namespace Ego;
@@ -51,6 +52,18 @@ public class TreeInspector : Node
     
     private unsafe void EDebug()
     {
+        
+        ImGui.Begin("Inspector");
+        if (InspectedNode != null)
+        {
+            if (InspectedNode != PreviousInspectedNode)
+                ImGui.GetStateStorage().Clear();
+            InspectedNode.GeneratedInspect();
+
+            PreviousInspectedNode = InspectedNode;
+        }
+        
+        ImGui.End();
         ImGui.Begin("Node Tree");
 
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
@@ -85,19 +98,6 @@ public class TreeInspector : Node
             ImGui.PopStyleColor();
 
         ImGui.End();
-
-
-        ImGui.Begin("Inspector");
-        if (InspectedNode != null)
-        {
-            if (InspectedNode != PreviousInspectedNode)
-                ImGui.GetStateStorage().Clear();
-            InspectedNode.GeneratedInspect();
-
-            PreviousInspectedNode = InspectedNode;
-        }
-        
-        ImGui.End();
     }
     
     private unsafe int Tree(Node aNode, int aRows = 0)
@@ -109,8 +109,8 @@ public class TreeInspector : Node
         if (aNode.Children.Count == 0)
             flags |= ImGuiTreeNodeFlags.Leaf;
 
-        if (aRows == 0)
-            flags |= ImGuiTreeNodeFlags.DefaultOpen;
+        //if (aRows == 0)
+        flags |= ImGuiTreeNodeFlags.DefaultOpen;
         
         aRows++;
         
@@ -128,7 +128,6 @@ public class TreeInspector : Node
 
         ImGui.PushID(aNode.GetHashCode());
         bool wasOpened = ImGui.TreeNodeEx(aNode.GetName(), flags, "     " + $"{aNode.GetName()}");
-        ImGui.PopID();
         
         if (aNode == InspectedNode)
         {
@@ -143,19 +142,62 @@ public class TreeInspector : Node
         draw_list.AddText(cursorPosition + FramePadding + new Vector2(15f, 0f), requestedU32Color, aNode.GetIcon().ToString());
     
         if (ImGui.IsItemClicked())
+            InspectedNode = aNode;
+        
+        if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
         {
             InspectedNode = aNode;
+            ImGui.OpenPopup("Context Menu");
+        }
+        
+        if (ImGui.BeginPopup("Context Menu"))
+        {
+            ImGui.SeparatorText("Node Actions");
+            if (ImGui.Selectable("Duplicate"))
+            {
+                aNode.Parent!.AddChild(aNode.Duplicate());
+            }
+            
+            if (ImGui.Selectable("Delete"))
+            {
+                if (aNode == InspectedNode)
+                    InspectedNode = null;
+
+                aNode.Destroy();
+            }
+            
+            ImGui.SeparatorText("Add Node...");
+            
+            foreach(var keyValue in NodeTypeDatabase.NodeTypes)
+            {
+                if (keyValue.Value.IsAbstract)
+                    continue;
+                
+                NodeAttribute? attribute = keyValue.Value.GetCustomAttribute<NodeAttribute>();
+
+                if (attribute == null || attribute.HideInEditor)
+                    continue;
+                    
+                if (ImGui.Selectable(keyValue.Key))
+                {
+                    if (Activator.CreateInstance(keyValue.Value) is Node child)
+                        aNode.AddChild(child);
+                }
+            }
+
+            ImGui.EndPopup();
         }
         
         if (wasOpened)
         {
-            foreach(Node child in aNode.Children)
+            foreach(Node child in new List<Node>(aNode.Children))
                 aRows = Tree(child, aRows);
         }
         
         if (wasOpened)
             ImGui.TreePop();
 
+        ImGui.PopID();
         return aRows;
     }
 

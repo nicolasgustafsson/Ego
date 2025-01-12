@@ -111,8 +111,6 @@ public static partial class EmGui
             return InspectEnum<T>(aName, ref aVar);
         }
         
-        //ref object hello = aVar
-
         object cloned = aVar;
 
         bool changed = DynamicInspect(aName, ref cloned);
@@ -132,8 +130,6 @@ public static partial class EmGui
                 var val = member.GetValue(aVar)!;
 
                 changed |= Inspect(member.Name, ref val);
-                
-                //changed |= (bool)(typeof(EmGui).GetMethod("Inspect", new System.Type[]{val.GetType()})!.Invoke(null, new []{member.Name, val})!);//Inspect(member.Name, ref val);
                 
                 member.SetValue(aVar, val);
             }

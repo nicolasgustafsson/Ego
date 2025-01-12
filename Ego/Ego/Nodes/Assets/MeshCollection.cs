@@ -1,7 +1,10 @@
 using Ego;
 using Rendering;
 
-public class MeshCollection : Node, IAsset
+namespace Ego;
+
+[Node(HideInEditor = true)]
+public partial class MeshCollection : Node, IAsset
 {
     public List<MeshData> Meshes = null!;
     protected override string Name => FileName;

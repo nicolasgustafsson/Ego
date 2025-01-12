@@ -6,7 +6,15 @@ namespace Ego;
 [Node]
 public partial class Node : IEgoContextProvider
 {
-    [Serialize] System.Guid Guid = new();
+    [MessagePackObject(true)]
+    public class SceneBranchNode
+    {
+        public SerializedNode Node;
+        public List<SceneBranchNode> Children = new();
+    }
+    [Serialize] public System.Guid Guid = System.Guid.NewGuid();
+
+    private bool HasStarted = false;
     
     //TODO: These can be source generated? 
     public TimeKeeper Time => MyContext.Time;
@@ -39,13 +47,26 @@ public partial class Node : IEgoContextProvider
     public T AddChild<T>(T aChild, bool aStart = true) where T : Node
     {
         xChildren.Add(aChild);
-        aChild.xParent = this;
-        aChild.MyContext = MyContext;
 
-        if (aStart)
-            aChild.Start();
-        
+        aChild.SetParent(this, aStart);
+
         return aChild;
+    }
+    
+    private void SetParent(Node aParent, bool aStart)
+    {
+        xParent = aParent;
+        MyContext = aParent.MyContext;
+
+        if (aStart && MyContext != null && !HasStarted)
+        {
+            HasStarted = true;
+            Start();
+        }
+        
+        //update context
+        foreach (var child in xChildren)
+            child.SetParent(this, aStart);
     }
     
     public T? Get<T>() where T  : Node
@@ -61,6 +82,11 @@ public partial class Node : IEgoContextProvider
     public virtual void Start()
     {
         
+    }
+    
+    public Node Duplicate()
+    {
+        return DeserializeTree(SerializeTree(), true);
     }
     
     internal virtual void UpdateInternal()
@@ -123,5 +149,48 @@ public partial class Node : IEgoContextProvider
     public virtual Vector4? GetIconColor()
     {
         return null;
+    }
+
+    public override int GetHashCode()
+    {
+        return Guid.GetHashCode();
+    }
+    
+    public SceneBranchNode SerializeTree()
+    {
+        return SerializeBranch(this);
+    }
+    
+    private SceneBranchNode SerializeBranch(Node aBranch)
+    {
+        SceneBranchNode serialized = new();
+        serialized.Node = aBranch.Serialize();
+        foreach(var node in aBranch.Children)
+        {
+            serialized.Children.Add(SerializeBranch(node));
+        }
+
+        return serialized;
+    }
+    
+    public Node DeserializeTree(SceneBranchNode aNode, bool aNewGuid)
+    {
+        Node node = DeserializeBranch(aNode, aNewGuid);
+
+        return node;
+    }
+    
+    public Node DeserializeBranch(SceneBranchNode aSerializedTree, bool aNewGuid)
+    {
+        Node aNode = aSerializedTree.Node.Deserialize(NodeTypeDatabase);
+        if (aNewGuid)
+            aNode.Guid = Guid.NewGuid();
+        
+        foreach(var branch in aSerializedTree.Children)
+        {
+            aNode.AddChild(DeserializeBranch(branch, aNewGuid), false);
+        }
+
+        return aNode;
     }
 }

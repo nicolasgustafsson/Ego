@@ -3,11 +3,17 @@ using Rendering;
 namespace Ego;
 
 [Node]
-public partial class MeshRenderer(string ModelPath = "Models/basicmesh.glb") : Node3D
+public partial class MeshRenderer : Node3D
 {
+    public MeshRenderer()
+    {
+        
+    }
+    
+    private string ModelPath = "Models/basicmesh.glb";
     private MeshCollection MeshCollection = null!;
 
-    private int MeshIndex = 0;
+    [Serialize] private int MeshIndex = 0;
 
     public override void Start()
     {
@@ -20,7 +26,7 @@ public partial class MeshRenderer(string ModelPath = "Models/basicmesh.glb") : N
         RendererApi.RenderMesh(new(){MyMeshData = MeshCollection.Meshes[MeshIndex], WorldMatrix = WorldMatrix}); 
     }
 
-    public void Inspect()
+    private void Inspect()
     {
         ImGui.SliderInt("Mesh Index", ref MeshIndex, 0, MeshCollection.Meshes.Count - 1);
     }
