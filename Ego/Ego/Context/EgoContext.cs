@@ -16,16 +16,41 @@ public partial class EgoContext : Node, IEgoContextProvider
     public new PerformanceMonitor PerformanceMonitor { get; private set; } = null!;
     public new NodeTypeDatabase NodeTypeDatabase { get; private set; } = null!;
 
+    private List<Func<LoggerConfiguration, LoggerConfiguration>> LoggerConfigHooks = new();
+    private Logger? Logger = null;
+
     public void Run<T>() where T : Node, new()
     {
         Run<T>(new());
     }
     
+    private void CreateLogger()
+    {
+        if (Logger != null)
+            Logger.Dispose();
+
+        LoggerConfiguration config = new LoggerConfiguration().WriteTo.Console().Enrich.FromLogContext();
+        
+        foreach(var hook in LoggerConfigHooks)
+        {
+            config = hook(config);
+        }
+        
+        Logger = config.CreateLogger();
+        
+        Log.Logger = Logger;
+    }
+    
+    public void AddLoggerConfigHook(Func<LoggerConfiguration, LoggerConfiguration> aLoggerConfigHook)
+    {
+        LoggerConfigHooks.Add(aLoggerConfigHook);
+
+        CreateLogger();
+    }
+    
     public void Run<T>(EngineInitSettings aSettings) where T : Node, new()
     {
-        using Logger log = new LoggerConfiguration().WriteTo.Console().CreateLogger();
-        Log.Logger = log;
-        
+        CreateLogger();
         MyContext = this;
         
         NodeTypeDatabase = AddChild(new NodeTypeDatabase());

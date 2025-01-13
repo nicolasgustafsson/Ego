@@ -1,9 +1,11 @@
 ﻿using System.Data;
+using System.Drawing;
 using System.Reflection;
 using System.Runtime.Loader;
 using ImGuiNET;
 using McMaster.NETCore.Plugins;
 using MessagePack;
+using Serilog.Context;
 
 namespace Editor;
 
@@ -25,6 +27,8 @@ public class Editor : Node
         Directory.SetCurrentDirectory("C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\bin\\net9.0\\");
 
         Api.Watch("C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\");
+
+        AddChild(new TopMenu());
         
         base.Start();
         Debug.EDebug += DebugWindow;
@@ -34,7 +38,6 @@ public class Editor : Node
         
         SceneEditor = AddChild(new SceneEditor());
         CreateTestNode();
-
     }
     
     private void UpdateAssembly()
@@ -86,6 +89,10 @@ public class Editor : Node
     private void HotReload()
     {
         WantsHotReload = false;
+
+        LogContext.PushProperty("Status", LoggingType.EditorStatus);
+        LogContext.PushProperty("EditorStatus", TopMenuStatus.InProgress);
+        
         Log.Information($"Hot Reload Started");
         Log.Information($"Destroying Scene...");
         SceneEditor.PrepareForHotReload();
@@ -93,12 +100,19 @@ public class Editor : Node
         Log.Information($"Assemblies Updated!");
         Log.Information($"Recreating Scene...");
         SceneEditor.ReinitializeAfterHotReload();
+        
+        LogContext.PushProperty("EditorStatus", TopMenuStatus.Success);
         Log.Information($"Scene reconstruction complete!");
         Log.Information($"Hot Reload Finished!");
     }
-
+    
     private void DebugWindow()
     {
+        if (ImGui.BeginMainMenuBar())
+        {
+            ImGui.EndMainMenuBar();
+        }
+        
         ImGui.Begin("Test");
 
         bool hasLoadedGameBinary = MyPluginLoader != null;

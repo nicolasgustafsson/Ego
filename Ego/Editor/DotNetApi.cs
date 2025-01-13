@@ -7,16 +7,16 @@ public partial class DotNetApi : Node
 {
     private Process? WatchProcess;
     
-    
     public void Watch(string aProjectPath)
     {
         WatchProcess?.Kill();
         string currentDirectory = Directory.GetCurrentDirectory();
+        
+        //Could not specify with --project, so instead we set current directory. Likely I did something wrong.
         Directory.SetCurrentDirectory(aProjectPath);
-        WatchProcess = Process.Start($"dotnet",  "watch build");// --project {aProjectPath}");
+        WatchProcess = Process.Start($"dotnet",  "watch build");
         Directory.SetCurrentDirectory(currentDirectory);
     }
-    
 
     public override void OnDestroy()
     {

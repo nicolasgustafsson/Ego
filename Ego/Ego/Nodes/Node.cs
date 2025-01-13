@@ -1,6 +1,7 @@
 using System.Runtime.Serialization;
 using ImGuiNET;
 using MessagePack;
+using Serilog.Context;
 
 namespace Ego;
 
@@ -107,7 +108,10 @@ public partial class Node : IEgoContextProvider
     
     internal virtual void UpdateInternal()
     {
-        Update();
+        using (LogContext.PushProperty("CurrentNode", Guid))
+        {
+            Update();
+        }
 
         UpdateChildren();
     }
