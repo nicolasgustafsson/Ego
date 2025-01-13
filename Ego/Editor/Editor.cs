@@ -90,9 +90,9 @@ public class Editor : Node
     {
         WantsHotReload = false;
 
-        LogContext.PushProperty("Status", LoggingType.EditorStatus);
-        LogContext.PushProperty("EditorStatus", TopMenuStatus.InProgress);
-        
+        using var _0 = LogContext.PushProperty("Status", LoggingType.EditorStatus);
+        using var _1 = LogContext.PushProperty("EditorStatus", TopMenuStatus.InProgress);
+
         Log.Information($"Hot Reload Started");
         Log.Information($"Destroying Scene...");
         SceneEditor.PrepareForHotReload();
@@ -100,8 +100,8 @@ public class Editor : Node
         Log.Information($"Assemblies Updated!");
         Log.Information($"Recreating Scene...");
         SceneEditor.ReinitializeAfterHotReload();
-        
-        LogContext.PushProperty("EditorStatus", TopMenuStatus.Success);
+
+        using var _2 =LogContext.PushProperty("EditorStatus", TopMenuStatus.Success);
         Log.Information($"Scene reconstruction complete!");
         Log.Information($"Hot Reload Finished!");
     }
