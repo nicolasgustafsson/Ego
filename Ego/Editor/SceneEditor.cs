@@ -6,6 +6,7 @@ namespace Editor;
 public partial class SceneEditor : Node
 {
     private Scene WorkingScene = new();
+    private Guid InspectedNodeGuid;
     
     public override void Start()
     {
@@ -22,16 +23,19 @@ public partial class SceneEditor : Node
         }
     }
     
-    public void SerializeScene()
+    public void PrepareForHotReload()
     {
+        if (TreeInspector.InspectedNode != null)
+            InspectedNodeGuid = TreeInspector.InspectedNode.Guid;
         WorkingScene.SerializeTree(Children.Last());
         Children.Last().Destroy();
     }
     
-    public void DeserializeScene()
+    public void ReinitializeAfterHotReload()
     {
-        var node = WorkingScene.DeserializeTree();
+        Node node = WorkingScene.DeserializeTree();
         AddChild(node);
+        TreeInspector.InspectedNode = node.FindNodeWithGuid(InspectedNodeGuid);
     }
     
     public void Save()

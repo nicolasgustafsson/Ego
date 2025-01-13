@@ -5,7 +5,7 @@ namespace Ego;
 
 public class TreeInspector : Node
 {
-    private Node? InspectedNode = null;
+    public Node? InspectedNode = null;
     private Node? PreviousInspectedNode = null;
 
     private ImGuiTreeNodeFlags Flags = ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick;
@@ -56,7 +56,7 @@ public class TreeInspector : Node
         ImGui.Begin("Inspector");
         if (InspectedNode != null)
         {
-            if (InspectedNode != PreviousInspectedNode)
+            if (InspectedNode.Guid != PreviousInspectedNode?.Guid)
                 ImGui.GetStateStorage().Clear();
             InspectedNode.GeneratedInspect();
 
@@ -158,7 +158,7 @@ public class TreeInspector : Node
                 aNode.Parent!.AddChild(aNode.Duplicate());
             }
             
-            if (ImGui.Selectable("Delete"))
+            if (ImGui.Selectable("Delete", aNode == InspectedNode))
             {
                 if (aNode == InspectedNode)
                     InspectedNode = null;

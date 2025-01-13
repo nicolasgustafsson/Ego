@@ -11,14 +11,21 @@ public class Editor : Node
 {
     public static Assembly? GameAssembly;
     private PluginLoader? MyPluginLoader;
-    string BinaryPath = "C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\TestGame\\bin\\net9.0\\TestGame.dll";
+    string BinaryPath = "C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\bin\\net9.0\\TestGame.dll";
 
     private SceneEditor SceneEditor = null!;
+    private DotNetApi Api;
+    
     private bool WantsHotReload = false;
 
     public override void Start()
     {
-        Directory.SetCurrentDirectory("C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\TestGame\\bin\\net9.0\\");
+        Api = AddChild(new DotNetApi());
+        
+        Directory.SetCurrentDirectory("C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\bin\\net9.0\\");
+
+        Api.Watch("C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\");
+        
         base.Start();
         Debug.EDebug += DebugWindow;
         MessagePackSerializer.DefaultOptions = MessagePack.Resolvers.ContractlessStandardResolver.Options;
@@ -81,11 +88,11 @@ public class Editor : Node
         WantsHotReload = false;
         Log.Information($"Hot Reload Started");
         Log.Information($"Destroying Scene...");
-        SceneEditor.SerializeScene();
+        SceneEditor.PrepareForHotReload();
         UpdateAssembly();
         Log.Information($"Assemblies Updated!");
         Log.Information($"Recreating Scene...");
-        SceneEditor.DeserializeScene();
+        SceneEditor.ReinitializeAfterHotReload();
         Log.Information($"Scene reconstruction complete!");
         Log.Information($"Hot Reload Finished!");
     }

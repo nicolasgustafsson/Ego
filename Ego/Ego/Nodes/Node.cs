@@ -1,4 +1,5 @@
 using System.Runtime.Serialization;
+using ImGuiNET;
 using MessagePack;
 
 namespace Ego;
@@ -30,6 +31,21 @@ public partial class Node : IEgoContextProvider
     private List<Node> xChildren { get; set; } = new();
     private Node? xParent = null;
 
+    public Node? FindNodeWithGuid(Guid aGuid)
+    {
+        if (Guid == aGuid)
+            return this;
+        
+        foreach(var child in xChildren)
+        {
+            var node = child.FindNodeWithGuid(aGuid);
+
+            if (node != null)
+                return node;
+        }
+
+        return null;
+    }
 
     public IReadOnlyList<Node> Children => xChildren; 
     public Node? Parent => xParent;
