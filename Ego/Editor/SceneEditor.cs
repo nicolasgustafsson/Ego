@@ -13,16 +13,6 @@ public partial class SceneEditor : Node
         AddChild(WorkingScene);
     }
     
-    public void Inspect()
-    {
-        if (ImGui.Button("Duplicate"))
-        {
-            WorkingScene.SerializeTree(Children.Last());
-            var node = WorkingScene.DeserializeTree();
-            AddChild(node);
-        }
-    }
-    
     public void PrepareForHotReload()
     {
         if (TreeInspector.InspectedNode != null)

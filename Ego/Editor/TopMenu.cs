@@ -22,11 +22,20 @@ enum TopMenuStatus
 [Node]
 public partial class TopMenu : Node, ILogEventSink
 {
+    public enum TopMenuState
+    {
+        None,
+        Flash,
+        Color
+    }
+    
+    
     private string StatusMessage;
     private System.DateTime StatusTimeStamp;
     private System.DateTime FlashTime;
     private Color StatusColor = Color.White;
     private Vector4 MenuBarColor;
+    private TopMenuState State = TopMenuState.Flash;
     
     
     public override unsafe void Start()
@@ -36,20 +45,31 @@ public partial class TopMenu : Node, ILogEventSink
         MenuBarColor = *ImGui.GetStyleColorVec4(ImGuiCol.MenuBarBg);
         
         Debug.EDebug += OnDebug;
-
-        (MyContext as EgoContext)!.AddLoggerConfigHook(configuration =>
-        {
-            return configuration.WriteTo.Logger(lc =>
-                lc.Filter.ByIncludingOnly(Matching.WithProperty<LoggingType>("Status", type => type == LoggingType.EditorStatus)).WriteTo.Sink(this));
-        });
-        
     }
 
     private void OnDebug()
     {
-        Vector4 flashColor = Vector4.Lerp(StatusColor.ToVec4(), MenuBarColor, (float)((DateTime.Now - FlashTime).TotalSeconds).Within(0f, 1f));
-        
-        ImGui.PushStyleColor(ImGuiCol.MenuBarBg, flashColor);
+        switch(State)
+        {
+            case TopMenuState.Flash:
+                float flashProgress = (float)((DateTime.Now - FlashTime).TotalSeconds).Within(0f, 1f);
+                Vector4 flashColor = Vector4.Lerp(StatusColor.ToVec4(), MenuBarColor, flashProgress);
+                ImGui.PushStyleColor(ImGuiCol.MenuBarBg, flashColor);
+
+                if (flashProgress > 0.999f)
+                    State = TopMenuState.None;
+                
+                break;
+            
+            case TopMenuState.Color:
+                ImGui.PushStyleColor(ImGuiCol.MenuBarBg, StatusColor.ToVec4());
+                break;
+
+            case TopMenuState.None:
+            default:
+                ImGui.PushStyleColor(ImGuiCol.MenuBarBg, MenuBarColor);
+                break;
+        }
         
         if (!ImGui.BeginMainMenuBar())
             return;
@@ -57,7 +77,7 @@ public partial class TopMenu : Node, ILogEventSink
         if ((System.DateTime.Now - StatusTimeStamp).TotalSeconds < 5f)
         {
             ImGui.Separator();
-            ImGui.TextColored(StatusColor.ToVec4(), StatusMessage);
+            ImGui.Text(StatusMessage);
         }
         
         ImGui.EndMainMenuBar();
@@ -88,5 +108,25 @@ public partial class TopMenu : Node, ILogEventSink
                 }
             }
         }
+    }
+    
+    public void Flash(Color aColor, string aMessage)
+    {
+        StatusColor = aColor;
+        FlashTime = System.DateTime.Now;
+
+        StatusMessage = aMessage;
+        StatusTimeStamp = System.DateTime.Now;
+
+        State = TopMenuState.Flash;
+    }
+    
+    public void SetColor(Color aColor, string aMessage)
+    {
+        StatusColor = aColor;
+        StatusMessage = aMessage;
+        StatusTimeStamp = System.DateTime.Now;
+
+        State = TopMenuState.Color;
     }
 }

@@ -11,24 +11,31 @@ namespace Editor;
 
 public class Editor : Node
 {
+    public static Editor Instance;
     public static Assembly? GameAssembly;
     private PluginLoader? MyPluginLoader;
     string BinaryPath = "C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\bin\\net9.0\\TestGame.dll";
 
-    private SceneEditor SceneEditor = null!;
-    private DotNetApi Api;
+    public SceneEditor SceneEditor = null!;
+    public DotNetApi DotNetApi;
+    public TopMenu TopMenu;
     
     private bool WantsHotReload = false;
+    
+    public Editor()
+    {
+        Instance = this;
+    }
 
     public override void Start()
     {
-        Api = AddChild(new DotNetApi());
+        DotNetApi = AddChild(new DotNetApi());
         
         Directory.SetCurrentDirectory("C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\bin\\net9.0\\");
 
-        Api.Watch("C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\");
+        DotNetApi.Watch("C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\");
 
-        AddChild(new TopMenu());
+        TopMenu = AddChild(new TopMenu());
         
         base.Start();
         Debug.EDebug += DebugWindow;
@@ -90,9 +97,6 @@ public class Editor : Node
     {
         WantsHotReload = false;
 
-        using var _0 = LogContext.PushProperty("Status", LoggingType.EditorStatus);
-        using var _1 = LogContext.PushProperty("EditorStatus", TopMenuStatus.InProgress);
-
         Log.Information($"Hot Reload Started");
         Log.Information($"Destroying Scene...");
         SceneEditor.PrepareForHotReload();
@@ -100,10 +104,8 @@ public class Editor : Node
         Log.Information($"Assemblies Updated!");
         Log.Information($"Recreating Scene...");
         SceneEditor.ReinitializeAfterHotReload();
-
-        using var _2 =LogContext.PushProperty("EditorStatus", TopMenuStatus.Success);
         Log.Information($"Scene reconstruction complete!");
-        Log.Information($"Hot Reload Finished!");
+        Log.Information($"Hot Reload Completed!");
     }
     
     private void DebugWindow()
