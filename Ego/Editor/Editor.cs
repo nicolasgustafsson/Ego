@@ -14,11 +14,12 @@ public class Editor : Node
     public static Editor Instance;
     public static Assembly? GameAssembly;
     private PluginLoader? MyPluginLoader;
-    string BinaryPath = "C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\bin\\net9.0\\TestGame.dll";
 
     public SceneEditor SceneEditor = null!;
     public DotNetApi DotNetApi;
     public TopMenu TopMenu;
+
+    private string GameProjectDllPath = "";
     
     private bool WantsHotReload = false;
     
@@ -30,10 +31,16 @@ public class Editor : Node
     public override void Start()
     {
         DotNetApi = AddChild(new DotNetApi());
-        
-        Directory.SetCurrentDirectory("C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\bin\\net9.0\\");
 
-        DotNetApi.Watch("C:\\Users\\Nicos\\Desktop\\Projects\\TestGame\\TestGame\\");
+        string gameProjectDllName = "ExampleProject.dll";
+        string gameProjectPathRelative = "../../ExampleProject/";
+        string gameProjectPathAbsolute = Path.GetFullPath(gameProjectPathRelative);
+        string gameProjectWorkingDirectory = gameProjectPathAbsolute + "Binaries/";
+        GameProjectDllPath = gameProjectWorkingDirectory + gameProjectDllName;
+        
+        Directory.SetCurrentDirectory(gameProjectWorkingDirectory);
+
+        DotNetApi.Watch(gameProjectPathAbsolute);
 
         TopMenu = AddChild(new TopMenu());
         
@@ -41,7 +48,7 @@ public class Editor : Node
         Debug.EDebug += DebugWindow;
         MessagePackSerializer.DefaultOptions = MessagePack.Resolvers.ContractlessStandardResolver.Options;
         
-        LoadBinary(BinaryPath);
+        LoadBinary(GameProjectDllPath);
         
         SceneEditor = AddChild(new SceneEditor());
         CreateTestNode();
@@ -123,7 +130,7 @@ public class Editor : Node
         
         if (ImGui.Button("Load Game Binary"))
         {
-            LoadBinary(BinaryPath);
+            LoadBinary(GameProjectDllPath);
         }
 
         if (hasLoadedGameBinary)
@@ -131,7 +138,7 @@ public class Editor : Node
 
         ImGui.SameLine();
         ImGui.PushID("Gamer");
-        ImGui.InputText("", ref BinaryPath, 255);
+        ImGui.InputText("", ref GameProjectDllPath, 255);
         ImGui.PopID();
 
         if (!hasLoadedGameBinary)
