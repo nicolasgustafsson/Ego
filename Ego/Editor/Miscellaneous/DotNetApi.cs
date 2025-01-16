@@ -25,10 +25,10 @@ public partial class DotNetApi : Node
         startInfo.RedirectStandardOutput = true;
         WatchProcess = Process.Start(startInfo);
         Directory.SetCurrentDirectory(currentDirectory);
-        ReadProcess(CancellationTokenSource.Token);
+        ReadWatchOutput(CancellationTokenSource.Token);
     }
     
-    private async Task ReadProcess(CancellationToken aToken)
+    private async Task ReadWatchOutput(CancellationToken aToken)
     {
         while (!aToken.IsCancellationRequested)
         {
@@ -45,15 +45,15 @@ public partial class DotNetApi : Node
     {
         if (aLine.Contains("Determining projects to restore..."))
         {
-            Editor.Instance.TopMenu.SetColor(Color.Yellow, "Building...!");
+            ProjectEditor.Instance.TopMenu.SetColor(Color.Yellow, "Building...!");
         }
         if (aLine.Contains("Build succeeded."))
         {
-            Editor.Instance.TopMenu.Flash(Color.LawnGreen, "Build succeeded!");
+            ProjectEditor.Instance.TopMenu.Flash(Color.LawnGreen, "Build succeeded!");
         }
         else if (aLine.Contains("Build FAILED."))
         {
-            Editor.Instance.TopMenu.Flash(Color.Red, "Build failed!");
+            ProjectEditor.Instance.TopMenu.Flash(Color.Red, "Build failed!");
         }
         else
         {
