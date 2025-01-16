@@ -1,10 +1,11 @@
 Todo:
 Scene Tree imgui
-Compile game on startup
-Compile on file change
 Inspect lists
-Serialize entire scenes
+Console
 
 Done:
+Serialize entire scenes
+Compile game on startup
+Compile on file change
 right click to add node
 Handle clicking different node (and not setting variable)

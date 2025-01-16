@@ -9,7 +9,7 @@ internal class Program
         EgoContext engine = new();
         
         EngineInitSettings settings = new();
-        settings.Name = "Benchmarks";
+        settings.Name = "Editor";
         settings.RendererInitSettings.PresentMode = VkPresentModeKHR.Mailbox;
         
         engine.Run<Editor>();

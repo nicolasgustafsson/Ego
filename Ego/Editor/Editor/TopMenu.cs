@@ -1,26 +1,10 @@
 ﻿using System.Drawing;
 using ImGuiNET;
-using Serilog.Configuration;
-using Serilog.Core;
-using Serilog.Events;
-using Serilog.Filters;
 
 namespace Editor;
 
-enum LoggingType
-{
-    Normal,
-    EditorStatus
-}
-
-enum TopMenuStatus
-{
-    InProgress,
-    Success
-}
-
 [Node]
-public partial class TopMenu : Node, ILogEventSink
+public partial class TopMenu : Node
 {
     public enum TopMenuState
     {
@@ -29,14 +13,12 @@ public partial class TopMenu : Node, ILogEventSink
         Color
     }
     
-    
     private string StatusMessage;
     private System.DateTime StatusTimeStamp;
     private System.DateTime FlashTime;
     private Color StatusColor = Color.White;
     private Vector4 MenuBarColor;
     private TopMenuState State = TopMenuState.Flash;
-    
     
     public override unsafe void Start()
     {
@@ -85,30 +67,6 @@ public partial class TopMenu : Node, ILogEventSink
         ImGui.PopStyleColor();
     }
 
-    public void Emit(LogEvent aLogEvent)
-    {
-        StatusMessage = aLogEvent.RenderMessage();
-        StatusTimeStamp = System.DateTime.Now;
-        
-        if (aLogEvent.Properties.TryGetValue("EditorStatus", out LogEventPropertyValue aColor))
-        {
-            if (aColor is ScalarValue scalarVal)
-            {
-                TopMenuStatus status = (TopMenuStatus)scalarVal.Value!;
-
-                switch (status)
-                {
-                    case TopMenuStatus.InProgress:
-                        StatusColor = Color.Yellow;
-                        break;
-                    case TopMenuStatus.Success:
-                        StatusColor = Color.LawnGreen;
-                        FlashTime = System.DateTime.Now;
-                        break;
-                }
-            }
-        }
-    }
     
     public void Flash(Color aColor, string aMessage)
     {
