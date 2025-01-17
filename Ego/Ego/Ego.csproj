@@ -13,6 +13,11 @@
         <RootNamespace>Ego</RootNamespace>
         <Platforms>AnyCPU</Platforms>
         <LangVersion>preview</LangVersion>
+        <Version>0.0.1</Version>
+        <Title>Ego</Title>
+        <Authors>Nicolas Gustafsson</Authors>
+        <Description>3D game engine with focus on low friction</Description>
+        <Copyright>Nicolas Gustafsson</Copyright>
     </PropertyGroup>
 
     <ItemGroup>

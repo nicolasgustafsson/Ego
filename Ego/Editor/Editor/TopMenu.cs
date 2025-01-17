@@ -56,6 +56,21 @@ public partial class TopMenu : Node
         if (!ImGui.BeginMainMenuBar())
             return;
 
+        /*if (ImGui.MenuItem("File"))
+        {
+            ImGui.OpenPopup("File Menu");
+        }*/
+        
+        if (ImGui.BeginMenu("File"))
+        {
+            if (ImGui.MenuItem("Open Project..."))
+            {
+                Editor.Instance.SelectProject();
+            }
+
+            ImGui.EndPopup();
+        }
+        
         if ((System.DateTime.Now - StatusTimeStamp).TotalSeconds < 5f)
         {
             ImGui.Separator();

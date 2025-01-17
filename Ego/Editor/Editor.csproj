@@ -31,6 +31,8 @@
 
   <ItemGroup>
     <PackageReference Include="McMaster.NETCore.Plugins" Version="2.0.0" />
+    <PackageReference Include="NativeFileDialogs.Net" Version="1.2.1" />
+    <PackageReference Include="NativeFileDialogs.Net.Runtime" Version="1.2.1" />
   </ItemGroup>
 
 </Project>

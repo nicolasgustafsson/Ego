@@ -45,15 +45,15 @@ public partial class DotNetApi : Node
     {
         if (aLine.Contains("Determining projects to restore..."))
         {
-            ProjectEditor.Instance.TopMenu.SetColor(Color.Yellow, "Building...!");
+            Editor.Instance.TopMenu.SetColor(Color.Yellow, "Building...!");
         }
         if (aLine.Contains("Build succeeded."))
         {
-            ProjectEditor.Instance.TopMenu.Flash(Color.LawnGreen, "Build succeeded!");
+            Editor.Instance.TopMenu.Flash(Color.LawnGreen, "Build succeeded!");
         }
         else if (aLine.Contains("Build FAILED."))
         {
-            ProjectEditor.Instance.TopMenu.Flash(Color.Red, "Build failed!");
+            Editor.Instance.TopMenu.Flash(Color.Red, "Build failed!");
         }
         else
         {

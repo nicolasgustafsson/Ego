@@ -48,7 +48,7 @@ public partial class EgoContext : Node, IEgoContextProvider
         CreateLogger();
     }
     
-    public void Run<T>(EngineInitSettings aSettings) where T : Node, new()
+    public void Run<T>(EngineInitSettings aSettings, Action<T>? aSetup = null) where T : Node, new()
     {
         CreateLogger();
         MyContext = this;
@@ -66,7 +66,10 @@ public partial class EgoContext : Node, IEgoContextProvider
         TreeInspector = AddChild(new TreeInspector());
         PerformanceMonitor = AddChild(new PerformanceMonitor());
         
-        AddChild(new T());
+        T childObject = AddChild(new T());
+
+        if (aSetup != null)
+            aSetup(childObject);
 
         while (!Window.IsClosing)
         {

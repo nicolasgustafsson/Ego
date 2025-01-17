@@ -12,6 +12,10 @@ internal class Program
         settings.Name = "Editor";
         settings.RendererInitSettings.PresentMode = VkPresentModeKHR.Mailbox;
         
-        engine.Run<Editor>();
+        engine.Run<Editor>(settings, editor =>
+        {
+            if (args.Length > 0)
+                ProjectEditor.Instance.SelectProject(args[0]);
+        });
     }
 }

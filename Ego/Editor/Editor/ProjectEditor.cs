@@ -15,7 +15,6 @@ public partial class ProjectEditor : Node
     
     public SceneEditor SceneEditor = null!;
     public DotNetApi DotNetApi = null!;
-    public TopMenu TopMenu = null!;
     public GameProjectAssemblyLoader GameProjectAssemblyLoader = null!;
 
     private string GameProjectDllPath = "";
@@ -30,12 +29,8 @@ public partial class ProjectEditor : Node
         DotNetApi = AddChild(new DotNetApi());
         
         GameProjectAssemblyLoader = AddChild(new GameProjectAssemblyLoader());
+        //SelectProject("../../ExampleProject/ExampleProject.csproj");
         
-        SelectProject("../../ExampleProject/ExampleProject.csproj");
-
-        TopMenu = AddChild(new TopMenu());
-        
-        SceneEditor = AddChild(new SceneEditor());
     }
     
     public void SelectProject(string aCsProj)
@@ -56,6 +51,12 @@ public partial class ProjectEditor : Node
             GameProjectAssemblyLoader.SelectGameProjectDll(GameProjectDllPath);
 
             Window.SetTitle($"Editor: {projectName}");
+
+            SceneEditor?.Destroy();
+            SceneEditor = AddChild(new SceneEditor());
+
+            Editor.Instance.LandingArea?.Destroy();
+            Editor.Instance.LandingArea = null;
         }
         catch (Exception e)
         {

@@ -94,6 +94,8 @@ public class ImGuiDriver : IGpuDestroyable
         var io = ImGui.GetIO();
 
         io.ConfigFlags = ImGuiConfigFlags.DockingEnable | ImGuiConfigFlags.ViewportsEnable;
+        
+        
         io.Fonts.AddFontFromFileTTF("Roboto-Regular.ttf", 15f);
 
         List<ushort> iconRange = new(300);
