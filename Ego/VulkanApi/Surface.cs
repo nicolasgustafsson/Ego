@@ -32,8 +32,8 @@ public unsafe class Surface : IGpuDestroyable
             {
                 VkXlibSurfaceCreateInfoKHR createInfo = new ()
                 {
-                    dpy = aWindow.X11Display,
-                    window = (UIntPtr)aWindow.X11Window
+                    /*dpy = aWindow.X11Display,
+                    window = (UIntPtr)aWindow.X11Window*/
                 };
                 fixed (VkSurfaceKHR* surfacePtr = &VkSurface)
                 {
@@ -45,8 +45,8 @@ public unsafe class Surface : IGpuDestroyable
             {
                 VkWaylandSurfaceCreateInfoKHR createInfo = new ()
                 {
-                    display = aWindow.WaylandDisplay,
-                    surface = aWindow.WaylandWindow
+                    /*display = aWindow.WaylandDisplay,
+                    surface = aWindow.WaylandWindow*/
                 };
                 fixed (VkSurfaceKHR* surfacePtr = &VkSurface)
                 {

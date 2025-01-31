@@ -106,7 +106,7 @@ public class TreeInspector : Node
         if (InspectedNode == aNode) 
             flags |= ImGuiTreeNodeFlags.Selected;
 
-        if (aNode.Children.Count == 0)
+        if (aNode.Children.Length == 0)
             flags |= ImGuiTreeNodeFlags.Leaf;
 
         //if (aRows == 0)
@@ -158,7 +158,7 @@ public class TreeInspector : Node
                 aNode.Parent!.AddChild(aNode.Duplicate());
             }
             
-            if (ImGui.Selectable("Delete", aNode == InspectedNode))
+            if (ImGui.Selectable("Delete"))
             {
                 if (aNode == InspectedNode)
                     InspectedNode = null;
@@ -190,7 +190,7 @@ public class TreeInspector : Node
         
         if (wasOpened)
         {
-            foreach(Node child in new List<Node>(aNode.Children))
+            foreach(Node child in new List<Node>(aNode.Children.ToArray()))
                 aRows = Tree(child, aRows);
         }
         

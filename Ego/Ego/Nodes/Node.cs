@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 using ImGuiNET;
 using MessagePack;
 using Serilog.Context;
+using Utilities;
 
 namespace Ego;
 
@@ -48,7 +49,7 @@ public partial class Node : IEgoContextProvider
         return null;
     }
 
-    public IReadOnlyList<Node> Children => xChildren; 
+    public ReadOnlySpan<Node> Children => xChildren.AsSpan(); 
     public Node? Parent => xParent;
 
     public IEgoContextProvider MyContext = null!; 
@@ -82,7 +83,7 @@ public partial class Node : IEgoContextProvider
         }
         
         //update context
-        foreach (var child in xChildren)
+        foreach (var child in Children)
             child.SetParent(this, aStart);
     }
     
@@ -142,7 +143,7 @@ public partial class Node : IEgoContextProvider
     
     protected virtual void DestroyChildren() 
     {
-        foreach (Node child in Children.Reverse())
+        foreach (Node child in Children.ToArray().Reverse())
             child.Destroy();
     }
     

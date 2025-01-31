@@ -27,7 +27,7 @@ public unsafe class Api : IGpuDestroyable
         
         VkApplicationInfo appInfo = new VkApplicationInfo
         {
-            pApplicationName = aWindow.Name.ToPointer(),
+            pApplicationName = aWindow.Title.ToPointer(),
             pEngineName = "Have A Great Day".ToPointer(),
             applicationVersion = VkVersion.Version_1_3,
             apiVersion = VkVersion.Version_1_3,

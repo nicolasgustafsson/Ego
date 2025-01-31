@@ -2,18 +2,23 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
-using GLFW;
+using Silk.NET.GLFW;
+using Silk.NET.Windowing;
+using ClientApi = Silk.NET.GLFW.ClientApi;
+using Cursor = Silk.NET.GLFW.Cursor;
+using ErrorCode = Silk.NET.GLFW.ErrorCode;
+using Glfw = Silk.NET.GLFW.Glfw;
 
-public class Window
+public unsafe class Window
 {
-    private static readonly ErrorCallback errorCallback = GlfwError;
-    private static readonly MouseCallback mouseScrollCallback = MouseScrollCallback;
-    private static readonly MouseButtonCallback mouseButtonCallback = MouseButtonCallback;
-    private static readonly KeyCallback keyCallback = KeyCallback;
-    private static readonly CharCallback charCallback = CharCallback;
-    private static readonly MouseCallback mousePosCallback = MousePositionCallback;
+    private static readonly GlfwCallbacks.ErrorCallback errorCallback = GlfwError;
+    private static readonly GlfwCallbacks.ScrollCallback mouseScrollCallback = MouseScrollCallback;
+    private static readonly GlfwCallbacks.MouseButtonCallback mouseButtonCallback = MouseButtonCallback;
+    private static readonly GlfwCallbacks.KeyCallback keyCallback = KeyCallback;
+    private static readonly GlfwCallbacks.CharCallback charCallback = CharCallback;
+    private static readonly GlfwCallbacks.CursorPosCallback mousePosCallback = MousePositionCallback;
 
-    private readonly NativeWindow NativeWindow;
+    private WindowHandle* WindowHandle;
 
     public Action<Window, Vector2>? EMouseScrolled;
     public Action<Window, Vector2>? EMousePosition;
@@ -23,92 +28,100 @@ public class Window
 
     private static Dictionary<IntPtr, Window> Windows = new();
 
-    public bool IsClosing => NativeWindow.IsClosing;
-    public bool IsClosed => NativeWindow.IsClosed;
-    public IntPtr Hwnd => NativeWindow.Hwnd;
-    public string Name => NativeWindow.Title!;
-    
-    public IntPtr X11Display => GLFW.Native.GetX11Display();
-    public IntPtr X11Window => GLFW.Native.GetX11Window(NativeWindow);
+    public bool IsClosing => GlfwInstance.WindowShouldClose(WindowHandle);
+    public bool IsClosed => IsClosing;
+    public IntPtr Hwnd => NativeWindow.Win32!.Value.Hwnd;
+    public string Title { get; private set; }
 
-    public IntPtr WaylandDisplay => GLFW.Native.GetWaylandDisplay();
-    public IntPtr WaylandWindow => GLFW.Native.GetWaylandWindow(NativeWindow);
-    public bool IsMinimized => NativeWindow.Minimized;
-    public bool IsFocused => NativeWindow.IsFocused;
+    public bool IsMinimized => GlfwInstance.GetWindowAttrib(WindowHandle, WindowAttributeGetter.Iconified);
+    public bool IsFocused => GlfwInstance.GetWindowAttrib(WindowHandle, WindowAttributeGetter.Focused);
 
-    public Window(string aName, System.Numerics.Vector2 aWindowSize)
+    public Glfw GlfwInstance;
+    public GlfwNativeWindow NativeWindow;
+
+    public Window(string aTitle, Vector2 aWindowSize)
     {
-        Glfw.WindowHint(Hint.ClientApi, ClientApi.None);
-        Glfw.SetErrorCallback(errorCallback);
-        NativeWindow = new((int)aWindowSize.X, (int)aWindowSize.Y, aName);
-        
-        Glfw.SetScrollCallback(NativeWindow, mouseScrollCallback);
-        Glfw.SetMouseButtonCallback(NativeWindow, mouseButtonCallback);
-        Glfw.SetCursorPositionCallback(NativeWindow, mousePosCallback);
-        Glfw.SetKeyCallback(NativeWindow, keyCallback);
-        Glfw.SetCharCallback(NativeWindow, charCallback);
+        Title = aTitle;
+        GlfwInstance = Glfw.GetApi();
+        GlfwInstance.Init();
+        GlfwInstance.SetErrorCallback(errorCallback);
+        GlfwInstance.WindowHint(WindowHintClientApi.ClientApi, ClientApi.NoApi);
 
-        Windows.Add(NativeWindow.Handle, this);
+        WindowOptions options = WindowOptions.DefaultVulkan;
+        options.Title = aTitle;
+        options.Size = new((int)aWindowSize.X, (int)aWindowSize.Y);
+
+        WindowHandle = GlfwInstance.CreateWindow((int)aWindowSize.X, (int)aWindowSize.Y, aTitle, null, null);
+        NativeWindow = new(GlfwInstance, WindowHandle);
+        //ActualWindow = Silk.NET.Windowing.Window.Create(WindowOptions.Default);
+        //ActualWindow.Run();
         
+        Windows.Add(new IntPtr(WindowHandle), this);
+        
+        GlfwInstance!.SetScrollCallback(WindowHandle, mouseScrollCallback);
+        GlfwInstance.SetMouseButtonCallback(WindowHandle, mouseButtonCallback);
+        GlfwInstance.SetCursorPosCallback(WindowHandle, mousePosCallback);
+        GlfwInstance.SetKeyCallback(WindowHandle, keyCallback);
+        GlfwInstance.SetCharCallback(WindowHandle, charCallback);
     }
 
-    private static void KeyCallback(IntPtr aWindow, GLFW.Keys aKey, int aScancode, GLFW.InputState aState, ModifierKeys aMods)
+    private static void KeyCallback(WindowHandle* aWindow, Keys aKey, int aScancode, InputAction aState, KeyModifiers aMods)
     {
-        var window = Windows[aWindow];
+        var window = Windows[new IntPtr(aWindow)];
         window.EKeyboardKey?.Invoke(window, (KeyboardKey)aKey, (InputState)aState);
     }
 
-    private static void MouseButtonCallback(IntPtr aWindow, GLFW.MouseButton aButton, GLFW.InputState aState, ModifierKeys aModifiers)
+    private static void MouseButtonCallback(WindowHandle* aWindow, Silk.NET.GLFW.MouseButton aButton, InputAction aState, KeyModifiers aModifiers)
     {
-        var window = Windows[aWindow];
-        Windows[aWindow].EMouseButton?.Invoke(window, (MouseButton)aButton, (InputState)aState);
+        var window = Windows[new IntPtr(aWindow)];
+        Windows[new IntPtr(aWindow)].EMouseButton?.Invoke(window, (MouseButton)aButton, (InputState)aState);
     }
 
-    private static void MouseScrollCallback(IntPtr aWindow, double aX, double aY)
+    private static unsafe void MouseScrollCallback(WindowHandle* aWindow, double aX, double aY)
     {
-        var window = Windows[aWindow];
-        Windows[aWindow].EMouseScrolled?.Invoke(window, new((float)aX, (float)aY));
+        var window = Windows[new IntPtr(aWindow)];
+        Windows[new IntPtr(aWindow)].EMouseScrolled?.Invoke(window, new((float)aX, (float)aY));
     }
 
-    private static void MousePositionCallback(IntPtr aWindow, double x, double y)
+    private static void MousePositionCallback(WindowHandle* aWindow, double x, double y)
     {
-        var window = Windows[aWindow];
-        Windows[aWindow].EMousePosition?.Invoke(window, new((float)x, (float)y));
+        var window = Windows[new IntPtr(aWindow)];
+        Windows[new IntPtr(aWindow)].EMousePosition?.Invoke(window, new((float)x, (float)y));
     }
     
-    private static void CharCallback(IntPtr aWindow, uint aCodePoint)
+    private static void CharCallback(WindowHandle* aWindow, uint aCodePoint)
     {
-        var window = Windows[aWindow];
-        Windows[aWindow].ECharInput?.Invoke(window, aCodePoint);
+        var window = Windows[new IntPtr(aWindow)];
+        Windows[new IntPtr(aWindow)].ECharInput?.Invoke(window, aCodePoint);
     }
 
     public void PollEvents()
     {
         lock(this)
         {
-            Glfw.PollEvents();
+            GlfwInstance.PollEvents();
         }
     }
     
     public Vector2 GetCursorPosition()
     {
-        Glfw.GetCursorPosition(NativeWindow, out double x, out double y);
+        GlfwInstance.GetCursorPos(WindowHandle, out double x, out double y);
 
         return new((float)x, (float)y);
     }
     
     public bool IsMouseButtonDown(MouseButton aMouseButton)
     {
-        return Glfw.GetMouseButton(NativeWindow, (GLFW.MouseButton)aMouseButton) == GLFW.InputState.Press;
+        return (InputAction)GlfwInstance.GetMouseButton(WindowHandle, (int)aMouseButton) == InputAction.Press;
     }
     
     public bool IsKeyboardKeyDown(KeyboardKey aKey)
     {
-        return Glfw.GetKey(NativeWindow, (GLFW.Keys)aKey) == GLFW.InputState.Press;
+        return (InputAction)GlfwInstance.GetKey(WindowHandle, (Keys)aKey) == InputAction.Press;
     }
-    private static void GlfwError(ErrorCode code, IntPtr message)
+    private static void GlfwError(ErrorCode code, string message)
     {
-        Log.Information(PtrToStringUTF8(message));
+        Log.Error(message);
     }
     
     public static string PtrToStringUTF8(IntPtr ptr)
@@ -123,57 +136,59 @@ public class Window
     
     public (int width, int height) GetFramebufferSize()
     {
-        Glfw.GetFramebufferSize(NativeWindow, out int width, out int height);
+        GlfwInstance.GetFramebufferSize(WindowHandle, out int width, out int height);
 
         return (width, height);
     }
     
     public (int width, int height) GetWindowSize()
     {
-        Glfw.GetWindowSize(NativeWindow, out int width, out int height);
+        GlfwInstance.GetWindowSize(WindowHandle, out int width, out int height);
 
         return (width, height);
     }
     
     public void SetWindowPosition(int x, int y)
     {
-        Glfw.SetWindowPosition(NativeWindow, x, y);
+        GlfwInstance.SetWindowPos(WindowHandle, x, y);
     }
     
     public void SetWindowSize(int width, int height)
     {
-        Glfw.SetWindowSize(NativeWindow, width, height);
+        GlfwInstance.SetWindowSize(WindowHandle, width, height);
     }
     
     public (int x, int y) GetWindowPosition()
     {
-        Glfw.GetWindowPosition(NativeWindow, out int x, out int y);
-        return (x, y);
+        GlfwInstance.GetWindowPos(WindowHandle, out int X, out int Y);
+
+        return (X, Y);
     }
 
     public void OnDestroy()
     {
-        NativeWindow.Close();
-        Windows.Remove(NativeWindow.Handle);
+        GlfwInstance.SetWindowShouldClose(WindowHandle, true);
+        Windows.Remove(new IntPtr(WindowHandle));
     }
     
-    public void SetCursor(Cursor aCursor)
+    public void SetCursor(Cursor* aCursor)
     {
-        Glfw.SetCursor(NativeWindow, aCursor);
+        GlfwInstance.SetCursor(WindowHandle, aCursor);
     }
 
     public void Show()
     {
-        Glfw.ShowWindow(NativeWindow);
+        GlfwInstance.ShowWindow(WindowHandle);
     }
 
     public void FocusWindow()
     {
-        Glfw.FocusWindow(NativeWindow);
+        GlfwInstance.FocusWindow(WindowHandle);
     }
 
     public void SetTitle(string aTitle)
     {
-        NativeWindow.Title = aTitle;
+        Title = aTitle;
+        GlfwInstance.SetWindowTitle(WindowHandle, aTitle);
     }
 }

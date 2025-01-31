@@ -29,18 +29,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="glfw.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="glfw.so">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="glfwWayland.so">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="MessagePack" Version="3.1.1" />
     </ItemGroup>
 

@@ -5,14 +5,15 @@ using System.Numerics;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using GLFW;
 using VulkanApi;
 using ImGuiNET;
 using Platform;
+using Silk.NET.GLFW;
 using Utilities;
 using Vortice.ShaderCompiler;
 using Vortice.Vulkan;
 using Image = VulkanApi.Image;
+using Monitor = Silk.NET.GLFW.Monitor;
 using Vulkan = Vortice.Vulkan.Vulkan;
 
 namespace Rendering;
@@ -21,11 +22,11 @@ public class ImGuiDriver : IGpuDestroyable
 {
     class PlatformUserData
     {
-        public GLFW.Cursor StandardCursor;
-        public GLFW.Cursor TextInputCursor;
-        public GLFW.Cursor ResizeNS;
-        public GLFW.Cursor ResizeEW;
-        public GLFW.Cursor Hand;
+        public unsafe Silk.NET.GLFW.Cursor* StandardCursor;
+        public unsafe Silk.NET.GLFW.Cursor* TextInputCursor;
+        public unsafe Silk.NET.GLFW.Cursor* ResizeNS;
+        public unsafe Silk.NET.GLFW.Cursor* ResizeEW;
+        public unsafe Silk.NET.GLFW.Cursor* Hand;
 
         public bool WantUpdateMonitors = false;
     }
@@ -189,11 +190,11 @@ public class ImGuiDriver : IGpuDestroyable
         GCHandle handle = GCHandle.Alloc(PlatformData, GCHandleType.Pinned);
         io.BackendPlatformUserData = GCHandle.ToIntPtr(handle);
         
-        PlatformData.StandardCursor = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.Arrow);
-        PlatformData.TextInputCursor = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.Beam);
-        PlatformData.ResizeEW = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.ResizeHorizontal);
-        PlatformData.ResizeNS = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.ResizeVertical);
-        PlatformData.Hand = GLFW.Glfw.CreateStandardCursor(GLFW.CursorType.Hand);
+        PlatformData.StandardCursor = aMainWindow.GlfwInstance.CreateStandardCursor(CursorShape.Arrow);
+        PlatformData.TextInputCursor = aMainWindow.GlfwInstance.CreateStandardCursor(CursorShape.IBeam);
+        PlatformData.ResizeEW = aMainWindow.GlfwInstance.CreateStandardCursor(CursorShape.HResize);
+        PlatformData.ResizeNS = aMainWindow.GlfwInstance.CreateStandardCursor(CursorShape.VResize);
+        PlatformData.Hand = aMainWindow.GlfwInstance.CreateStandardCursor(CursorShape.Hand);
 
         ImGuiViewportPtr mainViewPort = ImGui.GetMainViewport();
         
@@ -386,33 +387,34 @@ public class ImGuiDriver : IGpuDestroyable
 
         Marshal.FreeHGlobal(platformIo.NativePtr->Monitors.Data);
 
-        int monitorCount = Glfw.Monitors.Length;
-        IntPtr data = Marshal.AllocHGlobal(Unsafe.SizeOf<ImGuiPlatformMonitor>() * Glfw.Monitors.Length);
+        var monitors = MainWindow.GlfwInstance.GetMonitors(out int monitorCount);
+
+        IntPtr data = Marshal.AllocHGlobal(Unsafe.SizeOf<ImGuiPlatformMonitor>() * monitorCount);
         platformIo.NativePtr->Monitors = new ImVector(monitorCount, monitorCount, data);
         
         for(int i = 0; i < monitorCount; i++)
         {
-            var glfwMonitor = Glfw.Monitors[i];
-            Glfw.GetMonitorPosition(glfwMonitor, out int x, out int y);
-            var videoMode = Glfw.GetVideoMode(glfwMonitor);
+            Monitor* glfwMonitor = monitors[i];
+            MainWindow.GlfwInstance.GetMonitorPos(glfwMonitor, out int x, out int y);
+            VideoMode* videoMode = MainWindow.GlfwInstance.GetVideoMode(glfwMonitor);
             ImGuiPlatformMonitorPtr monitorPtr = platformIo.Monitors[i];
 
             monitorPtr.MainPos = monitorPtr.WorkPos = new Vector2(x, y);
-            monitorPtr.MainSize = monitorPtr.WorkSize = new Vector2(videoMode.Width, videoMode.Height);
+            monitorPtr.MainSize = monitorPtr.WorkSize = new Vector2(videoMode->Width, videoMode->Height);
 
-            PointF contentScale = glfwMonitor.ContentScale;
-            monitorPtr.DpiScale = contentScale.X;
-            monitorPtr.PlatformHandle = glfwMonitor.GetHandle();
+            MainWindow.GlfwInstance.GetMonitorContentScale(glfwMonitor, out float contentScaleX, out float contentScaleY);
+            monitorPtr.DpiScale = contentScaleX;
+            monitorPtr.PlatformHandle = MainWindow.GlfwInstance.GetMonitorUserPointer(glfwMonitor);
         }
     }
    
     private void CreateWindow(ImGuiViewportPtr vp)
     {
-        Glfw.WindowHint(Hint.Visible, false);
-        Glfw.WindowHint(Hint.Floating, false);
-        Glfw.WindowHint(Hint.FocusOnShow, false);
-        Glfw.WindowHint(Hint.Decorated, ((int)(vp.Flags & ImGuiViewportFlags.NoDecoration) == 0));
-        Glfw.WindowHint(Hint.Floating, ((int)(vp.Flags & ImGuiViewportFlags.TopMost) == 1));
+        MainWindow.GlfwInstance.WindowHint(WindowHintBool.Visible, false);
+        MainWindow.GlfwInstance.WindowHint(WindowHintBool.Floating, false);
+        MainWindow.GlfwInstance.WindowHint(WindowHintBool.FocusOnShow, false);
+        MainWindow.GlfwInstance.WindowHint(WindowHintBool.Decorated, ((int)(vp.Flags & ImGuiViewportFlags.NoDecoration) == 0));
+        MainWindow.GlfwInstance.WindowHint(WindowHintBool.Floating, ((int)(vp.Flags & ImGuiViewportFlags.TopMost) == 1));
         
         var window = new Window("Irrelevant", new Vector2(200, 200));
 
@@ -582,7 +584,7 @@ public class ImGuiDriver : IGpuDestroyable
         data.Window.SetTitle(System.Text.Encoding.ASCII.GetString(titlePtr, count));
     }
     
-    private void UpdateMouseCursor()
+    private unsafe void UpdateMouseCursor()
     {
         ImGuiMouseCursor imgui_cursor = ImGui.GetMouseCursor();
         var platformIo = ImGui.GetPlatformIO();

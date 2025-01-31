@@ -17,8 +17,8 @@ public partial class SceneEditor : Node
     {
         if (TreeInspector.InspectedNode != null)
             InspectedNodeGuid = TreeInspector.InspectedNode.Guid;
-        WorkingScene.SerializeTree(Children.Last());
-        Children.Last().Destroy();
+        WorkingScene.SerializeTree(Children[^1]);
+        Children[^1].Destroy();
     }
     
     public void ReinitializeAfterHotReload()
