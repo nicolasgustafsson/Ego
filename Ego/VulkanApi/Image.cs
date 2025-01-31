@@ -13,9 +13,9 @@ public unsafe class Image : IGpuDestroyable
     
     public VkImageLayout CurrentLayout = VkImageLayout.Undefined;
     
-    public nint GetHandle()
+    public IntPtr GetHandle()
     {
-        return (nint)VkImage.Handle;
+        return (IntPtr)VkImage.Handle;
     }
     
     public Image(VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps)

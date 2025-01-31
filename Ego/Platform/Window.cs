@@ -3,7 +3,6 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Silk.NET.GLFW;
-using Silk.NET.Windowing;
 using ClientApi = Silk.NET.GLFW.ClientApi;
 using Cursor = Silk.NET.GLFW.Cursor;
 using ErrorCode = Silk.NET.GLFW.ErrorCode;
@@ -42,23 +41,18 @@ public unsafe class Window
     public Window(string aTitle, Vector2 aWindowSize)
     {
         Title = aTitle;
+        
         GlfwInstance = Glfw.GetApi();
         GlfwInstance.Init();
         GlfwInstance.SetErrorCallback(errorCallback);
         GlfwInstance.WindowHint(WindowHintClientApi.ClientApi, ClientApi.NoApi);
 
-        WindowOptions options = WindowOptions.DefaultVulkan;
-        options.Title = aTitle;
-        options.Size = new((int)aWindowSize.X, (int)aWindowSize.Y);
-
-        WindowHandle = GlfwInstance.CreateWindow((int)aWindowSize.X, (int)aWindowSize.Y, aTitle, null, null);
+        WindowHandle = GlfwInstance.CreateWindow(aWindowSize.X.Round(), aWindowSize.Y.Round(), aTitle, null, null);
         NativeWindow = new(GlfwInstance, WindowHandle);
-        //ActualWindow = Silk.NET.Windowing.Window.Create(WindowOptions.Default);
-        //ActualWindow.Run();
         
         Windows.Add(new IntPtr(WindowHandle), this);
         
-        GlfwInstance!.SetScrollCallback(WindowHandle, mouseScrollCallback);
+        GlfwInstance.SetScrollCallback(WindowHandle, mouseScrollCallback);
         GlfwInstance.SetMouseButtonCallback(WindowHandle, mouseButtonCallback);
         GlfwInstance.SetCursorPosCallback(WindowHandle, mousePosCallback);
         GlfwInstance.SetKeyCallback(WindowHandle, keyCallback);
@@ -122,16 +116,6 @@ public unsafe class Window
     private static void GlfwError(ErrorCode code, string message)
     {
         Log.Error(message);
-    }
-    
-    public static string PtrToStringUTF8(IntPtr ptr)
-    {
-      int length = 0;
-      while (Marshal.ReadByte(ptr, length) != (byte) 0)
-        ++length;
-      byte[] numArray = new byte[length];
-      Marshal.Copy(ptr, numArray, 0, length);
-      return Encoding.UTF8.GetString(numArray);
     }
     
     public (int width, int height) GetFramebufferSize()

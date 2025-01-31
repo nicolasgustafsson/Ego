@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Numerics;
 
 public static partial class Extensions
@@ -37,4 +38,43 @@ public static partial class Extensions
         return aRadians * (180f / MathF.PI);
     }
     
+    public static int Round(this float aFloat)
+    {
+        return (int)MathF.Round(aFloat);
+    }
+    
+    public static int Floor(this float aDouble)
+    {
+        return (int)MathF.Floor(aDouble);
+    }
+    
+    public static int Ceiling(this float aDouble)
+    {
+        return (int)MathF.Ceiling(aDouble);
+    }
+    
+    public static double ToRadians(this double aDegrees)
+    {
+        return aDegrees * 0.01745329252d;
+    }
+    
+    public static double ToDegrees(this double aRadians)
+    {
+        return aRadians * (180d / Math.PI);
+    }
+    
+    public static int Round(this double aDouble)
+    {
+        return (int)Math.Round(aDouble);
+    }
+    
+    public static int Floor(this double aDouble)
+    {
+        return (int)Math.Floor(aDouble);
+    }
+    
+    public static int Ceiling(this double aDouble)
+    {
+        return (int)Math.Ceiling(aDouble);
+    }
 }
