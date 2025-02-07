@@ -3,8 +3,8 @@
     [System.AttributeUsage(System.AttributeTargets.Class, Inherited = false)]
     public class NodeAttribute : System.Attribute
     {
-        public bool HideInEditor = false;
+        public bool DisableEditorAdd = false;
 
-        public NodeAttribute(bool aHideInEditor = false) => HideInEditor = aHideInEditor;
+        public NodeAttribute(bool aDisableEditorAdd = false) => DisableEditorAdd = aDisableEditorAdd;
     }
 }

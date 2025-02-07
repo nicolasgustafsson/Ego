@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Drawing;
 using System.Reflection;
 using Ego;
 using ImGuiNET;
@@ -5,7 +7,7 @@ using Utilities;
 
 public static partial class EmGui
 {
-    public static bool Inspect(string aName, ref object aObject)
+    /*public static bool Inspect(string aName, ref object aObject)
     {
         if (aObject is string aString)
         {
@@ -34,7 +36,7 @@ public static partial class EmGui
         }
         
         return false;
-    }
+    }*/
     
     public static bool Inspect(string aName, ref string aString)
     {
@@ -54,6 +56,7 @@ public static partial class EmGui
     public static bool Inspect(string aName, ref Transform aTransform)
     {
         bool changed = false;
+
         changed |= Inspect("Position", ref aTransform.Position);
         changed |= Inspect("Rotation", ref aTransform.Rotation);
         changed |= Inspect("Scale", ref aTransform.Scale);
@@ -100,15 +103,77 @@ public static partial class EmGui
 
         return changed;
     }
+
+    public static bool InspectList(string aName, ref IList aList)
+    {
+        bool changed = false;
+
+        bool expanded = (ImGui.TreeNodeEx(aName, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.AllowOverlap | ImGuiTreeNodeFlags.FramePadding));
+            
+        ImGui.SameLine();
+        bool wasEmpty = aList.Count == 0;
+        if (wasEmpty)
+            ImGui.BeginDisabled();
+        if (ImGui.Button("-"))
+        {
+            aList.RemoveAt(aList.Count - 1);
+        }
+        if (wasEmpty)
+            ImGui.EndDisabled();
+        ImGui.SameLine();
+        if (ImGui.Button("+"))
+        {
+            Type? itemType = aList.GetType().GenericTypeArguments.FirstOrDefault();
+            if (itemType == null)
+            {
+                Log.Error("Could not add item to list {aName}! Item type was null. Your list is weird.", aName);
+                ImGui.EndChild();
+                ImGui.TreePop();
+                return false;
+            }
+
+            aList.Add(Activator.CreateInstance(itemType));
+        }
+
+        ImGui.SameLine();
+        ImGui.Text($"Size: {aList.Count}");
+
+        if (!expanded) 
+            return true;
+        
+        if (ImGui.BeginChild(aName, Vector2.Zero, ImGuiChildFlags.Border | ImGuiChildFlags.AlwaysAutoResize | ImGuiChildFlags.AutoResizeY))
+        {
+            //ImGui.SameLine();
+            for(int i = 0; i < aList.Count; i++)
+            {
+                var refObj = aList[i]!;
+                changed |= Inspect<object>(i.ToString(), ref refObj);
+                aList[i] = refObj;
+            }
+                
+            ImGui.EndChild();
+        }
+        ImGui.TreePop();
+
+        return changed;
+    }
     
     public static bool Inspect<T>(string aName, ref T aVar)
     {
-        if (aVar == null) 
-            throw new ArgumentNullException(nameof(aVar));
+        if (aVar == null)
+        {
+            ImGui.TextColored(Color.Brown.ToVec4(), $"Variable [{aName}] is null, make sure to create it!");
+            return false;
+        }
         
         if (aVar.GetType().IsEnum)
         {
             return InspectEnum<T>(aName, ref aVar);
+        }
+        
+        if (aVar is IList list)
+        {
+            return InspectList(aName, ref list);
         }
         
         object cloned = aVar;
@@ -123,6 +188,32 @@ public static partial class EmGui
     public static bool DynamicInspect(string aName, ref object aVar)
     {
         bool changed = false;
+        if (aVar is string aString)
+        {
+            changed = Inspect(aName, ref aString);
+            aVar = aString;
+            return changed;
+        }
+        if (aVar is Vector3 aVector3)
+        {
+            changed = Inspect(aName, ref aVector3);
+            aVar = aVector3;
+            return changed;
+        }
+        
+        if (aVar is int aInt)
+        {
+            changed = Inspect(aName, ref aInt);
+            aVar = aInt;
+            return changed;
+        }
+        if (aVar is Transform aTransform)
+        {
+            changed = Inspect(aName, ref aTransform);
+            aVar = aTransform;
+            return changed;
+        }
+        
         if (ImGui.TreeNodeEx(aName, ImGuiTreeNodeFlags.DefaultOpen))
         {
             foreach(var member in aVar.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public))

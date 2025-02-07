@@ -2,7 +2,7 @@
 
 namespace Ego;
 
-[Node(HideInEditor = true)]
+[Node(DisableEditorAdd = true)]
 public partial class TimeKeeper : Node
 {
     private Stopwatch DeltaTimeStopwatch = new();

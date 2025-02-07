@@ -2,7 +2,7 @@
 
 namespace Editor;
 
-[Node(HideInEditor = true)]
+[Node(DisableEditorAdd = true)]
 public partial class SceneEditor : Node
 {
     private Scene WorkingScene = new();

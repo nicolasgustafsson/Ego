@@ -39,9 +39,13 @@ public class SourceGenerator : IIncrementalGenerator
 
                         string typeName = "";
                         if (fieldSymbol != null)
-                            typeName = fieldSymbol.Type.Name;
+                        {
+                            typeName = fieldSymbol.Type.ToDisplayString();
+                        }
                         if (propertySymbol != null)
-                            typeName = propertySymbol.Type.Name;
+                        {
+                            typeName = propertySymbol.Type.ToDisplayString();
+                        }
                         
                         RefKind refKind = RefKind.None;
                         if (fieldSymbol != null)

@@ -56,11 +56,14 @@ public class TreeInspector : Node
         ImGui.Begin("Inspector");
         if (InspectedNode != null)
         {
+            ImGui.PushID(InspectedNode.Guid.ToString());
             if (InspectedNode.Guid != PreviousInspectedNode?.Guid)
                 ImGui.GetStateStorage().Clear();
+
             InspectedNode.GeneratedInspect();
 
             PreviousInspectedNode = InspectedNode;
+            ImGui.PopID();
         }
         
         ImGui.End();
@@ -175,7 +178,7 @@ public class TreeInspector : Node
                 
                 NodeAttribute? attribute = keyValue.Value.GetCustomAttribute<NodeAttribute>();
 
-                if (attribute == null || attribute.HideInEditor)
+                if (attribute == null || attribute.DisableEditorAdd)
                     continue;
                     
                 if (ImGui.Selectable(keyValue.Key))

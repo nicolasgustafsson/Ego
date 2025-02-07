@@ -11,4 +11,23 @@ public static class ListExtensions
     {
         return aList.Count == 0;
     }
+    public struct EnumeratedInstance<T>
+    {
+        public int Index;
+        public T Item;
+    }
+    
+    public static IEnumerable<EnumeratedInstance<T>> Enumerate<T>(this IEnumerable<T> collection)
+    {
+        int counter = 0;
+        foreach (var item in collection)
+        {
+            yield return new EnumeratedInstance<T>
+            {
+                Index = counter,
+                Item = item
+            };
+            counter++;
+        }
+    }
 }
