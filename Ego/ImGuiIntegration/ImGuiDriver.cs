@@ -190,11 +190,11 @@ public class ImGuiDriver : IGpuDestroyable
         GCHandle handle = GCHandle.Alloc(PlatformData, GCHandleType.Pinned);
         io.BackendPlatformUserData = GCHandle.ToIntPtr(handle);
         
-        PlatformData.StandardCursor = aMainWindow.GlfwInstance.CreateStandardCursor(CursorShape.Arrow);
-        PlatformData.TextInputCursor = aMainWindow.GlfwInstance.CreateStandardCursor(CursorShape.IBeam);
-        PlatformData.ResizeEW = aMainWindow.GlfwInstance.CreateStandardCursor(CursorShape.HResize);
-        PlatformData.ResizeNS = aMainWindow.GlfwInstance.CreateStandardCursor(CursorShape.VResize);
-        PlatformData.Hand = aMainWindow.GlfwInstance.CreateStandardCursor(CursorShape.Hand);
+        PlatformData.StandardCursor = Window.GlfwInstance.CreateStandardCursor(CursorShape.Arrow);
+        PlatformData.TextInputCursor = Window.GlfwInstance.CreateStandardCursor(CursorShape.IBeam);
+        PlatformData.ResizeEW = Window.GlfwInstance.CreateStandardCursor(CursorShape.HResize);
+        PlatformData.ResizeNS = Window.GlfwInstance.CreateStandardCursor(CursorShape.VResize);
+        PlatformData.Hand = Window.GlfwInstance.CreateStandardCursor(CursorShape.Hand);
 
         ImGuiViewportPtr mainViewPort = ImGui.GetMainViewport();
         
@@ -387,7 +387,7 @@ public class ImGuiDriver : IGpuDestroyable
 
         Marshal.FreeHGlobal(platformIo.NativePtr->Monitors.Data);
 
-        var monitors = MainWindow.GlfwInstance.GetMonitors(out int monitorCount);
+        var monitors = Window.GlfwInstance.GetMonitors(out int monitorCount);
 
         IntPtr data = Marshal.AllocHGlobal(Unsafe.SizeOf<ImGuiPlatformMonitor>() * monitorCount);
         platformIo.NativePtr->Monitors = new ImVector(monitorCount, monitorCount, data);
@@ -395,26 +395,26 @@ public class ImGuiDriver : IGpuDestroyable
         for(int i = 0; i < monitorCount; i++)
         {
             Monitor* glfwMonitor = monitors[i];
-            MainWindow.GlfwInstance.GetMonitorPos(glfwMonitor, out int x, out int y);
-            VideoMode* videoMode = MainWindow.GlfwInstance.GetVideoMode(glfwMonitor);
+            Window.GlfwInstance.GetMonitorPos(glfwMonitor, out int x, out int y);
+            VideoMode* videoMode = Window.GlfwInstance.GetVideoMode(glfwMonitor);
             ImGuiPlatformMonitorPtr monitorPtr = platformIo.Monitors[i];
 
             monitorPtr.MainPos = monitorPtr.WorkPos = new Vector2(x, y);
             monitorPtr.MainSize = monitorPtr.WorkSize = new Vector2(videoMode->Width, videoMode->Height);
 
-            MainWindow.GlfwInstance.GetMonitorContentScale(glfwMonitor, out float contentScaleX, out float contentScaleY);
+            Window.GlfwInstance.GetMonitorContentScale(glfwMonitor, out float contentScaleX, out float contentScaleY);
             monitorPtr.DpiScale = contentScaleX;
-            monitorPtr.PlatformHandle = MainWindow.GlfwInstance.GetMonitorUserPointer(glfwMonitor);
+            monitorPtr.PlatformHandle = Window.GlfwInstance.GetMonitorUserPointer(glfwMonitor);
         }
     }
    
     private void CreateWindow(ImGuiViewportPtr vp)
     {
-        MainWindow.GlfwInstance.WindowHint(WindowHintBool.Visible, false);
-        MainWindow.GlfwInstance.WindowHint(WindowHintBool.Floating, false);
-        MainWindow.GlfwInstance.WindowHint(WindowHintBool.FocusOnShow, false);
-        MainWindow.GlfwInstance.WindowHint(WindowHintBool.Decorated, ((int)(vp.Flags & ImGuiViewportFlags.NoDecoration) == 0));
-        MainWindow.GlfwInstance.WindowHint(WindowHintBool.Floating, ((int)(vp.Flags & ImGuiViewportFlags.TopMost) == 1));
+        Window.GlfwInstance.WindowHint(WindowHintBool.Visible, false);
+        Window.GlfwInstance.WindowHint(WindowHintBool.Floating, false);
+        Window.GlfwInstance.WindowHint(WindowHintBool.FocusOnShow, false);
+        Window.GlfwInstance.WindowHint(WindowHintBool.Decorated, ((int)(vp.Flags & ImGuiViewportFlags.NoDecoration) == 0));
+        Window.GlfwInstance.WindowHint(WindowHintBool.Floating, ((int)(vp.Flags & ImGuiViewportFlags.TopMost) == 1));
         
         var window = new Window("Irrelevant", new Vector2(200, 200));
 

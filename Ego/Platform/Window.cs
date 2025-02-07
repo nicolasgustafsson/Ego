@@ -35,16 +35,20 @@ public unsafe class Window
     public bool IsMinimized => GlfwInstance.GetWindowAttrib(WindowHandle, WindowAttributeGetter.Iconified);
     public bool IsFocused => GlfwInstance.GetWindowAttrib(WindowHandle, WindowAttributeGetter.Focused);
 
-    public Glfw GlfwInstance;
+    public static Glfw GlfwInstance = null!;
     public GlfwNativeWindow NativeWindow;
 
     public Window(string aTitle, Vector2 aWindowSize)
     {
         Title = aTitle;
         
-        GlfwInstance = Glfw.GetApi();
-        GlfwInstance.Init();
-        GlfwInstance.SetErrorCallback(errorCallback);
+        if (GlfwInstance == null)
+        {
+            GlfwInstance = Glfw.GetApi();
+            GlfwInstance.Init();
+            GlfwInstance.SetErrorCallback(errorCallback);
+        }
+        
         GlfwInstance.WindowHint(WindowHintClientApi.ClientApi, ClientApi.NoApi);
 
         WindowHandle = GlfwInstance.CreateWindow(aWindowSize.X.Round(), aWindowSize.Y.Round(), aTitle, null, null);
@@ -151,7 +155,7 @@ public unsafe class Window
 
     public void OnDestroy()
     {
-        GlfwInstance.SetWindowShouldClose(WindowHandle, true);
+        GlfwInstance.DestroyWindow(WindowHandle);
         Windows.Remove(new IntPtr(WindowHandle));
     }
     
