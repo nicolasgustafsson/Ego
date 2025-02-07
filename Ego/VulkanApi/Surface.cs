@@ -1,4 +1,5 @@
 ﻿global using static VulkanApi.Surface;
+
 namespace VulkanApi;
 
 public unsafe class Surface : IGpuDestroyable

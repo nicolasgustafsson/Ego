@@ -20,6 +20,9 @@
       <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.4.0" />
       <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0031" />
       <PackageReference Include="SharpGLTF.Toolkit" Version="1.0.0-alpha0031" />
+      <PackageReference Include="Silk.NET.Vulkan" Version="2.22.0" />
+      <PackageReference Include="Silk.NET.Vulkan.Extensions.EXT" Version="2.22.0" />
+      <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.22.0" />
       <PackageReference Include="Vortice.ShaderCompiler" Version="1.7.3" />
       <PackageReference Include="Vortice.Vulkan" Version="1.9.2" />
       <PackageReference Include="Vortice.VulkanMemoryAllocator" Version="1.5.0" />
