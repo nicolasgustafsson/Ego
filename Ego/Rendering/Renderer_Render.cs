@@ -97,7 +97,7 @@ public partial class Renderer
             Matrix4x4 view = SceneData.View;
             Matrix4x4 projection = MatrixExtensions.CreatePerspectiveFieldOfView(90f * (float)(Math.PI/180f), (float)RenderImage.Extent.width / (float)RenderImage.Extent.height, 10000f, 0.1f);
 
-            projection[1, 1] *= -1f;
+            //projection[1, 1] *= -1f;
 
             MeshPushConstants pushConstants = new();
             pushConstants.WorldMatrix = world * view * projection;
