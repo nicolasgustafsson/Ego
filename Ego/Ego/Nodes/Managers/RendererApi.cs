@@ -5,7 +5,7 @@ using Vortice.Vulkan;
 
 namespace Ego;
 
-[Node(DisableEditorAdd = true)]
+[Node(AllowAddingToScene = false)]
 public partial class RendererApi : ParallelBranch<RendererApi>
 {
     public Renderer Renderer = null!;

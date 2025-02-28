@@ -4,7 +4,7 @@ using Vortice.ShaderCompiler;
 
 namespace Ego;
 
-[Node(DisableEditorAdd = true)]
+[Node(AllowAddingToScene = false)]
 public partial class PerformanceMonitor : Node
 {
     private Dictionary<string, RingBuffer<TimeSpan>> Traces = new();

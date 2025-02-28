@@ -6,6 +6,7 @@ public class SubObject
     public int Integer = 10;
     public string String = "Yep";
     public string OtherSTring = "Yeppers";
+    public string NewMember = "Yyippie";
 }
 
 [Node]

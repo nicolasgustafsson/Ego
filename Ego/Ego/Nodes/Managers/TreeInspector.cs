@@ -34,8 +34,7 @@ public class TreeInspector : Node
         {
             for (int row_n = clipper.DisplayStart; row_n < clipper.DisplayEnd; ++row_n)
             {
-                
-                uint col = (row_n % 2 == 1) ? aOddColor : aEvenColor;
+                uint column = (row_n % 2 == 1) ? aOddColor : aEvenColor;
                 
                 /*if ((col & IM_COL32_A_MASK) == 0)
                     continue;*/
@@ -44,7 +43,7 @@ public class TreeInspector : Node
                 float y2 = y1 + aLineHeight;
                 
                 
-                draw_list.AddRectFilled(new Vector2(aMinX, y1), new Vector2(aMaxX, y2), col);
+                draw_list.AddRectFilled(new Vector2(aMinX, y1), new Vector2(aMaxX, y2), column);
             }
         }
         ImGui.SetCursorPos(pos);
@@ -178,7 +177,7 @@ public class TreeInspector : Node
                 
                 NodeAttribute? attribute = keyValue.Value.GetCustomAttribute<NodeAttribute>();
 
-                if (attribute == null || attribute.DisableEditorAdd)
+                if (attribute is null || !attribute.AllowAddingToScene)
                     continue;
                     
                 if (ImGui.Selectable(keyValue.Key))

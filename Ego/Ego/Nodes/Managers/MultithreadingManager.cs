@@ -1,6 +1,6 @@
 namespace Ego;
 
-[Node(DisableEditorAdd = true)]
+[Node(AllowAddingToScene = false)]
 public partial class MultithreadingManager : Node
 {
     public List<ParallelBranch> Branches = new();

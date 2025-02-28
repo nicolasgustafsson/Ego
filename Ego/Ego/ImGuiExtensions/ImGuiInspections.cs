@@ -147,7 +147,7 @@ public static partial class EmGui
             for(int i = 0; i < aList.Count; i++)
             {
                 var refObj = aList[i]!;
-                changed |= Inspect<object>(i.ToString(), ref refObj);
+                changed |= Inspect<object>($"Item {i}", ref refObj);
                 aList[i] = refObj;
             }
                 

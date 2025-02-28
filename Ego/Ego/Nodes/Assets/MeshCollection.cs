@@ -3,7 +3,7 @@ using Rendering;
 
 namespace Ego;
 
-[Node(DisableEditorAdd = true)]
+[Node(AllowAddingToScene = false)]
 public partial class MeshCollection : Node, IAsset
 {
     public List<MeshData> Meshes = null!;

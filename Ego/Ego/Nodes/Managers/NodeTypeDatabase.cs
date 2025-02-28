@@ -2,7 +2,7 @@
 
 namespace Ego;
 
-[Node(DisableEditorAdd = true)]
+[Node(AllowAddingToScene = false)]
 public partial class NodeTypeDatabase : Node
 {
     public Dictionary<string, Type> NodeTypes = new();

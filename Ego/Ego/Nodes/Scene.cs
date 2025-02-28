@@ -3,7 +3,7 @@ using MessagePack;
 
 namespace Ego;
 
-[Node(DisableEditorAdd = true)]
+[Node(AllowAddingToScene = false)]
 public partial class Scene : Node, IAsset
 {
     private SceneBranchNode? SerializedTree;
