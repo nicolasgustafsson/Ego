@@ -70,7 +70,7 @@ public class MeshData : IGpuDestroyable
                 
                 for(int vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++)
                 {
-                    const bool OverrideColors = true;
+                    const bool OverrideColors = false;
                     
                     vertices.Add(new Vertex()
                     {
