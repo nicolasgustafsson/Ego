@@ -58,6 +58,11 @@ public static partial class EmGui
         return ImGui.DragFloat3(aName, ref aVector, 0.1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat);
     }
     
+    public static bool Inspect(string aName, ref Vector4 aVector)
+    {
+        return ImGui.DragFloat4(aName, ref aVector, 0.1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat);
+    }
+    
     public static bool Inspect(string aName, ref Transform aTransform)
     {
         bool changed = false;
