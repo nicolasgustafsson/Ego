@@ -34,7 +34,7 @@ public partial class Renderer
         
         uint imageIndex = nextImageAcquisition.imageIndex;
         
-        UpdateSceneData();
+        VkDescriptorSet globalDescriptor = UpdateSceneData();
         
         using (CommandBufferHandle cmd = CurrentFrame.CommandBuffer.BeginRecording())
         {
@@ -45,7 +45,7 @@ public partial class Renderer
 
             cmd.TransitionImage(RenderImage, VkImageLayout.ColorAttachmentOptimal);
 
-            RenderGeometry(cmd);
+            RenderGeometry(cmd, globalDescriptor);
             
             cmd.BeginRendering(RenderImage, DepthImage);
             ERenderImgui(cmd);
@@ -75,7 +75,7 @@ public partial class Renderer
         return RenderResult.Success;
     }
 
-    private void RenderGeometry(CommandBufferHandle cmd)
+    private void RenderGeometry(CommandBufferHandle cmd, VkDescriptorSet aGlobalDescriptor)
     {
         cmd.BeginRendering(RenderImage, DepthImage); 
 
@@ -83,7 +83,19 @@ public partial class Renderer
 
         foreach(var renderData in MeshRenderData)
         {
-            VkDescriptorSet descriptorSet = CurrentFrame.FrameDescriptors.Allocate(SingleTextureLayout);
+            cmd.BindPipeline(renderData.Material.Pipeline);
+            cmd.BindDescriptorSet(renderData.Material.Pipeline.VkLayout, aGlobalDescriptor, VkPipelineBindPoint.Graphics, 0);
+            cmd.BindDescriptorSet(renderData.Material.Pipeline.VkLayout, renderData.Material.DescriptorSet, VkPipelineBindPoint.Graphics, 1);
+
+            cmd.BindIndexBuffer(renderData.MyMeshData.MeshBuffers.IndexRawBuffer);
+            
+            MeshPushConstants pushConstants = new();
+            pushConstants.WorldMatrix = renderData.WorldMatrix; 
+            pushConstants.VertexBufferAddress = renderData.MyMeshData.MeshBuffers.VertexBufferAddress;
+            cmd.SetPushConstants(pushConstants, renderData.Material.Pipeline.VkLayout, VkShaderStageFlags.Vertex);
+
+            cmd.DrawIndexed(renderData.MyMeshData.Surfaces[0].Count);
+            /*VkDescriptorSet descriptorSet = CurrentFrame.FrameDescriptors.Allocate(SingleTextureLayout);
 
             {
                 DescriptorWriter writer = new();
@@ -91,29 +103,33 @@ public partial class Renderer
                 writer.UpdateSet(descriptorSet);
             }
 
-            cmd.BindDescriptorSet(TrianglePipeline.VkLayout, descriptorSet, VkPipelineBindPoint.Graphics); 
-            
+            cmd.BindDescriptorSet(TrianglePipeline.VkLayout, descriptorSet, VkPipelineBindPoint.Graphics);
+
             Matrix4x4 world = renderData.WorldMatrix;
             Matrix4x4 view = SceneData.View;
             Matrix4x4 projection = MatrixExtensions.CreatePerspectiveFieldOfView(90f * (float)(Math.PI/180f), (float)RenderImage.Extent.width / (float)RenderImage.Extent.height, 10000f, 0.1f);
 
-            //projection[1, 1] *= -1f;
+            projection[1, 1] *= -1f;
+
+            SceneData.Projection = projection;
+
+            SceneData.ViewProjection = projection * view;
 
             MeshPushConstants pushConstants = new();
-            pushConstants.WorldMatrix = world * view * projection;
+            pushConstants.WorldMatrix = world;
             pushConstants.VertexBufferAddress = renderData.MyMeshData.MeshBuffers.VertexBufferAddress;
 
             cmd.SetPushConstants(pushConstants, TrianglePipeline.VkLayout, VkShaderStageFlags.Vertex);
 
             cmd.BindIndexBuffer(renderData.MyMeshData.MeshBuffers.IndexRawBuffer);
 
-            cmd.DrawIndexed(renderData.MyMeshData.Surfaces[0].Count);
+            cmd.DrawIndexed(renderData.MyMeshData.Surfaces[0].Count);*/
         }
        
         cmd.EndRendering();
     }
 
-    private unsafe void UpdateSceneData()
+    private unsafe VkDescriptorSet UpdateSceneData()
     {
         AllocatedBuffer<SceneData> sceneDataBuffer = new(VkBufferUsageFlags.UniformBuffer, VmaMemoryUsage.CpuToGpu);
         CurrentFrame.DeletionQueue.Add(sceneDataBuffer);
@@ -122,9 +138,11 @@ public partial class Renderer
         
         {
             DescriptorWriter writer = new();
-            writer.WriteBuffer(0, sceneDataBuffer.Buffer, (ulong)sizeof(SceneData), 0, VkDescriptorType.UniformBuffer);
+            writer.WriteBuffer(0, sceneDataBuffer, 0, VkDescriptorType.UniformBuffer);
             writer.UpdateSet(globalDescriptor);
         }
+
+        return globalDescriptor;
     }
 
     private void RenderBackground(CommandBufferHandle cmd)

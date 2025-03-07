@@ -48,6 +48,11 @@ public static partial class EmGui
         return ImGui.InputInt(aName, ref aNumber);
     }
     
+    public static bool Inspect(string aName, ref float aNumber)
+    {
+        return ImGui.DragFloat(aName, ref aNumber);
+    }
+    
     public static bool Inspect(string aName, ref Vector3 aVector)
     {
         return ImGui.DragFloat3(aName, ref aVector, 0.1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat);

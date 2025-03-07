@@ -179,4 +179,30 @@ public unsafe class Window
         Title = aTitle;
         GlfwInstance.SetWindowTitle(WindowHandle, aTitle);
     }
+
+    public void HideCursor()
+    {
+        GlfwInstance.SetInputMode(WindowHandle, CursorStateAttribute.Cursor, CursorModeValue.CursorHidden);
+    }
+
+    public void ShowCursor()
+    {
+        GlfwInstance.SetInputMode(WindowHandle, CursorStateAttribute.Cursor, CursorModeValue.CursorNormal);
+    }
+    
+    public void SetCursorPosition(Vector2 aMousePosition)
+    {
+        GlfwInstance.SetCursorPos(WindowHandle, aMousePosition.X, aMousePosition.Y);
+    }
+    
+    public void CenterCursor()
+    {
+        SetCursorPosition(GetCenter());
+    }
+    
+    public Vector2 GetCenter()
+    {
+        (int width, int height) windowSize = GetWindowSize();
+        return new Vector2(windowSize.width / 2f, windowSize.height / 2f);
+    }
 }

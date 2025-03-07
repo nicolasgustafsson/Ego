@@ -5,7 +5,7 @@ namespace VulkanApi;
 
 public class GraphicsPipeline : Pipeline
 {
-    public unsafe class GraphicsPipelineBuilder()
+    public unsafe class GraphicsPipelineBuilder : IDisposable
     {
         private List<VkDescriptorSetLayout> Layouts = new();
         private List<VkPushConstantRange> PushConstants = new();
@@ -136,25 +136,11 @@ public class GraphicsPipeline : Pipeline
         }
         
         
-        public GraphicsPipelineBuilder DisableDepthTest()
+        public GraphicsPipelineBuilder SetDepthTest(VkCompareOp aCompareOperation, bool aWrite)
         {
-            DepthStencilState.depthTestEnable = false;
-            DepthStencilState.depthWriteEnable = false;
-            DepthStencilState.depthCompareOp = VkCompareOp.Never;
-            DepthStencilState.depthBoundsTestEnable = false;
-            DepthStencilState.stencilTestEnable = false;
-            DepthStencilState.front = new();
-            DepthStencilState.back = new();
-            DepthStencilState.minDepthBounds = 0f;
-            DepthStencilState.maxDepthBounds = 1f;
-            return this;
-        }
-        
-        public GraphicsPipelineBuilder EnableDepthTest()
-        {
-            DepthStencilState.depthTestEnable = true;
-            DepthStencilState.depthWriteEnable = true;
-            DepthStencilState.depthCompareOp = VkCompareOp.Greater;
+            DepthStencilState.depthTestEnable = aCompareOperation != VkCompareOp.Never;
+            DepthStencilState.depthWriteEnable = aWrite;
+            DepthStencilState.depthCompareOp = aCompareOperation;
             DepthStencilState.depthBoundsTestEnable = false;
             DepthStencilState.stencilTestEnable = false;
             DepthStencilState.front = new();
@@ -184,6 +170,15 @@ public class GraphicsPipeline : Pipeline
             Rasterizer.frontFace = aFrontFace;
 
             return this;
+        }
+        
+        public GraphicsPipeline BuildAndDispose()
+        {
+            GraphicsPipeline built = Build();
+
+            Dispose();
+            
+            return built;
         }
 
         public GraphicsPipeline Build()
@@ -251,10 +246,7 @@ public class GraphicsPipeline : Pipeline
             pipelineCreateInfo.pColorBlendState = &blendStateCreateInfo;
             
             fixed(VkPipelineDepthStencilStateCreateInfo* pointer = &DepthStencilState)
-            {
                 pipelineCreateInfo.pDepthStencilState = pointer;
-                
-            }
 
             pipelineCreateInfo.layout = layout;
             
@@ -271,13 +263,15 @@ public class GraphicsPipeline : Pipeline
             graphicsPipeline.VkPipeline = pipeline;
             graphicsPipeline.VkLayout = layout;
             graphicsPipeline.BindPoint = VkPipelineBindPoint.Graphics;
-
-            vkDestroyShaderModule(Device.VkDevice, FragmentShader.Module); 
-            vkDestroyShaderModule(Device.VkDevice, VertexShader.Module); 
             
             return graphicsPipeline;
         }
 
+        public void Dispose()
+        {
+            vkDestroyShaderModule(Device.VkDevice, FragmentShader.Module); 
+            vkDestroyShaderModule(Device.VkDevice, VertexShader.Module); 
+        }
     }
     
     public static GraphicsPipelineBuilder StartBuild()

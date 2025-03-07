@@ -141,10 +141,10 @@ public class ImGuiDriver : IGpuDestroyable
             .SetTopology(VkPrimitiveTopology.TriangleList)
             .SetPolygonMode(VkPolygonMode.Fill)
             .SetCullMode(VkCullModeFlags.None, VkFrontFace.Clockwise)
-            .DisableDepthTest()
+            .SetDepthTest(VkCompareOp.Never, false)
             .SetColorAttachmentFormat(VkFormat.R16G16B16A16Sfloat)
             .SetDepthFormat(VkFormat.D32Sfloat)
-            .Build();
+            .BuildAndDispose();
 
         SetFrameData();
         

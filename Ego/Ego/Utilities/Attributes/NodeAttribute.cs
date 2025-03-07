@@ -4,7 +4,5 @@
     public class NodeAttribute : System.Attribute
     {
         public bool AllowAddingToScene;
-
-        public NodeAttribute(bool aAllowAddingToScene = true) => AllowAddingToScene = aAllowAddingToScene;
     }
 }

@@ -29,6 +29,7 @@ public partial class Node : IEgoContextProvider
     public MultithreadingManager MultithreadingManager => MyContext.MultithreadingManager;
     public PerformanceMonitor PerformanceMonitor => MyContext.PerformanceMonitor;
     public NodeTypeDatabase NodeTypeDatabase => MyContext.NodeTypeDatabase;
+    public MaterialBuilder MaterialBuilder => MyContext.MaterialBuilder;
 
     private List<Node> xChildren { get; set; } = new();
     private Node? xParent = null;

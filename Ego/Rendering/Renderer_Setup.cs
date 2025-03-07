@@ -147,11 +147,11 @@ public partial class Renderer
             .SetPolygonMode(VkPolygonMode.Fill)
             .SetCullMode(VkCullModeFlags.None, VkFrontFace.Clockwise)
             .DisableMultisampling()
-            .EnableDepthTest()
+            .SetDepthTest(VkCompareOp.Greater, true)
             .SetBlendMode(BlendMode.Alpha)
             .SetColorAttachmentFormat(RenderImage.ImageFormat)
             .SetDepthFormat(VkFormat.D32Sfloat)
-            .Build();
+            .BuildAndDispose();
 
         CleanupQueue.Add(TrianglePipeline);
     }

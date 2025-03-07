@@ -15,6 +15,7 @@ public partial class EgoContext : Node, IEgoContextProvider
     public new MultithreadingManager MultithreadingManager { get; private set; } = null!;
     public new PerformanceMonitor PerformanceMonitor { get; private set; } = null!;
     public new NodeTypeDatabase NodeTypeDatabase { get; private set; } = null!;
+    public new MaterialBuilder MaterialBuilder { get; private set; } = null!;
 
     private List<Func<LoggerConfiguration, LoggerConfiguration>> LoggerConfigHooks = new();
     private Logger? Logger = null;
@@ -55,7 +56,7 @@ public partial class EgoContext : Node, IEgoContextProvider
         
         NodeTypeDatabase = AddChild(new NodeTypeDatabase());
 
-        //Important that this is high up - it's Update will launch off any parallel tasks
+        //Important that this is high up - its Update will launch off any parallel tasks
         MultithreadingManager = AddChild(new MultithreadingManager());
         
         Time = AddChild(new TimeKeeper());
@@ -65,6 +66,7 @@ public partial class EgoContext : Node, IEgoContextProvider
         AssetManager = AddChild(new AssetManager());
         TreeInspector = AddChild(new TreeInspector());
         PerformanceMonitor = AddChild(new PerformanceMonitor());
+        MaterialBuilder = AddChild(new MaterialBuilder());
         
         T childObject = AddChild(new T());
 

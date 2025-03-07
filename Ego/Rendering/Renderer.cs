@@ -17,9 +17,9 @@ public partial class Renderer : IGpuImmediateSubmit
 {
     private Swapchain Swapchain = null!;
     private RenderQueue RenderQueue = null!;
-    private Image RenderImage = null!;
+    public Image RenderImage = null!;
     private Image DepthImage = null!;
-    private DescriptorAllocatorGrowable GlobalDescriptorAllocator = new();
+    public DescriptorAllocatorGrowable GlobalDescriptorAllocator = new();
     
     private ComputePipeline GradientPipeline = null!;
     private GraphicsPipeline TrianglePipeline = null!;
@@ -38,16 +38,16 @@ public partial class Renderer : IGpuImmediateSubmit
 
     private DeletionQueue CleanupQueue = new();
 
-    private Image BlackImage = null!;
-    private Image GreyImage = null!;
-    private Image WhiteImage = null!;
+    public Image BlackImage = null!;
+    public Image GreyImage = null!;
+    public Image WhiteImage = null!;
     public Image CheckerBoardImage = null!;
 
-    private Sampler DefaultNearestSampler = null!;
-    private Sampler DefaultLinearSampler = null!;
+    public Sampler DefaultNearestSampler = null!;
+    public Sampler DefaultLinearSampler = null!;
 
     private SceneData SceneData = new SceneData();
-    private VkDescriptorSetLayout SceneDataLayout;
+    public VkDescriptorSetLayout SceneDataLayout;
     
     private ulong FrameCount = 0;
     private bool WantsResize = false;
@@ -95,6 +95,14 @@ public partial class Renderer : IGpuImmediateSubmit
 
         MeshRenderData = aRenderData.MeshRenders;
         SceneData.View = aRenderData.CameraView;
+        SceneData.Projection = MatrixExtensions.CreatePerspectiveFieldOfView(90f * (float)(Math.PI/180f), (float)RenderImage.Extent.width / (float)RenderImage.Extent.height, 10000f, 0.1f);
+        SceneData.Projection[1, 1] *= -1f;
+        SceneData.ViewProjection = SceneData.View * SceneData.Projection;
+
+        SceneData.AmbientColor = aRenderData.AmbientColor;
+        SceneData.SunlightColor = aRenderData.SunlightColor;
+        SceneData.SunlightDirection = aRenderData.SunlightDirection;
+        
         RenderResult result = RenderInternal();
         
         if (result == RenderResult.ResizeNeeded)

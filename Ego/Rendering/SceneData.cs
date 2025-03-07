@@ -16,7 +16,7 @@ public struct SceneData
         Projection = default;
         ViewProjection = default;
         AmbientColor = default;
-        SunlightDirection = default;
+        SunlightDirection = new (0f, 1f, 0f, 0f);
         SunlightColor = default;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using Environment = Ego.Environment;
 
 namespace Editor;
 
@@ -10,21 +11,29 @@ public partial class SceneEditor : Node
     
     public override void Start()
     {
-        AddChild(WorkingScene);
+        var scene = AddChild(WorkingScene);
+        scene.AddChild(new MeshRenderer());
+        
+        var movement = AddChild(new EditorCameraMovement());
+
+        movement.AddChild(new Camera());
+        movement.AddChild(new Environment());
+
+        movement.LocalPosition.Z += 5f;
     }
     
     public void PrepareForHotReload()
     {
         if (TreeInspector.InspectedNode != null)
             InspectedNodeGuid = TreeInspector.InspectedNode.Guid;
-        WorkingScene.SerializeTree(Children[^1]);
-        Children[^1].Destroy();
+        WorkingScene.SerializeTree(WorkingScene.Children[0]);
+        WorkingScene.Children[0].Destroy();
     }
     
     public void ReinitializeAfterHotReload()
     {
         Node node = WorkingScene.DeserializeTree();
-        AddChild(node);
+        WorkingScene.AddChild(node);
         TreeInspector.InspectedNode = node.FindNodeWithGuid(InspectedNodeGuid);
     }
     

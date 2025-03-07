@@ -10,7 +10,9 @@ public partial class RendererApi : ParallelBranch<RendererApi>
 {
     public Renderer Renderer = null!;
 
-    public DoubleBuffer<RenderData> RenderData = new(new(), new());
+    private DoubleBuffer<RenderData> RenderDataBuffer = new(new(), new());
+
+    public RenderData RenderData => RenderDataBuffer.Producer;
     
     public RendererApi()
     {
@@ -26,11 +28,6 @@ public partial class RendererApi : ParallelBranch<RendererApi>
         Renderer.WaitUntilIdle();
     }
     
-    public void RenderMesh(MeshRenderData aRenderData)
-    {
-        RenderData.Producer.MeshRenders.Add(aRenderData);
-    }
-
     protected override void Update()
     {
     }
@@ -39,20 +36,15 @@ public partial class RendererApi : ParallelBranch<RendererApi>
     {
         PerformanceMonitor.PerformanceTracer tracer = PerformanceMonitor.StartTrace();
 
-        Renderer.Render(RenderData.Consumer);
+        Renderer.Render(RenderDataBuffer.Consumer);
         
         tracer.Trace("Render");
-    }
-    
-    public void SetCameraView(Matrix4x4 aView)
-    {
-        RenderData.Producer.CameraView = aView;
     }
 
     public override void UpdateSynchronous()
     {
-        RenderData.Swap();
-        RenderData.Producer.MeshRenders.Clear();
+        RenderDataBuffer.Swap();
+        RenderDataBuffer.Producer.MeshRenders.Clear();
     }
 
     public override void UpdateRoot()

@@ -38,6 +38,10 @@ public unsafe class DescriptorWriter
         Writes.Add(new(write, DescriptorWrite.WriteType.Image, ImageInfos.Count - 1));
     }
     
+    public void WriteBuffer<T>(uint aBinding, AllocatedBuffer<T> aBuffer, ulong aOffset, VkDescriptorType aType) where T : unmanaged
+    {
+        WriteBuffer(aBinding, aBuffer.Buffer, (ulong)sizeof(T), aOffset, aType);
+    }
     public void WriteBuffer(uint aBinding, VkBuffer aBuffer, ulong aSize, ulong aOffset, VkDescriptorType aType)
     {
         VkDescriptorBufferInfo bufferInfo = new();

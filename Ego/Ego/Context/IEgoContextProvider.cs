@@ -11,4 +11,5 @@ public interface IEgoContextProvider
     public MultithreadingManager MultithreadingManager { get; }
     public PerformanceMonitor PerformanceMonitor { get;} 
     public NodeTypeDatabase NodeTypeDatabase { get;}
+    public MaterialBuilder MaterialBuilder { get;}
 }

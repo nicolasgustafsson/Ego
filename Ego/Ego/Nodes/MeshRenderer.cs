@@ -1,5 +1,9 @@
 ﻿using ImGuiNET;
 using Rendering;
+using Rendering.Materials;
+using Vortice.Vulkan;
+using VulkanApi;
+
 namespace Ego;
 
 [Node]
@@ -12,18 +16,41 @@ public partial class MeshRenderer : Node3D
     
     private string ModelPath = "Models/basicmesh.glb";
     private MeshCollection MeshCollection = null!;
+    private Material Material = null!;
+    private AllocatedBuffer<MaterialBuilder.MaterialConstants> MaterialConstantsBuffer = null!;
 
     [Serialize] private int MeshIndex = 0;
 
     public override void Start()
     {
         base.Start();
-        MeshCollection = AssetManager.GetAsset<MeshCollection>(ModelPath); 
+        MeshCollection = AssetManager.GetAsset<MeshCollection>(ModelPath);
+
+        MaterialConstantsBuffer = new(VkBufferUsageFlags.UniformBuffer, VmaMemoryUsage.CpuToGpu);
+        
+        MaterialBuilder.MaterialConstants constants = new();
+        
+        constants.Color = Vector4.One;
+        constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
+        MaterialConstantsBuffer.SetWriteData(constants);
+        
+        Material = MaterialBuilder.CreateMaterial(MaterialPassType.MainColor,
+            RendererApi.Renderer.WhiteImage,
+            RendererApi.Renderer.DefaultLinearSampler,
+            RendererApi.Renderer.WhiteImage,
+            RendererApi.Renderer.DefaultLinearSampler, MaterialConstantsBuffer, 0, RendererApi.Renderer.GlobalDescriptorAllocator);
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+
+        MaterialConstantsBuffer.Destroy();
     }
 
     protected override void Update()
     {
-        RendererApi.RenderMesh(new(){MyMeshData = MeshCollection.Meshes[MeshIndex], WorldMatrix = WorldMatrix}); 
+        RendererApi.RenderData.RenderMesh(new(){MyMeshData = MeshCollection.Meshes[MeshIndex], Material = Material, WorldMatrix = WorldMatrix}); 
     }
 
     private void Inspect()

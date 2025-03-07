@@ -145,9 +145,9 @@ public unsafe class CommandBufferHandle : IDisposable
         vkCmdBindIndexBuffer(VkCommandBuffer, aIndexRawBuffer.Buffer, 0, aIndexType);
     }
     
-    public void BindDescriptorSet(VkPipelineLayout aLayout, VkDescriptorSet aDescriptorSet, VkPipelineBindPoint aBindPoint)
+    public void BindDescriptorSet(VkPipelineLayout aLayout, VkDescriptorSet aDescriptorSet, VkPipelineBindPoint aBindPoint, int aDescriptorIndex = 0)
     {
-        vkCmdBindDescriptorSets(VkCommandBuffer, aBindPoint, aLayout, 0, aDescriptorSet);
+        vkCmdBindDescriptorSets(VkCommandBuffer, aBindPoint, aLayout, (uint)aDescriptorIndex, aDescriptorSet);
     }
         
     
