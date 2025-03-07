@@ -9,7 +9,7 @@ public partial class Node3D : Node
 {
     [Inspect] private Transform Transform = new();
     
-    public Matrix4x4 WorldMatrix => ((Parent as Node3D)?.WorldMatrix ?? Matrix4x4.Identity) * Transform.Matrix;
+    public Matrix4x4 WorldMatrix => Transform.Matrix * ((Parent as Node3D)?.WorldMatrix ?? Matrix4x4.Identity);
     public Matrix4x4 LocalMatrix => Transform.Matrix; 
 
     public ref Vector3 LocalPosition => ref Transform.Position;
