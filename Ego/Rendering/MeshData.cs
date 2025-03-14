@@ -21,7 +21,7 @@ public class MeshData : IGpuDestroyable
     public List<GeoSurface> Surfaces;
     public MeshBuffers MeshBuffers;
 
-    private MeshData(string aName, List<GeoSurface> WindowSurfaces, MeshBuffers aMeshBuffers)
+    public MeshData(string aName, List<GeoSurface> WindowSurfaces, MeshBuffers aMeshBuffers)
     {
         Name = aName;
         Surfaces = WindowSurfaces;
@@ -40,12 +40,13 @@ public class MeshData : IGpuDestroyable
         if (model == null)
             return new();
 
-        
+        int index = 0;
+
         List<MeshData> meshes = new();
 
         List<UInt32> indices = new();
         List<Vertex> vertices = new();
-        
+
         foreach(var mesh in model.LogicalMeshes)
         {
             indices.Clear();
@@ -58,7 +59,7 @@ public class MeshData : IGpuDestroyable
                 IntegerArray primitiveIndices = primitive.IndexAccessor.AsIndicesArray();
                 IList<Vector3> positions = primitive.GetVertexAccessor("POSITION").AsVector3Array();
                 IList<Vector3> normals = primitive.GetVertexAccessor("NORMAL").AsVector3Array();
-                IList<Vector2> uvs = primitive.GetVertexAccessor("TEXCOORD_0").AsVector2Array();
+                IList<Vector2>? uvs = primitive.GetVertexAccessor("TEXCOORD_0") != null ? primitive.GetVertexAccessor("TEXCOORD_0").AsVector2Array() : null;
                 IList<Vector4>? colors = primitive.GetVertexAccessor("COLOR_0") != null ? primitive.GetVertexAccessor("COLOR_0").AsVector4Array() : null;
 
                 int vertexCount = positions.Count;
@@ -79,8 +80,8 @@ public class MeshData : IGpuDestroyable
                         Color = OverrideColors ? new Vector4(normals[vertexIndex], 1f) : colors is not null ? colors[vertexIndex] : Vector4.One, 
                         Normal = normals[vertexIndex], 
                         Position = positions[vertexIndex], 
-                        Uv_X = uvs[vertexIndex].X, 
-                        Uv_Y = uvs[vertexIndex].Y
+                        Uv_X = uvs is not null ? uvs[vertexIndex].X : 0f,  
+                        Uv_Y = uvs is not null ? uvs[vertexIndex].Y : 0f
                     });
                 }
 
@@ -88,8 +89,9 @@ public class MeshData : IGpuDestroyable
             }
 
             meshes.Add(new MeshData(mesh.Name, surfaces, new MeshBuffers(aRenderer, GlobalAllocator, indices, vertices)));
-            
+            index++;
         }
+        
         return meshes;
     }
 }

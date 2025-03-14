@@ -9,23 +9,26 @@ namespace Ego;
 [Node]
 public partial class MeshRenderer : Node3D
 {
+    private string ModelPath = "Models/structure.glb";
+    private MeshData? MeshData = null;
+    private Material Material = null!;
+    private AllocatedBuffer<MaterialBuilder.MaterialConstants> MaterialConstantsBuffer = null!;
+
+    [Serialize] private int MeshIndex = 0;
+    
     public MeshRenderer()
     {
         
     }
     
-    private string ModelPath = "Models/basicmesh.glb";
-    private MeshCollection MeshCollection = null!;
-    private Material Material = null!;
-    private AllocatedBuffer<MaterialBuilder.MaterialConstants> MaterialConstantsBuffer = null!;
-
-    [Serialize] private int MeshIndex = 0;
+    public MeshRenderer(MeshData aMeshData)
+    {
+        MeshData = aMeshData;
+    }
 
     public override void Start()
     {
         base.Start();
-        MeshCollection = AssetManager.GetAsset<MeshCollection>(ModelPath);
-
         MaterialConstantsBuffer = new(VkBufferUsageFlags.UniformBuffer, VmaMemoryUsage.CpuToGpu);
         
         MaterialBuilder.MaterialConstants constants = new();
@@ -50,11 +53,12 @@ public partial class MeshRenderer : Node3D
 
     protected override void Update()
     {
-        RendererApi.RenderData.RenderMesh(new(){MyMeshData = MeshCollection.Meshes[MeshIndex], Material = Material, WorldMatrix = WorldMatrix}); 
+        if (MeshData != null)
+            RendererApi.RenderData.RenderMesh(new(){MyMeshData = MeshData, Material = Material, WorldMatrix = WorldMatrix}); 
     }
-
+/*
     private void Inspect()
     {
         ImGui.SliderInt("Mesh Index", ref MeshIndex, 0, MeshCollection.Meshes.Count - 1);
-    }
+    }*/
 }

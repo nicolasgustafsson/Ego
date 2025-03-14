@@ -12,12 +12,13 @@ public partial class SceneEditor : Node
     public override void Start()
     {
         var scene = AddChild(WorkingScene);
-        scene.AddChild(new MeshRenderer());
+        scene.AddChild(new GltfRenderer("Models/house2.glb"));
         
         var movement = AddChild(new EditorCameraMovement());
 
         movement.AddChild(new Camera());
-        movement.AddChild(new Environment());
+        
+        AddChild(new Environment());
 
         movement.LocalPosition.X -= 3.5f;
         movement.LocalPosition.Y += 3.5f;
@@ -25,7 +26,6 @@ public partial class SceneEditor : Node
         movement.YawRotation = -0.5f;
         movement.PitchRotation = -0.64f;
         
-
         movement.UpdateRotation();
     }
     
