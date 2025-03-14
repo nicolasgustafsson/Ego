@@ -53,6 +53,13 @@ public static partial class EmGui
         return ImGui.DragFloat(aName, ref aNumber);
     }
     
+    public static bool Inspect(string aName, ref Color aColor)
+    {
+        Vector4 colorAsVec4 = aColor.ToVec4();
+        return ImGui.ColorPicker4(aName, ref colorAsVec4);
+        aColor = colorAsVec4.ToColor();
+    }
+    
     public static bool Inspect(string aName, ref Vector3 aVector)
     {
         return ImGui.DragFloat3(aName, ref aVector, 0.1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat);
@@ -198,7 +205,7 @@ public static partial class EmGui
     public static bool DynamicInspect(string aName, ref object aVar)
     {
         bool changed = false;
-        if (aVar is string aString)
+        /*if (aVar is string aString)
         {
             changed = Inspect(aName, ref aString);
             aVar = aString;
@@ -222,7 +229,7 @@ public static partial class EmGui
             changed = Inspect(aName, ref aTransform);
             aVar = aTransform;
             return changed;
-        }
+        }*/
         
         if (ImGui.TreeNodeEx(aName, ImGuiTreeNodeFlags.DefaultOpen))
         {

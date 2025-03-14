@@ -2,6 +2,7 @@ using VulkanApi;
 using ImageMagick;
 using SharpGLTF.Memory;
 using SharpGLTF.Schema2;
+using Silk.NET.Vulkan;
 using Utilities;
 using Image = VulkanApi.Image;
 
@@ -39,6 +40,7 @@ public class MeshData : IGpuDestroyable
         if (model == null)
             return new();
 
+        
         List<MeshData> meshes = new();
 
         List<UInt32> indices = new();

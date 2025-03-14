@@ -19,7 +19,14 @@ public partial class SceneEditor : Node
         movement.AddChild(new Camera());
         movement.AddChild(new Environment());
 
+        movement.LocalPosition.X -= 3.5f;
+        movement.LocalPosition.Y += 3.5f;
         movement.LocalPosition.Z += 5f;
+        movement.YawRotation = -0.5f;
+        movement.PitchRotation = -0.64f;
+        
+
+        movement.UpdateRotation();
     }
     
     public void PrepareForHotReload()

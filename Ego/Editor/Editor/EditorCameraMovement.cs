@@ -11,9 +11,9 @@ public partial class EditorCameraMovement : Node3D
     private bool Sprinting = false;
 
     private bool MovingCamera = false;
-    private float YawRotation = 0f;
+    public float YawRotation = 0f;
 
-    private float PitchRotation = 0f;
+    public float PitchRotation = 0f;
 
     [Inspect] private float Speed = 7f;
     [Inspect] private float SprintMultiplier = 2f;
@@ -68,9 +68,14 @@ public partial class EditorCameraMovement : Node3D
         
         YawRotation += -delta.X * MouseSensitivity * 0.001f;
         PitchRotation += -delta.Y * MouseSensitivity * 0.001f;
-        LocalRotation = Quaternion.CreateFromYawPitchRoll(YawRotation, PitchRotation, 0f);
+        UpdateRotation();
 
         Window.CenterCursor();
+    }
+    
+    public void UpdateRotation()
+    {
+        LocalRotation = Quaternion.CreateFromYawPitchRoll(YawRotation, PitchRotation, 0f);
     }
 
     public override void OnDestroy()
