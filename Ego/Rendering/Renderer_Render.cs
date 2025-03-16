@@ -79,8 +79,6 @@ public partial class Renderer
     {
         cmd.BeginRendering(RenderImage, DepthImage); 
 
-        cmd.BindPipeline(TrianglePipeline);
-
         foreach(var renderData in MeshRenderData)
         {
             cmd.BindPipeline(renderData.Material.Pipeline);

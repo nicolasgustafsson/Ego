@@ -133,7 +133,7 @@ public class ImGuiDriver : IGpuDestroyable
         
         Pipeline = new GraphicsPipeline.GraphicsPipelineBuilder()
             .AddPushConstant(new VkPushConstantRange { offset = 0, size = sizeof(float) * 4 + sizeof(VkDeviceAddress), stageFlags = VkShaderStageFlags.Vertex })
-            .AddLayout(Layout)
+            .AddDescriptorLayout(Layout)
             .SetBlendMode(BlendMode.Alpha)
             .DisableMultisampling()
             .SetVertexShader("Shaders/imguiVert.spv")

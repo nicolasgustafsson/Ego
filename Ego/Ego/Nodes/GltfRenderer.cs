@@ -11,7 +11,7 @@ public partial class GltfRenderer : Node3D
     //When we import, this somehow needs to be saved as a assetdata. We don't want to duplicate mesh data everytime we instantiate a scene.
     private Dictionary<int, MeshData> Meshes = new();
 
-    private string ModelPath = "";
+    [Inspect] private string ModelPath = "";
     //Get a gltf file path, load it. Then create child nodes and renderers.
     //Later, this will become the import process. We do this, save it as a scene, then we reuse the scene elsewhere.
 

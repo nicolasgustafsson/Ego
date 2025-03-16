@@ -7,7 +7,7 @@ public class GraphicsPipeline : Pipeline
 {
     public unsafe class GraphicsPipelineBuilder : IDisposable
     {
-        private List<VkDescriptorSetLayout> Layouts = new();
+        private List<VkDescriptorSetLayout> DescriptorLayouts = new();
         private List<VkPushConstantRange> PushConstants = new();
         private ShaderModule VertexShader;
         private ShaderModule FragmentShader;
@@ -24,9 +24,9 @@ public class GraphicsPipeline : Pipeline
         private List<VkVertexInputBindingDescription>? VertexBindings = null;
         private List<VkVertexInputAttributeDescription>? VertexAttributes = null;
 
-        public GraphicsPipelineBuilder AddLayout(VkDescriptorSetLayout aLayout)
+        public GraphicsPipelineBuilder AddDescriptorLayout(VkDescriptorSetLayout aLayout)
         {
-            Layouts.Add(aLayout);
+            DescriptorLayouts.Add(aLayout);
             return this;
         }
         
@@ -184,9 +184,9 @@ public class GraphicsPipeline : Pipeline
         public GraphicsPipeline Build()
         {
             VkPipelineLayoutCreateInfo layoutCreateInfo = new();
-            layoutCreateInfo.pSetLayouts = Layouts.AsSpan().GetPointerUnsafe();
+            layoutCreateInfo.pSetLayouts = DescriptorLayouts.AsSpan().GetPointerUnsafe();
 
-            layoutCreateInfo.setLayoutCount = (uint)Layouts.Count;
+            layoutCreateInfo.setLayoutCount = (uint)DescriptorLayouts.Count;
             
             layoutCreateInfo.pPushConstantRanges = PushConstants.AsSpan().GetPointerUnsafe();
             layoutCreateInfo.pushConstantRangeCount = (uint)PushConstants.Count;

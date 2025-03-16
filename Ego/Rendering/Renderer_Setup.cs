@@ -140,7 +140,7 @@ public partial class Renderer
         TrianglePipeline = GraphicsPipeline
             .StartBuild()
             .AddPushConstant<MeshPushConstants>(VkShaderStageFlags.Vertex)
-            .AddLayout(SingleTextureLayout)
+            .AddDescriptorLayout(SingleTextureLayout)
             .SetVertexShader("Shaders/vert.spv")
             .SetFragmentShader("Shaders/frag.spv")
             .SetTopology(VkPrimitiveTopology.TriangleList)

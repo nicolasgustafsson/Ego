@@ -58,8 +58,8 @@ public partial class MaterialBuilder : Node
         pipelineBuilder.SetVertexShader("Shaders/meshVert.spv");
         pipelineBuilder.SetFragmentShader("Shaders/meshFrag.spv");
         pipelineBuilder.AddPushConstant<MeshPushConstants>(VkShaderStageFlags.Vertex);
-        pipelineBuilder.AddLayout(RendererApi.Renderer.SceneDataLayout);
-        pipelineBuilder.AddLayout(MaterialLayout);
+        pipelineBuilder.AddDescriptorLayout(RendererApi.Renderer.SceneDataLayout);
+        pipelineBuilder.AddDescriptorLayout(MaterialLayout);
         pipelineBuilder.SetTopology(VkPrimitiveTopology.TriangleList);
         pipelineBuilder.SetPolygonMode(VkPolygonMode.Fill);
         pipelineBuilder.SetCullMode(VkCullModeFlags.None, VkFrontFace.Clockwise);
