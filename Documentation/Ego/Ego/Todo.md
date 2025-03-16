@@ -10,6 +10,7 @@ kanban-plugin: board
 - [ ] Decide whether to use Descriptor indexing or Push Descriptors(or both?)
 - [ ] Look into Shader Draw Parameters
 - [ ] Timeline Semaphores
+- [ ] Get rid off vkDeviceWaitIdle/vkQueueWaitIdle in runtime
 
 
 ## Renderer Features

@@ -11,17 +11,22 @@
             "id": "e7481ef64ea02c56",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "kanban",
               "state": {
-                "file": "Ego/Overview.canvas",
-                "viewState": {
-                  "x": -478.13506246062707,
-                  "y": -200.56521313500247,
-                  "zoom": 1.1102230246251565e-16
+                "file": "Ego/Todo.md",
+                "kanbanViewState": {
+                  "kanban-plugin": "board",
+                  "list-collapse": [
+                    false,
+                    false,
+                    false,
+                    false,
+                    false
+                  ]
                 }
               },
-              "icon": "lucide-layout-dashboard",
-              "title": "Overview"
+              "icon": "lucide-trello",
+              "title": "Todo"
             }
           },
           {
@@ -111,7 +116,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Ego/Overview.canvas",
+                "file": "Ego/Todo.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -121,7 +126,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Overview"
+              "title": "Backlinks for Todo"
             }
           },
           {
@@ -130,12 +135,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Ego/Overview.canvas",
+                "file": "Ego/Todo.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": false
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Overview"
+              "title": "Outgoing links from Todo"
             }
           },
           {
@@ -159,13 +164,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Ego/Overview.canvas",
+                "file": "Ego/Todo.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Overview"
+              "title": "Outline of Todo"
             }
           }
         ],
@@ -189,12 +194,12 @@
   },
   "active": "e7481ef64ea02c56",
   "lastOpenFiles": [
-    "Ego/Third Party Libraries.md",
-    "Ego/Todo.md",
-    "Ego/Ego Concepts.md",
     "Ego/Wishlist.md",
-    "Vulkan/Vulkan Questions.md",
+    "Ego/Todo.md",
+    "Ego/Third Party Libraries.md",
     "Ego/Overview.canvas",
+    "Ego/Ego Concepts.md",
+    "Vulkan/Vulkan Questions.md",
     "Cat.md",
     "Ego",
     "2025-03-16.md",

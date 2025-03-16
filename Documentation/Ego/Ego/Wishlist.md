@@ -5,4 +5,4 @@
 	- Have "Main" node high in hierarchy, listen in lower. Allows for easy configuration for things like healthbars.
 - Geometry Graph
 - FX Graph
-- Command palette
+- Command Palette

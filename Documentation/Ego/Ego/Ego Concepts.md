@@ -7,5 +7,5 @@
 - C#
 - Focus on simplicity and elegance
 - Frictionless is more important than speed(don't overcomplicate or overoptimize)
-- Few concepts, but lots of orthogonality between concepts.
+- Few but orthogonal concepts
 
