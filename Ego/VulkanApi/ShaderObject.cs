@@ -12,14 +12,16 @@ public class ShaderObject : IGpuDestroyable
     
     public unsafe class Shader
     {
-        private VkShaderStageFlags VkStage;
-        private VkShaderStageFlags VkNextStage;
-        private VkShaderEXT VkShader = VkShaderEXT.Null;
+        public VkShaderStageFlags VkStage;
+        public VkShaderStageFlags VkNextStage;
+        public VkShaderEXT VkShader = VkShaderEXT.Null;
         private string Name = "Shader";
         private VkShaderCreateInfoEXT VkShaderCreateInfo;
         private byte[] SpirvSource;
+        public List<VkDescriptorSetLayout> Layouts;
+        public VkPipelineLayout PipelineLayout;
 
-        public Shader(VkShaderStageFlags aStage, VkShaderStageFlags aNextStage, string aName, byte[] aSpirvSource, List<VkDescriptorSetLayout> aLayouts)
+        public Shader(VkShaderStageFlags aStage, VkShaderStageFlags aNextStage, string aName, byte[] aSpirvSource, List<VkDescriptorSetLayout> aLayouts, VkPushConstantRange aPushConstantRange)
         {
             VkStage = aStage;
             VkNextStage = aNextStage;
@@ -43,6 +45,29 @@ public class ShaderObject : IGpuDestroyable
             VkShaderCreateInfo.setLayoutCount = (uint)aLayouts.Count;
             VkShaderCreateInfo.pSetLayouts = aLayouts.AsSpan().GetPointerUnsafe();
             VkShaderCreateInfo.pSpecializationInfo = null;
+            VkShaderCreateInfo.pushConstantRangeCount = 1;
+            VkShaderCreateInfo.pPushConstantRanges = &aPushConstantRange;
+
+            Layouts = aLayouts;
+            
+            VkPipelineLayoutCreateInfo layoutCreateInfo = new();
+
+            layoutCreateInfo.pushConstantRangeCount = 1;
+            layoutCreateInfo.pPushConstantRanges = &aPushConstantRange;
+            layoutCreateInfo.setLayoutCount = (uint)aLayouts.Count;
+            layoutCreateInfo.pSetLayouts = aLayouts.AsSpan().GetPointerUnsafe();
+
+            vkCreatePipelineLayout(Device.VkDevice, &layoutCreateInfo, null, out PipelineLayout);
+            
+            Build();
+        }
+        
+        public void Build()
+        {
+            fixed(VkShaderEXT* shaderP = &VkShader)
+            {
+                vkCreateShadersEXT(LogicalDevice.Device.VkDevice, 1, VkShaderCreateInfo, null, shaderP).CheckResult();
+            }
         }
 
         /*public Shader(VkShaderStageFlags aStage, VkShaderStageFlags aNextStage, )

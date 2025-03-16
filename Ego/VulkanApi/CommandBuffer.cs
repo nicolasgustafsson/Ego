@@ -149,7 +149,85 @@ public unsafe class CommandBufferHandle : IDisposable
     {
         vkCmdBindDescriptorSets(VkCommandBuffer, aBindPoint, aLayout, (uint)aDescriptorIndex, aDescriptorSet);
     }
-        
+    
+    public void SetCullMode(VkCullModeFlags aCullMode)
+    {
+        vkCmdSetCullModeEXT(VkCommandBuffer, aCullMode);
+    }
+    
+    public void SetBlendMode(BlendMode aBlendMode)
+    {
+        VkBool32 enable = true;
+        vkCmdSetColorBlendEnableEXT(VkCommandBuffer, 0, 1, &enable);
+        VkColorBlendEquationEXT equation = aBlendMode.ToVkBlendEquation();
+        vkCmdSetColorBlendEquationEXT(VkCommandBuffer, 0, 1, &equation);
+    }
+    
+    public void SetPrimitiveTopology(VkPrimitiveTopology aTopology)
+    {
+        vkCmdSetPrimitiveTopology(VkCommandBuffer, aTopology);
+        vkCmdSetPrimitiveRestartEnableEXT(VkCommandBuffer, VkBool32.False);
+        vkCmdSetRasterizationSamplesEXT(VkCommandBuffer, VkSampleCountFlags.Count1);
+    }
+    
+    public void SetFrontFace(VkFrontFace aFrontFace)
+    {
+        vkCmdSetFrontFace(VkCommandBuffer, aFrontFace);
+    }
+    
+    public void SetDepthCompareOperation(VkCompareOp aCompareOperation)
+    {
+        vkCmdSetDepthCompareOp(VkCommandBuffer, aCompareOperation);
+    }
+    
+    public void SetDepthTestEnable(bool aEnable)
+    {
+        vkCmdSetDepthTestEnable(VkCommandBuffer, aEnable);
+    }
+    
+    public void SetStencilTestEnable(bool aEnable)
+    {
+        vkCmdSetStencilTestEnable(VkCommandBuffer, aEnable);
+    }
+    
+    public void SetDepthWrite(bool aEnable)
+    {
+        vkCmdSetDepthWriteEnable(VkCommandBuffer, aEnable);
+    }
+    
+    public void EnableShaderObjects()
+    {
+        vkCmdSetRasterizerDiscardEnable(VkCommandBuffer, VkBool32.False);
+        vkCmdSetDepthBoundsTestEnableEXT(VkCommandBuffer, false);
+        vkCmdSetDepthBiasEnable(VkCommandBuffer, false);
+        vkCmdSetLogicOpEnableEXT(VkCommandBuffer, false);
+        VkBool32 untrue = false;
+        vkCmdSetColorBlendEnableEXT(VkCommandBuffer, 0, 1, &untrue);
+
+        VkColorComponentFlags flags = VkColorComponentFlags.All;
+
+        vkCmdSetColorWriteMaskEXT(VkCommandBuffer, 0, 1, &flags);
+        vkCmdSetPolygonModeEXT(VkCommandBuffer, VkPolygonMode.Fill);
+        uint sampleMask = 0x1;
+        vkCmdSetSampleMaskEXT(VkCommandBuffer, VkSampleCountFlags.Count1, &sampleMask);
+        vkCmdSetAlphaToCoverageEnableEXT(VkCommandBuffer, VkBool32.False);
+    }
+    
+    public void BindShader(ShaderObject.Shader aShader)
+    {
+        fixed(VkShaderStageFlags* flags = &aShader.VkStage)
+        {
+            fixed(VkShaderEXT* shader = &aShader.VkShader)
+            {
+                vkCmdBindShadersEXT(VkCommandBuffer, 1, flags, shader);
+            }
+        }
+    }
+    
+    public void UnbindShader(VkShaderStageFlags aShaderStage)
+    {
+        vkCmdBindShadersEXT(VkCommandBuffer, 1, &aShaderStage, null);
+    }
     
     public void Draw(int aVertexCount)
     {
@@ -188,12 +266,14 @@ public unsafe class CommandBufferHandle : IDisposable
         dynamicViewport.maxDepth = 1f;
 
         vkCmdSetViewport(VkCommandBuffer, 0, dynamicViewport);
+        vkCmdSetViewportWithCount(VkCommandBuffer, 1, &dynamicViewport);
 
         VkRect2D scissor = new();
         scissor.extent = new VkExtent2D(aDrawImage.Extent.width, aDrawImage.Extent.height);
         scissor.offset = new VkOffset2D(0, 0);
 
         vkCmdSetScissor(VkCommandBuffer, 0, scissor);
+        vkCmdSetScissorWithCount(VkCommandBuffer, 1, &scissor);
     }
     
     public void EndRendering()

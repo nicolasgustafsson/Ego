@@ -22,8 +22,8 @@ public partial class GameProjectAssemblyLoader : Node
     protected override void Update()
     {
         base.Update();
-        if (WantsHotReload)
-            HotReload();
+        /*if (WantsHotReload)
+            HotReload();*/
     }
 
     private void HotReload()

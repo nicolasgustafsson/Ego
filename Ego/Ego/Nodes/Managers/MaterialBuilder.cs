@@ -11,6 +11,8 @@ public partial class MaterialBuilder : Node
 {
     private GraphicsPipeline OpaquePipeline = null!;
     private GraphicsPipeline TransparentPipeline = null!;
+    private ShaderObject.Shader OpaqueVertexShader = null!;
+    private ShaderObject.Shader OpaqueFragmentShader = null!;
 
     private VkDescriptorSetLayout MaterialLayout;
     private DescriptorWriter DescriptorWriter = new();
@@ -42,8 +44,21 @@ public partial class MaterialBuilder : Node
         base.Start();
 
         BuildDefaultPipelines();
+        BuildDefaultShaders();
     }
-    
+
+    private unsafe void BuildDefaultShaders()
+    {
+        List<VkDescriptorSetLayout> layouts = new() { RendererApi.Renderer.SceneDataLayout, MaterialLayout };
+        VkPushConstantRange range = new();
+        range.offset = 0;
+        range.size = (uint)sizeof(MeshPushConstants);
+        range.stageFlags = VkShaderStageFlags.Vertex;
+        
+        OpaqueVertexShader = new(VkShaderStageFlags.Vertex, VkShaderStageFlags.Fragment, "Vertex", File.ReadAllBytes("Shaders/meshVert.spv"), layouts, range);
+        OpaqueFragmentShader = new(VkShaderStageFlags.Fragment, VkShaderStageFlags.None, "Fragment", File.ReadAllBytes("Shaders/meshFrag.spv"), layouts, range);
+    }
+
     private void BuildDefaultPipelines()
     {
         DescriptorLayoutBuilder descriptorLayoutBuilder = new();
@@ -55,6 +70,7 @@ public partial class MaterialBuilder : Node
 
         using GraphicsPipeline.GraphicsPipelineBuilder pipelineBuilder = new();
         
+            
         pipelineBuilder.SetVertexShader("Shaders/meshVert.spv");
         pipelineBuilder.SetFragmentShader("Shaders/meshFrag.spv");
         pipelineBuilder.AddPushConstant<MeshPushConstants>(VkShaderStageFlags.Vertex);
@@ -88,7 +104,11 @@ public partial class MaterialBuilder : Node
         if (aPassType == MaterialPassType.Transparent)
             material.Pipeline = TransparentPipeline;
         else
+        {
             material.Pipeline = OpaquePipeline;
+            material.VertexShader = OpaqueVertexShader;
+            material.FragmentShader = OpaqueFragmentShader;
+        }
 
 
         material.DescriptorSet = aDescriptorAllocator.Allocate(MaterialLayout);

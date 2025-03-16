@@ -77,13 +77,20 @@ public partial class Renderer
 
     private void RenderGeometry(CommandBufferHandle cmd, VkDescriptorSet aGlobalDescriptor)
     {
-        cmd.BeginRendering(RenderImage, DepthImage); 
+        cmd.BeginRendering(RenderImage, DepthImage);
+
+        cmd.EnableShaderObjects();
 
         foreach(var renderData in MeshRenderData)
         {
-            cmd.BindPipeline(renderData.Material.Pipeline);
+            //cmd.BindPipeline(renderData.Material.Pipeline);
+            renderData.Material.Bind(cmd);
+            /*
             cmd.BindDescriptorSet(renderData.Material.Pipeline.VkLayout, aGlobalDescriptor, VkPipelineBindPoint.Graphics, 0);
             cmd.BindDescriptorSet(renderData.Material.Pipeline.VkLayout, renderData.Material.DescriptorSet, VkPipelineBindPoint.Graphics, 1);
+            */
+            cmd.BindDescriptorSet(renderData.Material.VertexShader.PipelineLayout, aGlobalDescriptor, VkPipelineBindPoint.Graphics, 0);
+            cmd.BindDescriptorSet(renderData.Material.VertexShader.PipelineLayout, renderData.Material.DescriptorSet, VkPipelineBindPoint.Graphics, 1);
 
             cmd.BindIndexBuffer(renderData.MyMeshData.MeshBuffers.IndexRawBuffer);
             

@@ -44,5 +44,33 @@ public static partial class Extensions
 
         return state;
     }
+    
+    public static VkColorBlendEquationEXT ToVkBlendEquation(this BlendMode aBlendMode)
+    {
+        VkColorBlendEquationEXT equation = new();
+        switch (aBlendMode)
+        {
+            case BlendMode.Additive:
+                equation.srcColorBlendFactor = VkBlendFactor.One;
+                equation.dstColorBlendFactor = VkBlendFactor.DstAlpha;
+                equation.colorBlendOp = VkBlendOp.Add;
+                equation.srcAlphaBlendFactor = VkBlendFactor.One;
+                equation.dstAlphaBlendFactor = VkBlendFactor.Zero;
+                equation.alphaBlendOp = VkBlendOp.Add;
+                break;
+            case BlendMode.Alpha:
+                equation.srcColorBlendFactor = VkBlendFactor.SrcAlpha;
+                equation.dstColorBlendFactor = VkBlendFactor.OneMinusSrcAlpha;
+                equation.colorBlendOp = VkBlendOp.Add;
+                equation.srcAlphaBlendFactor = VkBlendFactor.One;
+                equation.dstAlphaBlendFactor = VkBlendFactor.Zero;
+                equation.alphaBlendOp = VkBlendOp.Add;
+                break;
+            case BlendMode.Disabled:
+                break;
+        }
+
+        return equation;
+    }
 }
 
