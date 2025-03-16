@@ -12,7 +12,6 @@ public enum MaterialPassType
 
 public class Material
 {
-    public GraphicsPipeline Pipeline = null!;
     public VkDescriptorSet DescriptorSet;
     public MaterialPassType MyMaterialPassType = MaterialPassType.MainColor;
     public ShaderObject.Shader VertexShader = null!;

@@ -20,7 +20,9 @@ public partial class Renderer : IGpuImmediateSubmit
     public Image RenderImage = null!;
     private Image DepthImage = null!;
     public DescriptorAllocatorGrowable GlobalDescriptorAllocator = new();
-    
+
+    private ShaderObject.Shader GradientShader = null!;
+        
     private ComputePipeline GradientPipeline = null!;
     private GraphicsPipeline TrianglePipeline = null!;
 

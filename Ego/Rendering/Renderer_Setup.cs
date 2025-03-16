@@ -131,35 +131,18 @@ public partial class Renderer
     private void InitializePipelines()
     {
         InitializeBackgroundPipelines();
-
-        InitializeMeshTrianglePipeline();
     }
 
-    private void InitializeMeshTrianglePipeline()
+    
+    private unsafe void InitializeBackgroundPipelines()
     {
-        TrianglePipeline = GraphicsPipeline
-            .StartBuild()
-            .AddPushConstant<MeshPushConstants>(VkShaderStageFlags.Vertex)
-            .AddDescriptorLayout(SingleTextureLayout)
-            .SetVertexShader("Shaders/vert.spv")
-            .SetFragmentShader("Shaders/frag.spv")
-            .SetTopology(VkPrimitiveTopology.TriangleList)
-            .SetPolygonMode(VkPolygonMode.Fill)
-            .SetCullMode(VkCullModeFlags.None, VkFrontFace.Clockwise)
-            .DisableMultisampling()
-            .SetDepthTest(VkCompareOp.Greater, true)
-            .SetBlendMode(BlendMode.Alpha)
-            .SetColorAttachmentFormat(RenderImage.ImageFormat)
-            .SetDepthFormat(VkFormat.D32Sfloat)
-            .BuildAndDispose();
-
-        CleanupQueue.Add(TrianglePipeline);
-    }
-
-    private void InitializeBackgroundPipelines()
-    {
-        GradientPipeline = ComputePipeline.StartBuild().SetComputeShader("Shaders/comp.spv").AddLayout(RenderImageDescriptorLayout).AddPushConstant<PushConstants>().Build();
-        CleanupQueue.Add(GradientPipeline);
+        VkPushConstantRange range = new();
+        range.offset = 0;
+        range.stageFlags = VkShaderStageFlags.Compute;
+        range.size = (uint)sizeof(PushConstants);
+        GradientShader = new(VkShaderStageFlags.Compute, VkShaderStageFlags.None, "Background", File.ReadAllBytes("Shaders/comp.spv"), new() { RenderImageDescriptorLayout }, range);
+        //GradientPipeline = //ComputePipeline.StartBuild().SetComputeShader("Shaders/comp.spv").AddLayout(RenderImageDescriptorLayout).AddPushConstant<PushConstants>().Build();
+        //CleanupQueue.Add(GradientPipeline);
     }
 
     private void CreateRenderImage()

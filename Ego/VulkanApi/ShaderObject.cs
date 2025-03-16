@@ -20,7 +20,7 @@ public class ShaderObject : IGpuDestroyable
         private byte[] SpirvSource;
         public List<VkDescriptorSetLayout> Layouts;
         public VkPipelineLayout PipelineLayout;
-
+        
         public Shader(VkShaderStageFlags aStage, VkShaderStageFlags aNextStage, string aName, byte[] aSpirvSource, List<VkDescriptorSetLayout> aLayouts, VkPushConstantRange aPushConstantRange)
         {
             VkStage = aStage;
