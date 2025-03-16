@@ -1,0 +1,5 @@
+- Editor UI: [Dear ImGui](https://github.com/ocornut/imgui)
+- Platform: [GLFW](https://www.glfw.org/)
+- Graphics: [Vulkan](https://www.vulkan.org/)
+- Logging: [Serilog](https://serilog.net/)
+- Serialization: [MessagePack-CSharp](https://github.com/MessagePack-CSharp/MessagePack-CSharp)

@@ -1,0 +1,8 @@
+- Tag based file management
+- Inspected properties as expressions
+	- Game Color Palette (change palette, change colors everywhere)
+	- Easy localization
+	- Have "Main" node high in hierarchy, listen in lower. Allows for easy configuration for things like healthbars.
+- Geometry Graph
+- FX Graph
+- Command palette

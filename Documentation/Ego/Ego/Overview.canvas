@@ -1,0 +1,10 @@
+{
+	"nodes":[
+		{"id":"82240ee03a6839fd","type":"file","file":"Ego/Third Party Libraries.md","x":-840,"y":-80,"width":400,"height":400},
+		{"id":"893fa7f4041b88de","type":"file","file":"Cat.md","x":-1320,"y":-80,"width":400,"height":400},
+		{"id":"33215c0ed5987dda","type":"file","file":"Ego/Wishlist.md","x":-360,"y":-80,"width":400,"height":420},
+		{"id":"679b45acf640c2d9","x":100,"y":-60,"width":160,"height":50,"color":"6","type":"file","file":"Ego/Todo.md"},
+		{"id":"41560f1689c6c71c","type":"file","file":"Ego/Ego Concepts.md","x":-880,"y":-700,"width":480,"height":560}
+	],
+	"edges":[]
+}

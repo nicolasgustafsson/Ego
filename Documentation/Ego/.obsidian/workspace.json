@@ -1,0 +1,207 @@
+{
+  "main": {
+    "id": "ed9e34019c063285",
+    "type": "split",
+    "children": [
+      {
+        "id": "d84b1f5d04aa9572",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e7481ef64ea02c56",
+            "type": "leaf",
+            "state": {
+              "type": "canvas",
+              "state": {
+                "file": "Ego/Overview.canvas",
+                "viewState": {
+                  "x": -478.13506246062707,
+                  "y": -200.56521313500247,
+                  "zoom": 1.1102230246251565e-16
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "Overview"
+            }
+          },
+          {
+            "id": "d1dbe6fa23af5535",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Ego/Ego Concepts.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Ego Concepts"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "3055ae0df43dae07",
+    "type": "split",
+    "children": [
+      {
+        "id": "2de9b5eb999fe40e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e5810fa3e59d7235",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "593cdb3e823f14ff",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "919ef135f61d8122",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "b7ae49d78b9eaead",
+    "type": "split",
+    "children": [
+      {
+        "id": "a8676d505d8f6b34",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "ea2bb9cbc6e456c0",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Ego/Overview.canvas",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Overview"
+            }
+          },
+          {
+            "id": "067b4c0d657c3f7b",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Ego/Overview.canvas",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": false
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Overview"
+            }
+          },
+          {
+            "id": "f35edd3939c46255",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "b3b027b9ed0e7466",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Ego/Overview.canvas",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Overview"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "obsidian-kanban:Create new board": false,
+      "obsidian-excalidraw-plugin:New drawing": false
+    }
+  },
+  "active": "e7481ef64ea02c56",
+  "lastOpenFiles": [
+    "Ego/Third Party Libraries.md",
+    "Ego/Todo.md",
+    "Ego/Ego Concepts.md",
+    "Ego/Wishlist.md",
+    "Vulkan/Vulkan Questions.md",
+    "Ego/Overview.canvas",
+    "Cat.md",
+    "Ego",
+    "2025-03-16.md",
+    "Untitled Kanban.md",
+    "Excalidraw",
+    "Vulkan",
+    "Welcome.md",
+    "create a link.md"
+  ]
+}
