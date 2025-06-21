@@ -1,3 +1,4 @@
+using System.ComponentModel.Design.Serialization;
 using Rendering;
 using SharpGLTF.Memory;
 using SharpGLTF.Schema2;
@@ -12,6 +13,8 @@ public partial class GltfRenderer : Node3D
     private Dictionary<int, MeshData> Meshes = new();
 
     [Inspect] private string ModelPath = "";
+    [Inspect] private bool instantiated = false;
+    
     //Get a gltf file path, load it. Then create child nodes and renderers.
     //Later, this will become the import process. We do this, save it as a scene, then we reuse the scene elsewhere.
 
@@ -37,6 +40,9 @@ public partial class GltfRenderer : Node3D
 
     private void LoadModel(string aModelPath)
     {
+        if (instantiated)
+            return;
+        instantiated = true;
         LoadGltf(RendererApi.Renderer, aModelPath);
     }
     
