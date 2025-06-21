@@ -6,7 +6,7 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        EgoContext engine = new();
+        EgoRoot engine = new();
         
         EngineInitSettings settings = new();
         settings.Name = "Editor";

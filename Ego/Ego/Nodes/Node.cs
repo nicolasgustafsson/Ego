@@ -7,7 +7,7 @@ using Utilities;
 namespace Ego;
 
 [Node]
-public partial class Node : IEgoContextProvider
+public partial class Node
 {
     [MessagePackObject(true)]
     public class SceneBranchNode
@@ -53,7 +53,7 @@ public partial class Node : IEgoContextProvider
     public ReadOnlySpan<Node> Children => xChildren.AsSpan(); 
     public Node? Parent => xParent;
 
-    public IEgoContextProvider MyContext = null!; 
+    protected Context MyContext = null!; 
      
     public T? GetFirstParentOfType<T>() where T :Node
     {

@@ -25,7 +25,7 @@ public partial class TestNode : Node
     
     protected override void Update()
     {
-        if (MyContext.Window.IsKeyboardKeyDown(KeyboardKey.A))
+        if (Window.IsKeyboardKeyDown(KeyboardKey.A))
         {
             int i = 10;
             logger.ZLogInformation($"yep {i}");
