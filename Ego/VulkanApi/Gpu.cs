@@ -184,7 +184,7 @@ public unsafe class Gpu
     
     public void PrintAllAvailableDeviceExtensions()
     {
-        Log.Information("--- AVAILABLE DEVICE EXTENSIONS ---");
+        Log.Info($"--- AVAILABLE DEVICE EXTENSIONS ---");
         uint extensionCount = 0;
         vkEnumerateDeviceExtensionProperties(VkPhysicalDevice, null, &extensionCount, null).CheckResult();
         VkExtensionProperties* extensions = stackalloc VkExtensionProperties[(int)extensionCount];
@@ -192,8 +192,8 @@ public unsafe class Gpu
 
         for (int i = 0; i < extensionCount; i++)
         {
-            Log.Information($"Extension: {Helpers.GetString((sbyte*)extensions[i].extensionName)} version: {extensions[i].specVersion}");
+            Log.Info($"Extension: {Helpers.GetString((sbyte*)extensions[i].extensionName)} version: {extensions[i].specVersion}");
         }
-        Log.Information("--- ---------------------------- ---");
+        Log.Info($"--- ---------------------------- ---");
     }
 }

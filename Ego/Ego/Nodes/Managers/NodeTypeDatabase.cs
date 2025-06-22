@@ -16,7 +16,7 @@ public partial class NodeTypeDatabase : Node
     
     public void Build(Assembly aAssembly)
     {
-        Log.Information("Building Node Type Database of assembly {aAssembly}", aAssembly);
+        Log.Info($"Building Node Type Database of assembly {aAssembly}", aAssembly);
         Type NodeType = typeof(Node);
 
         var types = aAssembly.GetTypes().Where(type => type.IsSubclassOf(NodeType));
@@ -26,13 +26,13 @@ public partial class NodeTypeDatabase : Node
             AddNode(type);
         }
         
-        Log.Information("Finished adding {aAssembly} to Node Type Database!", aAssembly);
+        Log.Info($"Finished adding {aAssembly} to Node Type Database!", aAssembly);
     }
 
     private void AddNode(Type type)
     {
         NodeTypes[type.Name] = type;
 
-        Log.Information("NodeTypeDatabase: Added Node {type.Name}", type.Name);
+        Log.Info($"NodeTypeDatabase: Added Node {type.Name}", type.Name);
     }
 }

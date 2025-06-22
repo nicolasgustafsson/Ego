@@ -1,5 +1,4 @@
 ﻿using ImGuiNET;
-using Environment = Ego.Environment;
 
 namespace Editor;
 
@@ -18,7 +17,7 @@ public partial class SceneEditor : Node
 
         movement.AddChild(new Camera());
         
-        AddChild(new Environment());
+        AddChild(new WorldEnvironment());
 
         movement.LocalPosition.X -= 3.5f;
         movement.LocalPosition.Y += 3.5f;

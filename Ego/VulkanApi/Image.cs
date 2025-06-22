@@ -22,7 +22,7 @@ public unsafe class Image : IGpuDestroyable
     {
         if (aExtent.depth == 0)
         {
-            Log.Information("Depth should not be 0!");
+            Log.Info($"Depth should not be 0!");
         }
         Extent = aExtent;
         ImageFormat = aFormat;

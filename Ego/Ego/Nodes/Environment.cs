@@ -2,7 +2,7 @@
 namespace Ego;
 
 [Node]
-public partial class Environment : Node
+public partial class WorldEnvironment : Node
 {
     [Inspect] private Vector4 AmbientColor = new Vector4(0.3f, 0.3f, 0.3f, 0.3f);
     [Inspect] private Vector4 SunlightColor = new Vector4(1f, 1f, 1f, 1f);

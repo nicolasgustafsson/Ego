@@ -11,7 +11,7 @@ public partial class Scene : Node, IAsset
     public override void Start()
     {
         base.Start();
-        Log.Information("Started {Scene}", this);
+        Log.Info($"Started Scene!", this);
     }
 
     public void LoadFrom(string aPath)

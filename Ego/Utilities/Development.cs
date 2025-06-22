@@ -1,5 +1,4 @@
-﻿
-using Serilog;
+﻿using ZLogger;
 
 namespace Utilities;
 
@@ -16,7 +15,7 @@ public static class Development
             }
             catch (Exception e)
             {
-                Log.Information(e.ToString());
+                Log.Info(e, $"");
             }
         }
     }
@@ -31,7 +30,7 @@ public static class Development
             }
             catch (Exception e)
             {
-                Log.Information(e.ToString());
+                Log.Info(e, $"");
             }
         }
     }

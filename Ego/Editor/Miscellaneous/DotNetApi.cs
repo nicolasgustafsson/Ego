@@ -60,7 +60,7 @@ public partial class DotNetApi : Node
         }
         else
         {
-            Log.Information(aLine);
+            Log.Info($"{aLine}");
         }
     }
 

@@ -2,7 +2,6 @@
 global using static Vortice.Vulkan.Vulkan;
 global using Vortice.Vulkan;
 using System.Runtime.InteropServices;
-using Serilog;
 
 namespace VulkanApi;
 
@@ -91,14 +90,14 @@ public unsafe class Api : IGpuDestroyable
     {
         string message = new((sbyte*)pCallbackData->pMessage);
         
-        Log.Information($"[Vulkan]: {messageTypes}: {messageSeverity} - {message}");
+        Log.Info($"[Vulkan]: {messageTypes}: {messageSeverity} - {message}");
         
         return VK_FALSE;
     }
     
     public void PrintAllAvailableInstanceExtensions()
     {
-        Log.Information("--- AVAILABLE INSTANCE EXTENSIONS ---");
+        Log.Info($"--- AVAILABLE INSTANCE EXTENSIONS ---");
         uint extensionCount = 0;
         vkEnumerateInstanceExtensionProperties(null, &extensionCount, null).CheckResult();
         VkExtensionProperties* extensions = stackalloc VkExtensionProperties[(int)extensionCount];
@@ -106,10 +105,10 @@ public unsafe class Api : IGpuDestroyable
 
         for (int i = 0; i < extensionCount; i++)
         {
-            Log.Information($"Extension: {Helpers.GetString((sbyte*)extensions[i].extensionName)} version: {extensions[i].specVersion}");
+            Log.Info($"Extension: {Helpers.GetString((sbyte*)extensions[i].extensionName)} version: {extensions[i].specVersion}");
         }
 
-        Log.Information("--- ---------------------------- ---");
+        Log.Info($"--- ---------------------------- ---");
     }
 
     public Surface CreateSurface(Window aWindow)

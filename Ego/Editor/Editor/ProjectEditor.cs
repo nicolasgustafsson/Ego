@@ -4,7 +4,6 @@ using System.Reflection;
 using System.Runtime.Loader;
 using ImGuiNET;
 using MessagePack;
-using Serilog.Context;
 
 namespace Editor;
 
@@ -60,8 +59,8 @@ public partial class ProjectEditor : Node
         }
         catch (Exception e)
         {
-            Log.Error(e.ToString());
-            Log.Error("Could not load project! Make sure that the project path exists, project names and binaries match, and that output paths are set up correctly. See ExampleProject for an example on how to set things up.");
+            Log.Error($"{e.ToString()}");
+            Log.Error($"Could not load project! Make sure that the project path exists, project names and binaries match, and that output paths are set up correctly. See ExampleProject for an example on how to set things up.");
         }
     }
 }

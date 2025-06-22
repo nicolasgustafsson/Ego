@@ -1,15 +1,13 @@
 ﻿using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using Serilog.Core;
+using ZLogger;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Ego;
 
 [Node(AllowAddingToScene = false)]
 public partial class EgoRoot : Node
 {
-    private List<Func<LoggerConfiguration, LoggerConfiguration>> LoggerConfigHooks = new();
-    private Logger? Logger = null;
-
     public void Run<T>() where T : Node, new()
     {
         Run<T>(new());
@@ -17,19 +15,14 @@ public partial class EgoRoot : Node
     
     private void CreateLogger()
     {
-        if (Logger != null)
-            Logger.Dispose();
-
-        LoggerConfiguration config = new LoggerConfiguration().WriteTo.Console().Enrich.FromLogContext();
-        
-        foreach(var hook in LoggerConfigHooks)
+        var factory = LoggerFactory.Create(logging =>
         {
-            config = hook(config);
-        }
-        
-        Logger = config.CreateLogger();
-        
-        Log.Logger = Logger;
+            logging.SetMinimumLevel(LogLevel.Trace);
+            logging.AddZLoggerConsole();
+            //logging.AddZLoggerConsole(options => options.UseJsonFormatter());
+        });
+
+        Log = factory.CreateLogger("Ego");
     }
     
     public void Run<T>(EngineInitSettings aSettings, Action<T>? aSetup = null) where T : Node, new()

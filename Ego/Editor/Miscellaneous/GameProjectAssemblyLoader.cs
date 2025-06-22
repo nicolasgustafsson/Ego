@@ -14,7 +14,7 @@ public partial class GameProjectAssemblyLoader : Node
     {
         GameAssembly = MyPluginLoader!.LoadDefaultAssembly();
         
-        Log.Information($"Loaded Assembly {GameAssembly.FullName}");
+        Log.Info($"Loaded Assembly {GameAssembly.FullName}");
 
         NodeTypeDatabase.Build(GameAssembly);
     }
@@ -30,15 +30,15 @@ public partial class GameProjectAssemblyLoader : Node
     {
         WantsHotReload = false;
 
-        Log.Information($"Hot Reload Started");
-        Log.Information($"Destroying Scene...");
+        Log.Info($"Hot Reload Started");
+        Log.Info($"Destroying Scene...");
         ProjectEditor.Instance.SceneEditor.PrepareForHotReload();
         UpdateAssembly();
-        Log.Information($"Assemblies Updated!");
-        Log.Information($"Recreating Scene...");
+        Log.Info($"Assemblies Updated!");
+        Log.Info($"Recreating Scene...");
         ProjectEditor.Instance.SceneEditor.ReinitializeAfterHotReload();
-        Log.Information($"Scene reconstruction complete!");
-        Log.Information($"Hot Reload Completed!");
+        Log.Info($"Scene reconstruction complete!");
+        Log.Info($"Hot Reload Completed!");
     }
     
     public void SelectGameProjectDll(string aBinaryPath)
@@ -63,7 +63,7 @@ public partial class GameProjectAssemblyLoader : Node
         }
         catch (Exception e)
         {
-            Log.Error(e.Message);
+            Log.Error($"{e.Message}");
         }
     }
     
