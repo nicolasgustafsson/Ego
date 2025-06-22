@@ -52,7 +52,10 @@ public partial class GameProjectAssemblyLoader : Node
                 config.EnableHotReload = true;
             });
 
-            plugin.Reloaded += (_, _) => WantsHotReload = true;
+            plugin.Reloaded += (_, _) =>
+            {
+                WantsHotReload = true;
+            };
 
             if (MyPluginLoader != null)
                 MyPluginLoader.Dispose();
@@ -63,7 +66,7 @@ public partial class GameProjectAssemblyLoader : Node
         }
         catch (Exception e)
         {
-            Log.Error($"{e.Message}");
+            Log.Error(e, $"{e.Message}");
         }
     }
     

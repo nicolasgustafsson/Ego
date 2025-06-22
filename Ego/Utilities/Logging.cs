@@ -8,7 +8,11 @@ namespace Utilities;
 
 public static class Logging
 {
+    //This is set from EgoRoot
     public static ILogger Log = null!;
+    
+    
+    //Nicos: These are all copy-pasted from the same file as the ZLog methods. I wanted to alias, so you write Log.Info instead of Log.ZLogInformation
     
     public static void Trace(
       this ILogger logger,
