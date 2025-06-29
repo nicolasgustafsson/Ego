@@ -4,6 +4,14 @@ namespace Ego;
 public partial class MultithreadingManager : Node
 {
     public List<ParallelBranch> Branches = new();
+    public static EgoSynchronizationContext EgoSynchronizationContext = null!;
+    
+    public MultithreadingManager()
+    {
+        Thread.CurrentThread.Name = "Main Thread";
+        EgoSynchronizationContext = new();
+        SynchronizationContext.SetSynchronizationContext(EgoSynchronizationContext);
+    }
 
     public Task RunParallelTasks()
     {
@@ -30,5 +38,7 @@ public partial class MultithreadingManager : Node
         {
             branch.UpdateRoot(); 
         }
+
+        EgoSynchronizationContext.ExecutePendingContinuations();
     }
 }

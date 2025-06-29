@@ -4,7 +4,7 @@ using Rendering;
 namespace Ego;
 
 [Node(AllowAddingToScene = false)]
-public partial class MeshCollection : Node, IAsset
+public partial class MeshCollection : Node, IFileAsset
 {
     public List<MeshData> Meshes = null!;
     protected override string Name => FileName;
@@ -17,6 +17,11 @@ public partial class MeshCollection : Node, IAsset
 
         Meshes = MeshData.LoadGltf(RendererApi.Renderer, aPath);
     }
+
+    /*Task LoadFromAsync(string aPath)
+    {
+        
+    }*/
 
     public override void OnDestroy()
     {

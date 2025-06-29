@@ -17,17 +17,6 @@ public partial class TestNode : Node
     {
         if (Window.IsKeyboardKeyDown(KeyboardKey.A))
         {
-            Stopwatch watch = new();
-
-            watch.Start();
-            for(int i = 0; i < 10000; i++)
-            {
-                Log.Debug($"yep {i}"); 
-            }
-
-            watch.Stop();
-
-            Log.Debug($"Time taken to print 10000 logs: {watch.Elapsed}");
         }
     }
 }

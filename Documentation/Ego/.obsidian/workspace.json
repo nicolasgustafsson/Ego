@@ -42,12 +42,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Workout/Low-impact movement.md",
+                "file": "Ego/Assets.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Low-impact movement"
+              "title": "Assets"
             }
           },
           {
@@ -157,12 +157,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Workout/Low-impact movement.md",
+                "file": "Ego/Assets.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": false
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Low-impact movement"
+              "title": "Outgoing links from Assets"
             }
           },
           {
@@ -213,10 +213,11 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "31f810d32369d9ae",
+  "active": "e5810fa3e59d7235",
   "lastOpenFiles": [
-    "Palettemaker.md",
     "Workout/Low-impact movement.md",
+    "Ego/Assets.md",
+    "Palettemaker.md",
     "Workout",
     "Pasted image 20250410204828.png",
     "Pasted image 20250410204624.png",

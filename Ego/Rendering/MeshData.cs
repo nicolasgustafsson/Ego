@@ -14,7 +14,6 @@ public struct GeoSurface
     public UInt32 Count;
 }
 
-
 public class MeshData : IGpuDestroyable
 {
     public string Name;

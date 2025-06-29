@@ -1,4 +1,6 @@
-﻿namespace Editor;
+﻿using System.Net.Security;
+
+namespace Editor;
 using Ego;
 using Vortice.Vulkan;
 

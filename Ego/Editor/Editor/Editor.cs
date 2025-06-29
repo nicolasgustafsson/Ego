@@ -32,4 +32,23 @@ public partial class Editor : Node
             ProjectEditor.Instance.SelectProject(outPath);
         }
     }
+    
+    
+    public void Inspect()
+    {
+        DefaultInspect();
+        
+        if (ImGui.Button("TryLoadModel"))
+        {
+            
+            if (Nfd.OpenDialog(out string? outPath, new Dictionary<string, string>()
+            {
+                { "Model file", "glb" },
+            }) == NfdStatus.Ok && outPath != null)
+            {
+                ImportCommand command = new(outPath);
+                command.Do();
+            }
+        }
+    }
 }

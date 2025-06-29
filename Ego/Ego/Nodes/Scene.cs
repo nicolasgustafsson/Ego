@@ -4,7 +4,7 @@ using MessagePack;
 namespace Ego;
 
 [Node(AllowAddingToScene = false)]
-public partial class Scene : Node, IAsset
+public partial class Scene : Node, IFileAsset
 {
     private SceneBranchNode? SerializedTree;
 
