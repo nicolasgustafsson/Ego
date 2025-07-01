@@ -1,4 +1,7 @@
-﻿using ImGuiNET;
+﻿using System.Diagnostics;
+using ImageMagick;
+using ImGuiNET;
+using NativeFileDialogs.Net;
 using Rendering;
 using Rendering.Materials;
 using Vortice.Vulkan;
@@ -29,6 +32,7 @@ public partial class MeshRenderer : Node3D
     public override void Start()
     {
         base.Start();
+
         MaterialConstantsBuffer = new(VkBufferUsageFlags.UniformBuffer, VmaMemoryUsage.CpuToGpu);
         
         MaterialBuilder.MaterialConstants constants = new();
@@ -56,9 +60,50 @@ public partial class MeshRenderer : Node3D
         if (MeshData != null)
             RendererApi.RenderData.RenderMesh(new(){MyMeshData = MeshData, Material = Material, WorldMatrix = WorldMatrix}); 
     }
-/*
+    
+    private async Task LoadATexture(string aPath)
+    {
+        await EgoTask.WorkerThread();
+
+        var file = await File.ReadAllBytesAsync(aPath);
+        
+        MagickImage image = new(file);
+        image.Format = MagickFormat.Rgba;
+        var rawTextureData = image.ToByteArray();
+
+        Renderer renderer = await EgoTask.Renderer();
+        
+        Image vulkanImage = new(renderer, rawTextureData, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(image.Width, image.Height, 1), true);
+
+        MaterialConstantsBuffer = new(VkBufferUsageFlags.UniformBuffer, VmaMemoryUsage.CpuToGpu);
+        
+        MaterialBuilder.MaterialConstants constants = new();
+        
+        constants.Color = Vector4.One;
+        constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
+        MaterialConstantsBuffer.SetWriteData(constants);
+        
+        var newMaterial = MaterialBuilder.CreateMaterial(MaterialPassType.MainColor,
+            vulkanImage,
+            RendererApi.Renderer.DefaultLinearSampler,
+            RendererApi.Renderer.WhiteImage,
+            RendererApi.Renderer.DefaultLinearSampler, MaterialConstantsBuffer, 0, RendererApi.Renderer.GlobalDescriptorAllocator);
+        
+        await EgoTask.MainThread();
+        Material = newMaterial;
+    }
+
     private void Inspect()
     {
-        ImGui.SliderInt("Mesh Index", ref MeshIndex, 0, MeshCollection.Meshes.Count - 1);
-    }*/
+        if (ImGui.Button("Load Texture"))
+        {
+            if (Nfd.OpenDialog(out string? outPath, new Dictionary<string, string>()
+            {
+                { "Texture", "png" },
+            }) == NfdStatus.Ok && outPath != null)
+            {
+                LoadATexture(outPath);
+            }
+        }
+    }
 }

@@ -1,5 +1,4 @@
 using VulkanApi;
-using ImageMagick;
 using SharpGLTF.Memory;
 using SharpGLTF.Schema2;
 using Silk.NET.Vulkan;

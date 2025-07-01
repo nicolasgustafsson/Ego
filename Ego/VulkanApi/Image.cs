@@ -1,5 +1,6 @@
 using System.Numerics;
 using Rendering;
+using Vortice.ShaderCompiler;
 
 namespace VulkanApi;
 
@@ -54,6 +55,11 @@ public unsafe class Image : IGpuDestroyable
         ImageRegistry.PointersToImages.TryAdd((nint)VkImage.Handle, this);
     }
     
+    public Image(IGpuImmediateSubmit aSubmit, byte[] aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps)  
+        : this(aSubmit, aData.AsSpan().GetPointerUnsafe(), aFormat, aUsageFlags, aExtent, aMipMaps)
+    {
+        
+    }
     public Image(IGpuImmediateSubmit aSubmit, byte* aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps) : this(aFormat, aUsageFlags | VkImageUsageFlags.TransferDst, aExtent, aMipMaps)
     {
         ulong dataSize = aExtent.width * aExtent.height * aExtent.depth * 4;
@@ -83,6 +89,11 @@ public unsafe class Image : IGpuDestroyable
         });
 
         staging.Destroy();
+    }
+    
+    private void UploadData()
+    {
+        
     }
     
     public void Destroy()

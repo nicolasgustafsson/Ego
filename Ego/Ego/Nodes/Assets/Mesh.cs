@@ -57,6 +57,8 @@ public partial class Mesh : Node, IFileAsset, IImportable
         //don't block main thread
         await EgoTask.WorkerThread();
         
+        
+        #region a bunch of import code
         FileName = aFile;
         var model = ModelRoot.Load(aFile);
 
@@ -108,6 +110,7 @@ public partial class Mesh : Node, IFileAsset, IImportable
 
             surfaces.Add(newSurface);
         }
+        #endregion
 
         await EgoTask.MainThread();
 

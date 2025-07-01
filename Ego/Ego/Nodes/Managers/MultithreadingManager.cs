@@ -21,7 +21,8 @@ public partial class MultithreadingManager : Node
             parallels.Add(Task.Run(branch.UpdateBranchInternal));
         }
 
-        return Task.WhenAll(parallels);
+        var task = Task.WhenAll(parallels);
+        return task;
     }
 
     public void UpdateSynchronous()
@@ -39,6 +40,6 @@ public partial class MultithreadingManager : Node
             branch.UpdateRoot(); 
         }
 
-        EgoSynchronizationContext.ExecutePendingContinuations();
+        EgoSynchronizationContext.ExecuteMainThreadContinuations();
     }
 }

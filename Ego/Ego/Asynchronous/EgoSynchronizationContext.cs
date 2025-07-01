@@ -1,10 +1,12 @@
 ﻿using System.Collections.Concurrent;
+using Rendering;
 
 namespace Ego;
 
 public sealed class EgoSynchronizationContext : SynchronizationContext
 {
-    private readonly BlockingCollection<(SendOrPostCallback Callback, object State)> _queue = new();
+    private readonly BlockingCollection<(SendOrPostCallback Callback, object State)> MainThreadQueue = new();
+    private readonly BlockingCollection<(RendererAwaitable.RendererSendOrPostCallback Callback, object State)> RendererQueue = new();
 
     public override void Send(SendOrPostCallback d, object? state)
     {
@@ -18,7 +20,7 @@ public sealed class EgoSynchronizationContext : SynchronizationContext
 
         var source = new TaskCompletionSource();
 
-        _queue.Add((st =>
+        MainThreadQueue.Add((st =>
         {
             try
             {
@@ -35,18 +37,27 @@ public sealed class EgoSynchronizationContext : SynchronizationContext
 
     public override void Post(SendOrPostCallback d, object? state)
     {
-        _queue.Add((d, state!));
+        MainThreadQueue.Add((d, state!));
+    }
+    
+    public void PostRenderer(RendererAwaitable.RendererSendOrPostCallback d, object? state)
+    {
+        RendererQueue.Add((d, state!));
     }
 
-    /// <summary>
-    /// Calls the Key method on each workItem object in the _queue to activate their callbacks.
-    /// </summary>
-    public void ExecutePendingContinuations()
+    public void ExecuteMainThreadContinuations()
     {
-        while (_queue.TryTake(out var workItem))
+        while (MainThreadQueue.TryTake(out var workItem))
         {
             workItem.Callback(workItem.State);
         }
     }
 
+    public void ExecuteRendererContinuations(Renderer aRenderer)
+    {
+        while (RendererQueue.TryTake(out var workItem))
+        {
+            workItem.Callback(aRenderer, workItem.State);
+        }
+    }
 }
