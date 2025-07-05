@@ -98,12 +98,10 @@ public partial class MeshRenderer : Node3D
         GpuDataTransferer dataTransfer = await EgoTask.GpuDataTransfer();
         
         uint dataSize = image.Width * image.Height * 4;
-        var buffer = dataTransfer.GetStagingBuffer(dataSize);
+        var buffer = dataTransfer.TakeStagingBuffer(dataSize);
         Image vulkanImage = new(dataTransfer, rawTextureData, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(image.Width, image.Height, 1), true, buffer);
         dataTransfer.ReturnStagingBuffer(buffer);
 
-        vulkanImage.Destroy();
-        
         MaterialConstantsBuffer = new(VkBufferUsageFlags.UniformBuffer, VmaMemoryUsage.CpuToGpu);
         
         MaterialBuilder.MaterialConstants constants = new();
@@ -126,6 +124,8 @@ public partial class MeshRenderer : Node3D
         myPreviousVulkanImage = vulkanImage;
 
         //Destroy the previous image. We wait until next renderer to handle frames
+        await EgoTask.Renderer();
+        await EgoTask.Renderer();
         await EgoTask.Renderer();
         toDelete?.Destroy();
     }

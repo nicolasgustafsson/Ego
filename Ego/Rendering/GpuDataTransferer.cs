@@ -36,7 +36,7 @@ public class GpuDataTransferer : IGpuImmediateSubmit, IGpuDestroyable
         ImmediateCommandBuffer.Destroy();
     }
 
-    public AllocatedRawBuffer GetStagingBuffer(uint aByteSize)
+    public AllocatedRawBuffer TakeStagingBuffer(uint aByteSize)
     {
         for (int i = 0; i < BufferPool.Count; i++)
         {
