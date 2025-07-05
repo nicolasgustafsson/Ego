@@ -7,6 +7,7 @@ public sealed class EgoSynchronizationContext : SynchronizationContext
 {
     private readonly BlockingCollection<(SendOrPostCallback Callback, object State)> MainThreadQueue = new();
     private readonly BlockingCollection<(RendererAwaitable.RendererSendOrPostCallback Callback, object State)> RendererQueue = new();
+    private readonly BlockingCollection<(GpuTransferAwaitable.TransfererSendOrPostCallback Callback, object State)> TransferQueue = new();
 
     public override void Send(SendOrPostCallback d, object? state)
     {
@@ -44,6 +45,11 @@ public sealed class EgoSynchronizationContext : SynchronizationContext
     {
         RendererQueue.Add((d, state!));
     }
+    
+    public void PostTransferer(GpuTransferAwaitable.TransfererSendOrPostCallback d, object? state)
+    {
+        TransferQueue.Add((d, state!));
+    }
 
     public void ExecuteMainThreadContinuations()
     {
@@ -58,6 +64,14 @@ public sealed class EgoSynchronizationContext : SynchronizationContext
         while (RendererQueue.TryTake(out var workItem))
         {
             workItem.Callback(aRenderer, workItem.State);
+        }
+    }
+
+    public void ExecuteGpuTransferContinuations(GpuDataTransferer aTransferer)
+    {
+        while (TransferQueue.TryTake(out var workItem))
+        {
+            workItem.Callback(aTransferer, workItem.State);
         }
     }
 }

@@ -9,6 +9,7 @@ public unsafe class Gpu
     public static Gpu GpuInstance = null!;
 
     public uint GraphicsFamily;
+    public uint TransferFamily;
     public uint PresentFamily;
     
     internal Gpu(Api aApi)
@@ -28,7 +29,7 @@ public unsafe class Gpu
         {
             VkPhysicalDevice physicalDevice = physicalDevices[i];
 
-            (GraphicsFamily, PresentFamily) = FindQueueFamilies(physicalDevice, MainWindowSurface.VkSurface);
+            (GraphicsFamily, PresentFamily, TransferFamily) = FindQueueFamilies(physicalDevice, MainWindowSurface.VkSurface);
             
             if (IsDeviceSuitable(physicalDevice) == false)
                 continue;
@@ -76,6 +77,13 @@ public unsafe class Gpu
         deviceQueueCreateInfo.queueFamilyIndex = GraphicsFamily;
         deviceQueueCreateInfo.queueCount = 1;
         deviceQueueCreateInfo.pQueuePriorities = &queuePriority;
+        
+        VkDeviceQueueCreateInfo transferQueueCreateInfo = new();
+        transferQueueCreateInfo.queueFamilyIndex = TransferFamily;
+        transferQueueCreateInfo.queueCount = 1;
+        transferQueueCreateInfo.pQueuePriorities = &queuePriority;
+
+        ReadOnlySpan<VkDeviceQueueCreateInfo> queues = [deviceQueueCreateInfo, transferQueueCreateInfo];
 
         VkPhysicalDeviceFeatures deviceFeatures = new();
         
@@ -94,8 +102,8 @@ public unsafe class Gpu
         
         VkDeviceCreateInfo deviceCreateInfo = new();
         deviceCreateInfo.pNext = &device13Features;
-        deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;
-        deviceCreateInfo.queueCreateInfoCount = 1;
+        deviceCreateInfo.pQueueCreateInfos = queues.GetPointer();
+        deviceCreateInfo.queueCreateInfoCount = 2;
         deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
         
         IntPtr* extensionsToBytesArray = stackalloc IntPtr[deviceExtensions.Length];
@@ -114,28 +122,33 @@ public unsafe class Gpu
         Device = logicalDevice;
     }
     
-    public (uint graphicsFamily, uint presentFamily) FindQueueFamilies()
+    public (uint graphicsFamily, uint presentFamily, uint transferFamily) FindQueueFamilies()
     {
         return FindQueueFamilies(VkPhysicalDevice, MainWindowSurface.VkSurface);
     }
     
-    public (uint graphicsFamily, uint presentFamily) FindQueueFamilies(VkSurfaceKHR aSurface)
+    public (uint graphicsFamily, uint presentFamily, uint transferFamily) FindQueueFamilies(VkSurfaceKHR aSurface)
     {
         return FindQueueFamilies(VkPhysicalDevice, aSurface);
     }
     
-    public (uint graphicsFamily, uint presentFamily) FindQueueFamilies(VkPhysicalDevice aDevice, VkSurfaceKHR WindowSurface)
+    public (uint graphicsFamily, uint presentFamily, uint transferFamily) FindQueueFamilies(VkPhysicalDevice aDevice, VkSurfaceKHR WindowSurface)
     {
         ReadOnlySpan<VkQueueFamilyProperties> queueFamilies = vkGetPhysicalDeviceQueueFamilyProperties(aDevice);
 
         uint graphicsFamily = VK_QUEUE_FAMILY_IGNORED;
         uint presentFamily = VK_QUEUE_FAMILY_IGNORED;
+        uint transferFamily = VK_QUEUE_FAMILY_IGNORED;
         uint i = 0;
         foreach (VkQueueFamilyProperties queueFamily in queueFamilies)
         {
             if ((queueFamily.queueFlags & VkQueueFlags.Graphics) != VkQueueFlags.None)
             {
                 graphicsFamily = i;
+            }
+            else if ((queueFamily.queueFlags & VkQueueFlags.Transfer) != VkQueueFlags.None)
+            {
+                transferFamily = i;
             }
 
             vkGetPhysicalDeviceSurfaceSupportKHR(aDevice, i, WindowSurface, out VkBool32 presentSupport);
@@ -145,7 +158,8 @@ public unsafe class Gpu
             }
 
             if (graphicsFamily != VK_QUEUE_FAMILY_IGNORED
-                && presentFamily != VK_QUEUE_FAMILY_IGNORED)
+                && presentFamily != VK_QUEUE_FAMILY_IGNORED
+                && transferFamily != VK_QUEUE_FAMILY_IGNORED)
             {
                 break;
             }
@@ -153,7 +167,7 @@ public unsafe class Gpu
             i++;
         }
 
-        return (graphicsFamily, presentFamily);
+        return (graphicsFamily, presentFamily, transferFamily);
     }
 
     public VkSurfaceFormatKHR GetSurfaceFormat(VkFormat aPreferredFormat, VkColorSpaceKHR aPreferredColorSpace)

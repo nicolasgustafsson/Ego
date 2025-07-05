@@ -18,6 +18,11 @@ public partial class MeshRenderer : Node3D
     private AllocatedBuffer<MaterialBuilder.MaterialConstants> MaterialConstantsBuffer = null!;
 
     [Serialize] private int MeshIndex = 0;
+    private string lastPath = "";
+    private Task? myLoadTextureTask;
+
+    private static int index = 0;
+    private Image? myPreviousVulkanImage = null;
     
     public MeshRenderer()
     {
@@ -59,22 +64,46 @@ public partial class MeshRenderer : Node3D
     {
         if (MeshData != null)
             RendererApi.RenderData.RenderMesh(new(){MyMeshData = MeshData, Material = Material, WorldMatrix = WorldMatrix}); 
+        
+        if (Window.IsKeyboardKeyDown(KeyboardKey.Backspace) && (myLoadTextureTask == null || myLoadTextureTask.IsCompleted))
+        {
+            var randomPathFolder = "C:/Users/Nicos/Desktop/RandomImages";
+            string randomPath = Directory.GetFiles(randomPathFolder).OrderBy(thing => Guid.NewGuid().GetHashCode()).First();
+            
+            myLoadTextureTask = LoadATexture(randomPath);
+        }
+        if (Window.IsKeyboardKeyDown(KeyboardKey.U))
+        {
+            var randomPathFolder = "C:/Users/Nicos/Desktop/RandomImages";
+            string randomPath = Directory.GetFiles(randomPathFolder).OrderBy(thing => Guid.NewGuid().GetHashCode()).First();
+            
+            var file = File.ReadAllBytes(randomPath);
+        }
     }
     
     private async Task LoadATexture(string aPath)
     {
+        index++;
+        
+        lastPath = aPath;
+        
         await EgoTask.WorkerThread();
 
-        var file = await File.ReadAllBytesAsync(aPath);
+        var file = File.ReadAllBytes(aPath);
         
-        MagickImage image = new(file);
+        using MagickImage image = new(file);
         image.Format = MagickFormat.Rgba;
         var rawTextureData = image.ToByteArray();
 
-        Renderer renderer = await EgoTask.Renderer();
+        GpuDataTransferer dataTransfer = await EgoTask.GpuDataTransfer();
         
-        Image vulkanImage = new(renderer, rawTextureData, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(image.Width, image.Height, 1), true);
+        uint dataSize = image.Width * image.Height * 4;
+        var buffer = dataTransfer.GetStagingBuffer(dataSize);
+        Image vulkanImage = new(dataTransfer, rawTextureData, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(image.Width, image.Height, 1), true, buffer);
+        dataTransfer.ReturnStagingBuffer(buffer);
 
+        vulkanImage.Destroy();
+        
         MaterialConstantsBuffer = new(VkBufferUsageFlags.UniformBuffer, VmaMemoryUsage.CpuToGpu);
         
         MaterialBuilder.MaterialConstants constants = new();
@@ -90,7 +119,15 @@ public partial class MeshRenderer : Node3D
             RendererApi.Renderer.DefaultLinearSampler, MaterialConstantsBuffer, 0, RendererApi.Renderer.GlobalDescriptorAllocator);
         
         await EgoTask.MainThread();
+
         Material = newMaterial;
+
+        Image? toDelete = myPreviousVulkanImage;
+        myPreviousVulkanImage = vulkanImage;
+
+        //Destroy the previous image. We wait until next renderer to handle frames
+        await EgoTask.Renderer();
+        toDelete?.Destroy();
     }
 
     private void Inspect()
@@ -102,7 +139,7 @@ public partial class MeshRenderer : Node3D
                 { "Texture", "png" },
             }) == NfdStatus.Ok && outPath != null)
             {
-                LoadATexture(outPath);
+                myLoadTextureTask = LoadATexture(outPath);
             }
         }
     }

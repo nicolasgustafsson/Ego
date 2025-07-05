@@ -19,7 +19,6 @@ public partial class EgoRoot : Node
         {
             logging.SetMinimumLevel(LogLevel.Trace);
             logging.AddZLoggerConsole();
-            //logging.AddZLoggerConsole(options => options.UseJsonFormatter());
         });
 
         Log = factory.CreateLogger("Ego");
@@ -60,10 +59,17 @@ public partial class EgoRoot : Node
     private void SingleFrame()
     {
         var trace = PerformanceMonitor.StartTrace();
-
+        
+        //Nicos: Alleviates GC spikes - 20ms spikes in debug mode was what triggered me to do this, it might not be needed in release builds.
+        GC.Collect(0);
+        
+        trace.Trace("Manual GC collection");
+        
         MultithreadingManager.UpdateSynchronous();
 
         Task work = MultithreadingManager.RunParallelTasks();
+        
+        trace.Trace("Multithreading");
         
         UpdateInternal();
 

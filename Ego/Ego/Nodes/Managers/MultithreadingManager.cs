@@ -1,3 +1,5 @@
+using Rendering;
+
 namespace Ego;
 
 [Node(AllowAddingToScene = false)]
@@ -21,8 +23,17 @@ public partial class MultithreadingManager : Node
             parallels.Add(Task.Run(branch.UpdateBranchInternal));
         }
 
+        parallels.Add(Task.Run(UpdateGpuTransfer));
+
         var task = Task.WhenAll(parallels);
         return task;
+    }
+    
+    private void UpdateGpuTransfer()
+    {
+        Thread.CurrentThread.Name = "Gpu Transfer";
+
+        EgoSynchronizationContext.ExecuteGpuTransferContinuations(RendererApi.Renderer.DataTransferer);
     }
 
     public void UpdateSynchronous()

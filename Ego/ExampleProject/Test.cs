@@ -4,10 +4,10 @@ using Rendering;
 using ZLogger;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
-namespace ExampleProject;  
+namespace ExampleProject;
 
 [Node(AllowAddingToScene = true)]
-public partial class TestNode : Node
+public partial class TestNode : Node3D
 {
     public override void Start()
     {
@@ -19,8 +19,6 @@ public partial class TestNode : Node
     
     protected override void Update()
     {
-        if (Window.IsKeyboardKeyDown(KeyboardKey.A))
-        {
-        }
+        LocalPosition = new(LocalPosition.X, (float)Math.Sin(Time.ElapsedTime.TotalSeconds) * 3f, 0f);
     }
 }

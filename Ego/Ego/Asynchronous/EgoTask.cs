@@ -19,6 +19,11 @@ public class EgoTask
     {
         return new RendererAwaitable();
     }
+    
+    public static GpuTransferAwaitable GpuDataTransfer()
+    {
+        return new GpuTransferAwaitable();
+    }
 }
 
 public class WorkerThreadAwaitable
@@ -63,6 +68,35 @@ public class RendererAwaitable
         }
         
         private void RunAction(Renderer aRenderer, object? state)
+        {
+            myRenderer = aRenderer;
+            ((Action)state!)(); }
+    }
+}
+
+public class GpuTransferAwaitable
+{
+    public GpuTransferAwaiter GetAwaiter() => new GpuTransferAwaiter(); 
+    
+    public delegate void TransfererSendOrPostCallback(GpuDataTransferer Transferer, object? state);
+    
+    public class GpuTransferAwaiter : INotifyCompletion
+    {
+        public bool IsCompleted => false;
+
+        private GpuDataTransferer myRenderer = null!;
+
+        public GpuDataTransferer GetResult()
+        {
+            return myRenderer; 
+        }
+        
+        public void OnCompleted(Action continuation)
+        {
+            MultithreadingManager.EgoSynchronizationContext.PostTransferer(RunAction, continuation);
+        }
+        
+        private void RunAction(GpuDataTransferer aRenderer, object? state)
         {
             myRenderer = aRenderer;
             ((Action)state!)(); }

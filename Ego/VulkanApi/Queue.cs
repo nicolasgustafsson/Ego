@@ -43,8 +43,17 @@ public unsafe class Queue
         return info;
     }
     
+    public void Submit(CommandBuffer aCommandBuffer, Fence aFence)
+    {
+        VkCommandBufferSubmitInfo cmdInfo = GetCommandBufferSubmitInfo(aCommandBuffer);
+
+        VkSubmitInfo2 submitInfo = GetSubmitInfo(&cmdInfo, null, null);
+        vkQueueSubmit2(VkQueue, 1, &submitInfo, aFence.VkFence).CheckResult();
+    }
+    
     protected Queue(uint aQueueFamilyIndex)
     {
+        QueueFamilyIndex = aQueueFamilyIndex;
         vkGetDeviceQueue(Device.VkDevice, aQueueFamilyIndex, 0, out VkQueue);
     }
     
