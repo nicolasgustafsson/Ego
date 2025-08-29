@@ -56,16 +56,16 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Ego/Ego Concepts.md",
+                "file": "Ego/Assets.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Ego Concepts"
+              "title": "Assets"
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -215,8 +215,11 @@
   },
   "active": "e5810fa3e59d7235",
   "lastOpenFiles": [
-    "Workout/Low-impact movement.md",
+    "Ego/Ego Concepts.md",
+    "Cat.md",
+    "Untitled Kanban.md",
     "Ego/Assets.md",
+    "Workout/Low-impact movement.md",
     "Palettemaker.md",
     "Workout",
     "Pasted image 20250410204828.png",
@@ -228,12 +231,9 @@
     "Ego/Wishlist.md",
     "Ego/Third Party Libraries.md",
     "Ego/Overview.canvas",
-    "Ego/Ego Concepts.md",
     "Vulkan/Vulkan Questions.md",
-    "Cat.md",
     "Ego",
     "2025-03-16.md",
-    "Untitled Kanban.md",
     "Excalidraw",
     "Vulkan",
     "Welcome.md",

@@ -2,5 +2,5 @@
 
 public interface IImportable
 {
-    public Task Import(string aFile);
+    public Task Import(string aFilePath);
 }

@@ -31,7 +31,6 @@ public partial class Mesh : Node, IFileAsset, IImportable
     public void LoadFrom(string aPath)
     {
         /*
-    }
         FileName = Path.GetFileNameWithoutExtension(aPath);
 
         Meshes = MeshData.LoadGltf(RendererApi.Renderer, aPath);*/
@@ -52,15 +51,15 @@ public partial class Mesh : Node, IFileAsset, IImportable
         base.OnDestroy();
     }
 
-    public async Task Import(string aFile)
+    public async Task Import(string aFilePath)
     {
         //don't block main thread
         await EgoTask.WorkerThread();
         
         
         #region a bunch of import code
-        FileName = aFile;
-        var model = ModelRoot.Load(aFile);
+        FileName = aFilePath;
+        var model = ModelRoot.Load(aFilePath);
 
         if (model == null)
             return;
@@ -115,7 +114,7 @@ public partial class Mesh : Node, IFileAsset, IImportable
         await EgoTask.MainThread();
 
         MeshInfo = new(indices, vertices, surfaces);
-        Log.Info($"Successfully imported mesh {aFile}!");
+        Log.Info($"Successfully imported mesh {aFilePath}!");
     }
 }
 

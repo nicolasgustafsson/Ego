@@ -61,7 +61,7 @@ public partial class EgoRoot : Node
         var trace = PerformanceMonitor.StartTrace();
         
         //Nicos: Alleviates GC spikes - 20ms spikes in debug mode was what triggered me to do this, it might not be needed in release builds.
-        GC.Collect(0);
+        //GC.Collect(0);
         
         trace.Trace("Manual GC collection");
         

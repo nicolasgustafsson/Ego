@@ -5,13 +5,13 @@ namespace Editor;
 [Node(AllowAddingToScene = false)]
 public partial class SceneEditor : Node
 {
-    private Scene WorkingScene = new();
+    private Scene WorkingScene = new(); 
     private Guid InspectedNodeGuid;
     
     public override void Start()
     {
         var scene = AddChild(WorkingScene);
-        scene.AddChild(new GltfRenderer("Models/house2.glb"));
+        scene.AddChild(new Node());
         
         var movement = AddChild(new EditorCameraMovement());
 

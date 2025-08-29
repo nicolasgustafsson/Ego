@@ -43,11 +43,11 @@ public partial class Editor : Node
     {
         DefaultInspect();
         
-        if (ImGui.Button("TryLoadModel"))
+        if (ImGui.Button("Import Texture"))
         {
             if (Nfd.OpenDialog(out string? outPath, new Dictionary<string, string>()
             {
-                { "Model file", "glb" },
+                { "Texture", "png" },
             }) == NfdStatus.Ok && outPath != null)
             {
                 ImportCommand command = new(outPath);

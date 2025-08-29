@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics;
 using ImageMagick;
 using ImGuiNET;
+using Microsoft.IO;
 using NativeFileDialogs.Net;
 using Rendering;
 using Rendering.Materials;
+using StbImageSharp;
 using Vortice.Vulkan;
 using VulkanApi;
 
@@ -88,18 +90,25 @@ public partial class MeshRenderer : Node3D
         lastPath = aPath;
         
         await EgoTask.WorkerThread();
-
-        var file = File.ReadAllBytes(aPath);
         
-        using MagickImage image = new(file);
+        /*RecyclableMemoryStreamManager manager;
+        var file = manager.GetStream();*/
+        
+        /*
+        using MagickImage image = new(new FileStream(aPath, FileMode.Open));
         image.Format = MagickFormat.Rgba;
+        
         var rawTextureData = image.ToByteArray();
+*/
+        using FileStream stream = File.OpenRead(aPath);
 
+        ImageResult image = ImageResult.FromStream(stream);
+        
         GpuDataTransferer dataTransfer = await EgoTask.GpuDataTransfer();
         
-        uint dataSize = image.Width * image.Height * 4;
-        var buffer = dataTransfer.TakeStagingBuffer(dataSize);
-        Image vulkanImage = new(dataTransfer, rawTextureData, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(image.Width, image.Height, 1), true, buffer);
+        int dataSize = image.Width * image.Height * 4;
+        var buffer = dataTransfer.TakeStagingBuffer((uint)dataSize);
+        Image vulkanImage = new(dataTransfer, image.Data, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(image.Width, image.Height, 1), true, buffer);
         dataTransfer.ReturnStagingBuffer(buffer);
 
         MaterialConstantsBuffer = new(VkBufferUsageFlags.UniformBuffer, VmaMemoryUsage.CpuToGpu);
@@ -123,9 +132,7 @@ public partial class MeshRenderer : Node3D
         Image? toDelete = myPreviousVulkanImage;
         myPreviousVulkanImage = vulkanImage;
 
-        //Destroy the previous image. We wait until next renderer to handle frames
-        await EgoTask.Renderer();
-        await EgoTask.Renderer();
+        //Destroy the previous image.
         await EgoTask.Renderer();
         toDelete?.Destroy();
     }
