@@ -21,7 +21,10 @@ public partial class DotNetApi : Node
         Directory.SetCurrentDirectory(aProjectPath);
         ProcessStartInfo startInfo = new();
         startInfo.FileName = "dotnet";
-        startInfo.Arguments = "watch build";
+        
+        //--no-restore speeds rebuilds up(1.45s -> 1.05s) at the cost of not handling dependencies. This means that if we add a nuget package we need to restart the editor right now.
+        startInfo.Arguments = "watch build --no-restore"; 
+        
         startInfo.RedirectStandardOutput = true;
         WatchProcess = Process.Start(startInfo);
         Directory.SetCurrentDirectory(currentDirectory);
@@ -57,7 +60,7 @@ public partial class DotNetApi : Node
         }
         else
         {
-            Log.Information(aLine);
+            Log.Info($"{aLine}");
         }
     }
 

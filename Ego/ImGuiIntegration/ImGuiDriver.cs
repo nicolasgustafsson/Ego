@@ -440,8 +440,8 @@ public class ImGuiDriver : IGpuDestroyable
         userData.ImageViews = userData.Swapchain.CreateImageViews();
         userData.RenderQueue = new RenderQueue();
 
-        userData.RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(userData.Swapchain.Extents.width, userData.Swapchain.Extents.height, 1), false);
-        userData.DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(userData.Swapchain.Extents.width, userData.Swapchain.Extents.height, 1), false);
+        userData.RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(userData.Swapchain.Extents.width, userData.Swapchain.Extents.height, 1), false, aIsRenderTexture:true);
+        userData.DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(userData.Swapchain.Extents.width, userData.Swapchain.Extents.height, 1), false, aIsRenderTexture:true);
 
         userData.FrameData = new();
         
@@ -477,8 +477,8 @@ public class ImGuiDriver : IGpuDestroyable
         aUserData.ImageViews = aUserData.Swapchain.CreateImageViews();
         aUserData.RenderQueue = new RenderQueue();
 
-        aUserData.RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(aUserData.Swapchain.Extents.width, aUserData.Swapchain.Extents.height, 1), false);
-        aUserData.DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(aUserData.Swapchain.Extents.width, aUserData.Swapchain.Extents.height, 1), false);
+        aUserData.RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(aUserData.Swapchain.Extents.width, aUserData.Swapchain.Extents.height, 1), false, aIsRenderTexture:true);
+        aUserData.DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(aUserData.Swapchain.Extents.width, aUserData.Swapchain.Extents.height, 1), false, aIsRenderTexture:true);
     }
 
     private void DestroyWindow(ImGuiViewportPtr vp)
@@ -827,7 +827,7 @@ public class ImGuiDriver : IGpuDestroyable
             
             var viewportData = GetWindowUserDataFromViewport(viewport);
 
-            LogicalDevice.Device.WaitUntilIdle();
+            //LogicalDevice.Device.WaitUntilIdle();
             
             viewportData.CurrentFrame.RenderFence.Wait();
             viewportData.CurrentFrame.RenderFence.Reset();

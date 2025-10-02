@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Numerics;
 using Rendering;
+using Vortice.ShaderCompiler;
 
 namespace VulkanApi;
 
@@ -18,11 +20,14 @@ public unsafe class Image : IGpuDestroyable
         return (IntPtr)VkImage.Handle;
     }
     
-    public Image(VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps)
+    public Image(VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps, bool aIsRenderTexture)
     {
+        Stopwatch watch = new();
+        Stopwatch totalWatch = new();
+        watch.Start();
         if (aExtent.depth == 0)
         {
-            Log.Information("Depth should not be 0!");
+            Log.Error($"Depth should not be 0!");
         }
         Extent = aExtent;
         ImageFormat = aFormat;
@@ -42,6 +47,14 @@ public unsafe class Image : IGpuDestroyable
         
         createInfo.tiling = VkImageTiling.Optimal;
         createInfo.usage = aUsageFlags;
+        
+        if (!aIsRenderTexture)
+        {
+            createInfo.sharingMode = VkSharingMode.Concurrent;
+            ReadOnlySpan<uint> queueFamilies = [GpuInstance.GraphicsFamily, GpuInstance.TransferFamily]; 
+            createInfo.pQueueFamilyIndices = queueFamilies.GetPointer();
+            createInfo.queueFamilyIndexCount = (uint)queueFamilies.Length;
+        }
 
         VmaAllocationCreateInfo allocCreateInfo = new();
         allocCreateInfo.usage = VmaMemoryUsage.GpuOnly;
@@ -54,14 +67,21 @@ public unsafe class Image : IGpuDestroyable
         ImageRegistry.PointersToImages.TryAdd((nint)VkImage.Handle, this);
     }
     
-    public Image(IGpuImmediateSubmit aSubmit, byte* aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps) : this(aFormat, aUsageFlags | VkImageUsageFlags.TransferDst, aExtent, aMipMaps)
+    public Image(IGpuImmediateSubmit aSubmit, byte[] aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps, AllocatedRawBuffer? aStagingBuffer = null)  
+        : this(aSubmit, aData.AsSpan().GetPointerUnsafe(), aFormat, aUsageFlags, aExtent, aMipMaps, aStagingBuffer)
+    {
+        
+    }
+    public Image(IGpuImmediateSubmit aSubmit, byte* aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps, AllocatedRawBuffer? aStagingBuffer = null) : this(aFormat, aUsageFlags | VkImageUsageFlags.TransferDst, aExtent, aMipMaps, aIsRenderTexture: false)
     {
         ulong dataSize = aExtent.width * aExtent.height * aExtent.depth * 4;
-
-        AllocatedRawBuffer staging = new(dataSize, VkBufferUsageFlags.TransferSrc, VmaMemoryUsage.CpuToGpu);
-
+        
+        AllocatedRawBuffer staging = aStagingBuffer;
+        if (staging == null)
+            staging = new(dataSize, VkBufferUsageFlags.TransferSrc, VmaMemoryUsage.CpuToGpu);
+        
         Buffer.MemoryCopy(aData, staging.AllocationInfo.pMappedData, dataSize, dataSize);
-
+        
         aSubmit.ImmediateSubmit(cmd =>
         {
             cmd.TransitionImage(this, VkImageLayout.TransferDstOptimal);
@@ -81,8 +101,14 @@ public unsafe class Image : IGpuDestroyable
 
             cmd.TransitionImage(this, VkImageLayout.ReadOnlyOptimal);
         });
-
-        staging.Destroy();
+        
+        if (aStagingBuffer == null)
+            staging.Destroy();
+    }
+    
+    private void UploadData()
+    {
+        
     }
     
     public void Destroy()
@@ -132,5 +158,5 @@ public unsafe class Image : IGpuDestroyable
         renderInfo.pStencilAttachment = null;
 
         return renderInfo;
-    } 
+    }
 }

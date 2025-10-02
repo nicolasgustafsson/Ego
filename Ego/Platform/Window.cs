@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Silk.NET.GLFW;
+using Utilities;
 using ClientApi = Silk.NET.GLFW.ClientApi;
 using Cursor = Silk.NET.GLFW.Cursor;
 using ErrorCode = Silk.NET.GLFW.ErrorCode;
@@ -119,7 +120,7 @@ public unsafe class Window
     }
     private static void GlfwError(ErrorCode code, string message)
     {
-        Log.Error(message);
+        Log.Error($"{message}");
     }
     
     public (int width, int height) GetFramebufferSize()

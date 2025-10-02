@@ -1,4 +1,4 @@
-public interface IAsset
+public interface IFileAsset
 {
     void LoadFrom(string aPath);
 }

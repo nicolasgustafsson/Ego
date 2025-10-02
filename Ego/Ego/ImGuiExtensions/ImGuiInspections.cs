@@ -143,7 +143,7 @@ public static partial class EmGui
             Type? itemType = aList.GetType().GenericTypeArguments.FirstOrDefault();
             if (itemType == null)
             {
-                Log.Error("Could not add item to list {aName}! Item type was null. Your list is weird.", aName);
+                Log.Error($"Could not add item to list {aName}! Item type was null. Your list is weird.", aName);
                 ImGui.EndChild();
                 ImGui.TreePop();
                 return false;

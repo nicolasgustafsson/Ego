@@ -12,6 +12,11 @@ public unsafe class AllocatedRawBuffer : IGpuDestroyable
         bufferCreateInfo.pNext = null;
         bufferCreateInfo.size = aSize;
         bufferCreateInfo.usage = aBufferUsageFlags;
+        bufferCreateInfo.sharingMode = VkSharingMode.Concurrent;
+
+        ReadOnlySpan<uint> queueFamilies = [GpuInstance.GraphicsFamily, GpuInstance.TransferFamily]; 
+        bufferCreateInfo.pQueueFamilyIndices = queueFamilies.GetPointer();
+        bufferCreateInfo.queueFamilyIndexCount = (uint)queueFamilies.Length;
 
         VmaAllocationCreateInfo allocationInfo = new();
         allocationInfo.usage = aMemoryUsage;

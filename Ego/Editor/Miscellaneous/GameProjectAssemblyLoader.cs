@@ -14,7 +14,7 @@ public partial class GameProjectAssemblyLoader : Node
     {
         GameAssembly = MyPluginLoader!.LoadDefaultAssembly();
         
-        Log.Information($"Loaded Assembly {GameAssembly.FullName}");
+        Log.Info($"Loaded Assembly {GameAssembly.FullName}");
 
         NodeTypeDatabase.Build(GameAssembly);
     }
@@ -22,23 +22,23 @@ public partial class GameProjectAssemblyLoader : Node
     protected override void Update()
     {
         base.Update();
-        /*if (WantsHotReload)
-            HotReload();*/
+        if (WantsHotReload)
+            HotReload();
     }
 
     private void HotReload()
     {
         WantsHotReload = false;
 
-        Log.Information($"Hot Reload Started");
-        Log.Information($"Destroying Scene...");
+        Log.Info($"Hot Reload Started");
+        Log.Info($"Destroying Scene...");
         ProjectEditor.Instance.SceneEditor.PrepareForHotReload();
         UpdateAssembly();
-        Log.Information($"Assemblies Updated!");
-        Log.Information($"Recreating Scene...");
+        Log.Info($"Assemblies Updated!");
+        Log.Info($"Recreating Scene...");
         ProjectEditor.Instance.SceneEditor.ReinitializeAfterHotReload();
-        Log.Information($"Scene reconstruction complete!");
-        Log.Information($"Hot Reload Completed!");
+        Log.Info($"Scene reconstruction complete!");
+        Log.Info($"Hot Reload Completed!");
     }
     
     public void SelectGameProjectDll(string aBinaryPath)
@@ -52,7 +52,10 @@ public partial class GameProjectAssemblyLoader : Node
                 config.EnableHotReload = true;
             });
 
-            plugin.Reloaded += (_, _) => WantsHotReload = true;
+            plugin.Reloaded += (_, _) =>
+            {
+                WantsHotReload = true;
+            };
 
             if (MyPluginLoader != null)
                 MyPluginLoader.Dispose();
@@ -63,7 +66,7 @@ public partial class GameProjectAssemblyLoader : Node
         }
         catch (Exception e)
         {
-            Log.Error(e.Message);
+            Log.Error(e, $"{e.Message}");
         }
     }
     

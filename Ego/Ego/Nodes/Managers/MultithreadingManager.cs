@@ -1,9 +1,19 @@
+using Rendering;
+
 namespace Ego;
 
 [Node(AllowAddingToScene = false)]
 public partial class MultithreadingManager : Node
 {
     public List<ParallelBranch> Branches = new();
+    public static EgoSynchronizationContext EgoSynchronizationContext = null!;
+    
+    public MultithreadingManager()
+    {
+        Thread.CurrentThread.Name = "Main Thread";
+        EgoSynchronizationContext = new();
+        SynchronizationContext.SetSynchronizationContext(EgoSynchronizationContext);
+    }
 
     public Task RunParallelTasks()
     {
@@ -13,7 +23,17 @@ public partial class MultithreadingManager : Node
             parallels.Add(Task.Run(branch.UpdateBranchInternal));
         }
 
-        return Task.WhenAll(parallels);
+        parallels.Add(Task.Run(UpdateGpuTransfer));
+
+        var task = Task.WhenAll(parallels);
+        return task;
+    }
+    
+    private void UpdateGpuTransfer()
+    {
+        Thread.CurrentThread.Name = "Gpu Transfer";
+
+        EgoSynchronizationContext.ExecuteGpuTransferContinuations(RendererApi.Renderer.DataTransferer);
     }
 
     public void UpdateSynchronous()
@@ -30,5 +50,7 @@ public partial class MultithreadingManager : Node
         {
             branch.UpdateRoot(); 
         }
+
+        EgoSynchronizationContext.ExecuteMainThreadContinuations();
     }
 }

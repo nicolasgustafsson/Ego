@@ -34,9 +34,13 @@ public partial class RendererApi : ParallelBranch<RendererApi>
 
     private void RenderFrame()
     {
+        Thread.CurrentThread.Name = "Renderer Thread";
+        
         PerformanceMonitor.PerformanceTracer tracer = PerformanceMonitor.StartTrace();
 
         Renderer.Render(RenderDataBuffer.Consumer);
+
+        MultithreadingManager.EgoSynchronizationContext.ExecuteRendererContinuations(Renderer);
         
         tracer.Trace("Render");
     }

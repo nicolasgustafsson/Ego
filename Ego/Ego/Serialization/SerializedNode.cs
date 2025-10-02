@@ -13,7 +13,6 @@ public readonly record struct SerializedNode(string NodeTypeHash, byte[] Data)
     {
         var type = aDatabase.NodeTypes[NodeTypeHash];
 
-        
         return (type!.GetMethod("Deserialize")!.Invoke(null, [this]) as Node)!;
     }
 }

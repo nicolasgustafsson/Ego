@@ -1,24 +1,23 @@
 ﻿using ImGuiNET;
-using Environment = Ego.Environment;
 
 namespace Editor;
 
 [Node(AllowAddingToScene = false)]
 public partial class SceneEditor : Node
 {
-    private Scene WorkingScene = new();
+    private Scene WorkingScene = new(); 
     private Guid InspectedNodeGuid;
     
     public override void Start()
     {
         var scene = AddChild(WorkingScene);
-        scene.AddChild(new GltfRenderer("Models/house2.glb"));
+        scene.AddChild(new Node());
         
         var movement = AddChild(new EditorCameraMovement());
 
         movement.AddChild(new Camera());
         
-        AddChild(new Environment());
+        AddChild(new WorldEnvironment());
 
         movement.LocalPosition.X -= 3.5f;
         movement.LocalPosition.Y += 3.5f;

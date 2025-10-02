@@ -1,4 +1,6 @@
-﻿namespace Editor;
+﻿using System.Net.Security;
+
+namespace Editor;
 using Ego;
 using Vortice.Vulkan;
 
@@ -6,7 +8,7 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        EgoContext engine = new();
+        EgoRoot engine = new();
         
         EngineInitSettings settings = new();
         settings.Name = "Editor";

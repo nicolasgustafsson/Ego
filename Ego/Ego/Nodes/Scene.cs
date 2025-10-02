@@ -4,14 +4,14 @@ using MessagePack;
 namespace Ego;
 
 [Node(AllowAddingToScene = false)]
-public partial class Scene : Node, IAsset
+public partial class Scene : Node, IFileAsset
 {
     private SceneBranchNode? SerializedTree;
 
     public override void Start()
     {
         base.Start();
-        Log.Information("Started {Scene}", this);
+        Log.Info($"Started Scene!", this);
     }
 
     public void LoadFrom(string aPath)

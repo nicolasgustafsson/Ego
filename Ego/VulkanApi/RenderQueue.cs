@@ -14,14 +14,6 @@ public unsafe class RenderQueue : Queue
         vkQueueSubmit2(VkQueue, 1, &submitInfo, aRenderFence.VkFence).CheckResult();
     }
     
-    public void Submit(CommandBuffer aCommandBuffer, Fence aRenderFence)
-    {
-        VkCommandBufferSubmitInfo cmdInfo = GetCommandBufferSubmitInfo(aCommandBuffer);
-
-        VkSubmitInfo2 submitInfo = GetSubmitInfo(&cmdInfo, null, null);
-        vkQueueSubmit2(VkQueue, 1, &submitInfo, aRenderFence.VkFence).CheckResult();
-    }
-    
     //Currently the draw queue handles presenting too; this might be changed in the future
     public VkResult Present(Swapchain aSwapchain, Semaphore aRenderFinishedSemaphore, uint aImageIndex)
     {

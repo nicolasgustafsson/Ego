@@ -3,7 +3,6 @@ using System.Drawing;
 using Vortice.Vulkan;
 using static Vortice.Vulkan.Vulkan;
 using System.Runtime.InteropServices;
-using Serilog;
 using VulkanApi;
 using Vortice.ShaderCompiler;
 
@@ -23,7 +22,7 @@ public partial class Renderer
     
     private void InitVulkan(Window aWindow)
     {
-        Log.Information("Creating renderer...");
+        Log.Info($"Creating renderer...");
         
         CreateApi(aWindow);
 
@@ -37,6 +36,8 @@ public partial class Renderer
         CreateDevice();
 
         CreateRenderQueue();
+        
+        CreateDataTransferer();
 
         CreateSwapchain();
 
@@ -56,7 +57,7 @@ public partial class Renderer
 
         InitializePipelines();
         
-        Log.Information("Renderer successfully created!");
+        Log.Info($"Renderer successfully created!");
     }
 
     private unsafe void CreateDefaultImages()
@@ -147,10 +148,10 @@ public partial class Renderer
 
     private void CreateRenderImage()
     {
-         RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false);
+         RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false, aIsRenderTexture:true);
          CleanupQueue.Add(RenderImage);
          
-         DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false);
+         DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false, aIsRenderTexture:true);
          CleanupQueue.Add(DepthImage);
     }
 
@@ -235,6 +236,12 @@ public partial class Renderer
     {
         RenderQueue = new RenderQueue();
     }
+    
+    private void CreateDataTransferer()
+    {
+        DataTransferer = new();
+        CleanupQueue.Add(DataTransferer);
+    }
 
     private void CreateApi(Window aWindow)
     {
@@ -299,12 +306,12 @@ public partial class Renderer
     
     public void OnDestroy()
     {
-        Log.Information("Destroying renderer...");
+        Log.Info($"Destroying renderer...");
 
         Device.WaitUntilIdle();
         
         CleanupQueue.Flush();
         
-        Log.Information("Renderer successfully destroyed!");
+        Log.Info($"Renderer successfully destroyed!");
     }
 }

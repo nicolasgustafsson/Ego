@@ -1,5 +1,4 @@
 using VulkanApi;
-using ImageMagick;
 using SharpGLTF.Memory;
 using SharpGLTF.Schema2;
 using Silk.NET.Vulkan;
@@ -13,7 +12,6 @@ public struct GeoSurface
     public UInt32 StartIndex;
     public UInt32 Count;
 }
-
 
 public class MeshData : IGpuDestroyable
 {

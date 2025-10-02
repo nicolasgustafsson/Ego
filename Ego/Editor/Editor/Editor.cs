@@ -1,5 +1,9 @@
-﻿using MessagePack;
+﻿using ImageMagick;
+using MessagePack;
 using NativeFileDialogs.Net;
+using Rendering;
+using Vortice.Vulkan;
+using VulkanApi;
 
 namespace Editor;
 
@@ -9,6 +13,8 @@ public partial class Editor : Node
     private ProjectEditor ProjectEditor = null!;
     public LandingArea? LandingArea = null!;
     public TopMenu TopMenu = null!;
+
+    public MeshRenderer MeshRenderer;
 
     public static Editor Instance;
     public override void Start()
@@ -30,6 +36,23 @@ public partial class Editor : Node
         }) == NfdStatus.Ok && outPath != null)
         {
             ProjectEditor.Instance.SelectProject(outPath);
+        }
+    }
+    
+    public void Inspect()
+    {
+        DefaultInspect();
+        
+        if (ImGui.Button("Import Texture"))
+        {
+            if (Nfd.OpenDialog(out string? outPath, new Dictionary<string, string>()
+            {
+                { "Texture", "png" },
+            }) == NfdStatus.Ok && outPath != null)
+            {
+                ImportCommand command = new(outPath);
+                command.Do();
+            }
         }
     }
 }
