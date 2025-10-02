@@ -1,0 +1,5 @@
+- Use a geometry graph
+- Try both SoA and AoS for perf
+- Submit a "finished" list of particles.
+- Use source generation to generate simulation code - or equivalently fast method.
+- Simulate 2m simple particles on 1 thread @ 60fps
