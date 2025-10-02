@@ -94,21 +94,50 @@ public partial class MeshRenderer : Node3D
         /*RecyclableMemoryStreamManager manager;
         var file = manager.GetStream();*/
         
-        /*
+        
         using MagickImage image = new(new FileStream(aPath, FileMode.Open));
         image.Format = MagickFormat.Rgba;
         
         var rawTextureData = image.ToByteArray();
-*/
-        using FileStream stream = File.OpenRead(aPath);
 
-        ImageResult image = ImageResult.FromStream(stream);
+        //using FileStream stream = File.OpenRead(aPath);
+
+        //ImageResult image = ImageResult.FromStream(stream);
         
         GpuDataTransferer dataTransfer = await EgoTask.GpuDataTransfer();
         
-        int dataSize = image.Width * image.Height * 4;
+        /*
+        int components = (int)image.Comp;
+        
+        if (components == 0)
+            components = 4;
+
+        VkFormat formatToUse;
+        switch(image.Comp)
+        {
+            case ColorComponents.Default:
+                formatToUse = VkFormat.R8G8B8A8Unorm;
+                break;
+            case ColorComponents.Grey:
+                formatToUse = VkFormat.R8Unorm;
+                break;
+            case ColorComponents.GreyAlpha:
+                formatToUse = VkFormat.R8G8Unorm;
+                break;
+            case ColorComponents.RedGreenBlue:
+                formatToUse = VkFormat.R8G8B8Unorm;
+                break;
+            case ColorComponents.RedGreenBlueAlpha:
+                formatToUse = VkFormat.R8G8B8A8Unorm;
+                break;
+            default:
+                formatToUse = VkFormat.R8G8B8A8Unorm;
+                break;
+        }*/
+        
+        int dataSize = (int)image.Width * (int)image.Height * 4;
         var buffer = dataTransfer.TakeStagingBuffer((uint)dataSize);
-        Image vulkanImage = new(dataTransfer, image.Data, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(image.Width, image.Height, 1), true, buffer);
+        Image vulkanImage = new(dataTransfer, rawTextureData, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(image.Width, image.Height, 1), true, buffer);
         dataTransfer.ReturnStagingBuffer(buffer);
 
         MaterialConstantsBuffer = new(VkBufferUsageFlags.UniformBuffer, VmaMemoryUsage.CpuToGpu);

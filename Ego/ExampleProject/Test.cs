@@ -19,7 +19,7 @@ public partial class TestNode : Node3D
     }
     
     protected override void Update()
-    {
+    { 
         LocalPosition = new(LocalPosition.X, (float)Math.Sin(Time.ElapsedTime.TotalSeconds) * 3f, LocalPosition.Z);
     }
 }

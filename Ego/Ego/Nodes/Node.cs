@@ -138,10 +138,13 @@ public partial class Node
         Parent?.RemoveChild(this);
     }
     
-    protected virtual void DestroyChildren() 
+    protected virtual void DestroyChildren()
     {
-        foreach (Node child in Children.ToArray().Reverse())
-            child.Destroy();
+        //foreach (Node child in Children)
+        for(int i = Children.Length - 1; i >= 0; i--)
+        {
+            Children[i].Destroy();
+        }
     }
     
     public virtual void OnDestroy()
