@@ -27,6 +27,7 @@ public partial class EgoRoot : Node
     public void Run<T>(EngineInitSettings aSettings, Action<T>? aSetup = null) where T : Node, new()
     {
         CreateLogger();
+        
         MyContext = new();
         
         MyContext.NodeTypeDatabase = AddChild(new NodeTypeDatabase());

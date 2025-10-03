@@ -16,7 +16,7 @@ namespace Rendering;
 public partial class Renderer : IGpuImmediateSubmit
 {
     private Swapchain Swapchain = null!;
-    private RenderQueue RenderQueue = null!;
+    public RenderQueue RenderQueue = null!;
     public GpuDataTransferer DataTransferer = null!;
     public Image RenderImage = null!;
     private Image DepthImage = null!;

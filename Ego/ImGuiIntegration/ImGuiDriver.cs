@@ -1,10 +1,12 @@
 ﻿global using VkDeviceAddress = ulong;
 using System.Diagnostics;
 using System.Drawing;
+using System.Net.Mime;
 using System.Numerics;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using ImguiBindings;
 using VulkanApi;
 using ImGuiNET;
 using Platform;
@@ -13,6 +15,8 @@ using Utilities;
 using Vortice.ShaderCompiler;
 using Vortice.Vulkan;
 using Image = VulkanApi.Image;
+using ImDrawVert = ImGuiNET.ImDrawVert;
+using ImGuiPlatformMonitor = ImGuiNET.ImGuiPlatformMonitor;
 using Monitor = Silk.NET.GLFW.Monitor;
 using Vulkan = Vortice.Vulkan.Vulkan;
 
@@ -84,10 +88,45 @@ public class ImGuiDriver : IGpuDestroyable
     private Stopwatch Stopwatch = new();
     private PlatformUserData PlatformData = new();
 
+    private VkPipelineRenderingCreateInfo pipelineCreateInfo = new();
+    private VkFormat format;
+
     public unsafe ImGuiDriver(Renderer aRenderer, Window aMainWindow)
     {
         Stopwatch.Start();
         MainWindow = aMainWindow;
+
+        var ctx = ImguiNative.CreateContext(null);
+        ImguiNative.SetCurrentContext(ctx);
+
+        
+        
+        ImguiNative.ImGui_ImplGlfw_InitForVulkan((GLFWwindow*)aMainWindow.NativeWindow.Glfw, 1);
+
+        var info = new ImGui_ImplVulkan_InitInfo();
+        info.Instance = VulkanApi.Api.ApiInstance.VkInstance.Handle;
+        info.PhysicalDevice = VulkanApi.Gpu.GpuInstance.VkPhysicalDevice.Handle;
+        info.Device = VulkanApi.LogicalDevice.Device.VkDevice.Handle;
+        info.QueueFamily = aRenderer.RenderQueue.QueueFamilyIndex;
+        info.Queue = aRenderer.RenderQueue.VkQueue.Handle;
+        info.PipelineCache = 0;
+        info.DescriptorPool = 0;
+        info.DescriptorPoolSize = 100;
+        info.MinImageCount = 2;
+        info.ImageCount = 2;
+        info.UseDynamicRendering = 1;
+        pipelineCreateInfo.colorAttachmentCount = 1;
+        pipelineCreateInfo.depthAttachmentFormat = VkFormat.D32Sfloat;
+
+        format = VkFormat.R16G16B16A16Sfloat;
+        
+        fixed(VkFormat* fixedFormat = &format)
+            pipelineCreateInfo.pColorAttachmentFormats = fixedFormat;
+
+        info.PipelineRenderingCreateInfo = pipelineCreateInfo;
+        
+        ImguiNative.ImGui_ImplVulkan_Init(&info);
+        
         
         var context = ImGui.CreateContext();
         ImGui.SetCurrentContext(context);
@@ -620,15 +659,29 @@ public class ImGuiDriver : IGpuDestroyable
         myLock.Enter();
         SetFrameData();
         UpdateMouseCursor();
+        
+        
+        ImguiNative.ImGui_ImplVulkan_NewFrame();
+        ImguiNative.ImGui_ImplGlfw_NewFrame();
+        ImguiNative.NewFrame();
+
+        unsafe{
+        bool yes = true;
+        ImguiNative.ShowDemoWindow(&yes);}
+        
         ImGui.NewFrame();
+
     }
     
-    public void End()
+    public unsafe void End()
     {
         ImGui.EndFrame();
         ImGui.Render();
         ImGui.UpdatePlatformWindows();
+        ImguiNative.Render();
         myLock.Exit();
+        
+
     }
 
     private ImDrawDataPtr myDrawData;
@@ -643,6 +696,9 @@ public class ImGuiDriver : IGpuDestroyable
                 return;
         
             RenderDrawData(cmd, drawData);
+            
+            var drawData2 = ImguiNative.GetDrawData();
+            ImguiNative.ImGui_ImplVulkan_RenderDrawData(drawData2, cmd.VkCommandBuffer.Handle, 0);
         }
     }
     
