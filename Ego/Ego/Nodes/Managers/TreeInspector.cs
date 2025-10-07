@@ -1,4 +1,5 @@
 using System.Reflection;
+using ImguiBindings;
 using ImGuiNET;
 
 namespace Ego;
@@ -51,7 +52,9 @@ public class TreeInspector : Node
     
     private unsafe void EDebug()
     {
-        
+        Imgui.Begin("Test");
+        Imgui.Text("yahoo");
+        Imgui.End();
         ImGui.Begin("Inspector");
         if (InspectedNode != null)
         {

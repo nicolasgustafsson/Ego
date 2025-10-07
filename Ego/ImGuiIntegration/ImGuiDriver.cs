@@ -97,9 +97,12 @@ public class ImGuiDriver : IGpuDestroyable
         MainWindow = aMainWindow;
 
         var ctx = ImguiNative.CreateContext(null);
-        ImguiNative.SetCurrentContext(ctx);
-
         
+        ImguiNative.GetIO_ContextPtr(ctx)->ConfigFlags |= (int)ImGuiConfigFlags_.ImGuiConfigFlags_DockingEnable;
+        ImguiNative.GetIO_ContextPtr(ctx)->ConfigFlags |= (int)ImGuiConfigFlags_.ImGuiConfigFlags_ViewportsEnable;
+        
+        ImguiNative.SetCurrentContext(ctx);
+        //ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable; 
         
         ImguiNative.ImGui_ImplGlfw_InitForVulkan((GLFWwindow*)aMainWindow.NativeWindow.Glfw, 1);
 
@@ -665,9 +668,11 @@ public class ImGuiDriver : IGpuDestroyable
         ImguiNative.ImGui_ImplGlfw_NewFrame();
         ImguiNative.NewFrame();
 
-        unsafe{
-        bool yes = true;
-        ImguiNative.ShowDemoWindow(&yes);}
+        unsafe
+        {
+            bool yes = true;
+            ImguiNative.ShowDemoWindow(&yes);
+        }
         
         ImGui.NewFrame();
 
@@ -678,7 +683,11 @@ public class ImGuiDriver : IGpuDestroyable
         ImGui.EndFrame();
         ImGui.Render();
         ImGui.UpdatePlatformWindows();
+
+        ImguiNative.EndFrame();
+        ImguiNative.UpdatePlatformWindows();
         ImguiNative.Render();
+        ImguiNative.RenderPlatformWindowsDefault(null, null);
         myLock.Exit();
         
 
