@@ -9,6 +9,7 @@ public partial class GameProjectAssemblyLoader : Node
     public static Assembly? GameAssembly;
     private PluginLoader? MyPluginLoader;
     private bool WantsHotReload = false;
+    public static bool MyIsFirstBuild = true;
     
     private void UpdateAssembly()
     {
@@ -54,6 +55,12 @@ public partial class GameProjectAssemblyLoader : Node
 
             plugin.Reloaded += (_, _) =>
             {
+                if (MyIsFirstBuild)
+                {
+                    MyIsFirstBuild = false;
+                    Log.Info($"Skipped first build!");
+                    return;
+                }
                 WantsHotReload = true;
             };
 

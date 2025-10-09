@@ -8,6 +8,7 @@ public partial class DotNetApi : Node
 {
     private Process? WatchProcess;
     private CancellationTokenSource CancellationTokenSource = new();
+    private bool myIsFirstBuild = false;
     
     public void Watch(string aProjectPath)
     {
@@ -23,7 +24,7 @@ public partial class DotNetApi : Node
         startInfo.FileName = "dotnet";
         
         //--no-restore speeds rebuilds up(1.45s -> 1.05s) at the cost of not handling dependencies. This means that if we add a nuget package we need to restart the editor right now.
-        startInfo.Arguments = "watch build --no-restore"; 
+        startInfo.Arguments = "watch build --no-restore --no-hot-reload"; 
         
         startInfo.RedirectStandardOutput = true;
         WatchProcess = Process.Start(startInfo);
@@ -48,19 +49,25 @@ public partial class DotNetApi : Node
     {
         if (aLine.Contains("Determining projects to restore..."))
         {
-            Editor.Instance.TopMenu.SetColor(Color.Yellow, "Building...!");
+            if (!GameProjectAssemblyLoader.MyIsFirstBuild)
+                Editor.Instance.TopMenu.SetColor(Color.Yellow, "Building...!");
         }
         if (aLine.Contains("Build succeeded."))
         {
-            Editor.Instance.TopMenu.Flash(Color.LawnGreen, "Build succeeded!");
+            if (!GameProjectAssemblyLoader.MyIsFirstBuild)
+                Editor.Instance.TopMenu.Flash(Color.LawnGreen, "Build succeeded!");
+            myIsFirstBuild = false;
         }
         else if (aLine.Contains("Build FAILED."))
         {
-            Editor.Instance.TopMenu.Flash(Color.Red, "Build failed!");
+            if (!GameProjectAssemblyLoader.MyIsFirstBuild)
+                Editor.Instance.TopMenu.Flash(Color.Red, "Build failed!");
+            myIsFirstBuild = false;
         }
         else
         {
-            Log.Info($"{aLine}");
+            if (!GameProjectAssemblyLoader.MyIsFirstBuild)
+                Log.Info($"{aLine}");
         }
     }
 
