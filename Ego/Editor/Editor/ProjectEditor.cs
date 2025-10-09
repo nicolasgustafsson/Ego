@@ -2,7 +2,6 @@
 using System.Drawing;
 using System.Reflection;
 using System.Runtime.Loader;
-using ImGuiNET;
 using MessagePack;
 
 namespace Editor;

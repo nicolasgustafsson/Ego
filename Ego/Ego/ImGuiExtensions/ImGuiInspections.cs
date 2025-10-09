@@ -3,7 +3,6 @@ using System.Drawing;
 using System.Reflection;
 using Ego;
 using ImguiBindings;
-using ImGuiNET;
 using Utilities;
 
 public static partial class EmGui
@@ -34,12 +33,12 @@ public static partial class EmGui
     
     public static bool Inspect(string aName, ref Vector3 aVector)
     {
-        return Imgui.DragFloat3(aName, ref aVector, 0.1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_NoRoundToFormat);
+        return Imgui.DragFloat3(aName, ref aVector, 0.1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat);
     }
     
     public static bool Inspect(string aName, ref Vector4 aVector)
     {
-        return Imgui.DragFloat4(aName, ref aVector, 0.1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_NoRoundToFormat);
+        return Imgui.DragFloat4(aName, ref aVector, 0.1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat);
     }
     
     public static bool Inspect(string aName, ref Transform aTransform)
@@ -61,7 +60,7 @@ public static partial class EmGui
         Ypr.Y = Imgui.GetStateStorage().GetFloat((uint)"pitch".GetHashCode(), aRotation.ToEulerAngle().Y);
         Ypr.Z = Imgui.GetStateStorage().GetFloat((uint)"roll".GetHashCode(), aRotation.ToEulerAngle().Z);
         
-        if (ImGui.DragFloat3(aName, ref Ypr, 1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat))
+        if (Imgui.DragFloat3(aName, ref Ypr, 1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat))
         {
             if (Ypr.X > 180f)
                 Ypr.X -= 360f;
@@ -97,7 +96,7 @@ public static partial class EmGui
     {
         bool changed = false;
 
-        bool expanded = (Imgui.TreeNodeEx(aName, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowOverlap | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_FramePadding));
+        bool expanded = (Imgui.TreeNodeEx(aName, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.AllowOverlap | ImGuiTreeNodeFlags.FramePadding));
             
         Imgui.SameLine();
         bool wasEmpty = aList.Count == 0;
@@ -130,7 +129,7 @@ public static partial class EmGui
         if (!expanded) 
             return true;
         
-        if (Imgui.BeginChild(aName, Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_Borders | ImGuiChildFlags_.ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_.ImGuiChildFlags_AutoResizeY))
+        if (Imgui.BeginChild(aName, Vector2.Zero, ImGuiChildFlags.Borders | ImGuiChildFlags.AlwaysAutoResize | ImGuiChildFlags.AutoResizeY))
         {
             //ImGui.SameLine();
             for(int i = 0; i < aList.Count; i++)
@@ -203,7 +202,7 @@ public static partial class EmGui
             return changed;
         }*/
         
-        if (Imgui.TreeNodeEx(aName, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
+        if (Imgui.TreeNodeEx(aName, ImGuiTreeNodeFlags.DefaultOpen))
         {
             foreach(var member in aVar.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public))
             {

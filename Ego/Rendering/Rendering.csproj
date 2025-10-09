@@ -11,7 +11,6 @@
         <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
     <ItemGroup>
-      <ProjectReference Include="..\..\ImguiDotNet\src\ImGui.NET\ImGui.NET.csproj" />
       <ProjectReference Include="..\Platform\Platform.csproj" />
       <ProjectReference Include="..\Utilities\Utilities.csproj" />
       <ProjectReference Include="..\VulkanApi\VulkanApi.csproj" />
@@ -98,18 +97,6 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="Shaders\vert.spv">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="cimgui.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="cimgui.exp">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="cimgui.lib">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="cimgui.pdb">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="Shaders\mesh.vert">

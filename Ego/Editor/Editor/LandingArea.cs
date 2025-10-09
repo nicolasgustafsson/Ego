@@ -15,7 +15,7 @@ public partial class LandingArea : Node
     private unsafe void EDebug()
     {
 
-        ImGuiWindowFlags_ flags = ImGuiWindowFlags_.ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings;
+        ImGuiWindowFlags flags = ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings;
         ImGuiViewport* viewport = Imgui.GetMainViewport();
         Imgui.SetNextWindowPos(viewport->Pos);
         Imgui.SetNextWindowSize(viewport->Size);

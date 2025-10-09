@@ -1,6 +1,5 @@
 using System.Reflection;
 using ImguiBindings;
-using ImGuiNET;
 
 namespace Ego;
 
@@ -9,6 +8,7 @@ public class TreeInspector : Node
     public Node? InspectedNode = null;
     private Node? PreviousInspectedNode = null;
 
+    /*
     private ImGuiTreeNodeFlags Flags = ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick;
     private Vector4 EvenColor = new Vector4(1f, 1f, 1f, 0.0392f);
     private Vector4 OddColor = new Vector4(1f, 1f, 1f, 0f);
@@ -39,6 +39,7 @@ public class TreeInspector : Node
                 
                 /*if ((col & IM_COL32_A_MASK) == 0)
                     continue;*/
+    /*
                 
                 float y1 = y0 + (aLineHeight * (float)(row_n));
                 float y2 = y1 + aLineHeight;
@@ -211,5 +212,5 @@ public class TreeInspector : Node
     public override char GetIcon()
     {
         return (char)59393;
-    }
+    }*/
 }

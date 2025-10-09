@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using ImageMagick;
-using ImGuiNET;
 using Microsoft.IO;
 using NativeFileDialogs.Net;
 using Rendering;

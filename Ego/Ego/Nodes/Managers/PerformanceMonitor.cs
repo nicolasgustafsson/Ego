@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using ImGuiNET;
 using Vortice.ShaderCompiler;
 
 namespace Ego;

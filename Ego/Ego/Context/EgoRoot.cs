@@ -17,7 +17,7 @@ public partial class EgoRoot : Node
     {
         var factory = LoggerFactory.Create(logging =>
         {
-            logging.SetMinimumLevel(LogLevel.Trace);
+            logging.SetMinimumLevel(LogLevel.Trace); 
             logging.AddZLoggerConsole();
         });
 

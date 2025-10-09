@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using ImGuiNET;
 
 namespace Editor;
 
@@ -24,7 +23,7 @@ public partial class TopMenu : Node
     {
         base.Start();
 
-        MenuBarColor = Imgui.GetStyleColorVec4(ImGuiCol_.ImGuiCol_MenuBarBg);
+        MenuBarColor = Imgui.GetStyleColorVec4(ImGuiCol.MenuBarBg);
         
         Debug.EDebug += OnDebug;
     }
@@ -36,7 +35,7 @@ public partial class TopMenu : Node
             case TopMenuState.Flash:
                 float flashProgress = (float)((DateTime.Now - FlashTime).TotalSeconds).Within(0f, 1f);
                 Vector4 flashColor = Vector4.Lerp(StatusColor.ToVec4(), MenuBarColor, flashProgress);
-                Imgui.PushStyleColor(ImGuiCol_.ImGuiCol_MenuBarBg, flashColor);
+                Imgui.PushStyleColor(ImGuiCol.MenuBarBg, flashColor);
 
                 if (flashProgress > 0.999f)
                     State = TopMenuState.None;
@@ -44,12 +43,12 @@ public partial class TopMenu : Node
                 break;
             
             case TopMenuState.Color:
-                Imgui.PushStyleColor(ImGuiCol_.ImGuiCol_MenuBarBg, StatusColor.ToVec4());
+                Imgui.PushStyleColor(ImGuiCol.MenuBarBg, StatusColor.ToVec4());
                 break;
 
             case TopMenuState.None:
             default:
-                Imgui.PushStyleColor(ImGuiCol_.ImGuiCol_MenuBarBg, MenuBarColor);
+                Imgui.PushStyleColor(ImGuiCol.MenuBarBg, MenuBarColor);
                 break;
         }
         

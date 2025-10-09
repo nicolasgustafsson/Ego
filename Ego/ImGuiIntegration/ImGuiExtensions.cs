@@ -1,8 +1,9 @@
 ﻿
 using System.Numerics;
 using VulkanApi;
-using ImGuiNET;
+//using ImGuiNET;
 
+/*
 public static unsafe partial class ImGuiEx
 {
     public static void Image(Image aImage, Vector2? aSize = null)
@@ -12,4 +13,4 @@ public static unsafe partial class ImGuiEx
         
         ImGui.Image(handle, size);
     }
-}
+}*/

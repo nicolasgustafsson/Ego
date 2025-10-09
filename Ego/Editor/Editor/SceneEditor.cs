@@ -1,6 +1,4 @@
-﻿using ImGuiNET;
-
-namespace Editor;
+﻿namespace Editor;
 
 [Node(AllowAddingToScene = false)]
 public partial class SceneEditor : Node

@@ -9,7 +9,7 @@ internal static partial class Helpers
 {
     internal static unsafe sbyte* AsBytes(this string aString)
     {
-        byte[] bytes = Encoding.ASCII.GetBytes(aString);
+        byte[] bytes = Encoding.UTF8.GetBytes(aString);
 
         fixed(byte* asBytesPtr = &bytes[0])
         {
@@ -20,13 +20,13 @@ internal static partial class Helpers
 
 public static unsafe partial class Imgui
 {
-    public static bool Begin(string aName, ImGuiWindowFlags_ aFlags = 0)
+    public static bool Begin(string aName, ImGuiWindowFlags aFlags = 0)
     {
         bool enabled = true;
         return Begin(aName, ref enabled, aFlags);
     }
     
-    public static bool Begin(string aName, ref bool aEnabled, ImGuiWindowFlags_ aFlags)
+    public static bool Begin(string aName, ref bool aEnabled, ImGuiWindowFlags aFlags)
     {
         fixed(bool* enabled = &aEnabled)
             return ImguiNative.Begin(aName.AsBytes(), enabled, (int)aFlags) > 0;
@@ -62,12 +62,12 @@ public static unsafe partial class Imgui
         ImguiNative.PopID();
     }
     
-    public static void PushStyleVar(ImGuiStyleVar_ idx, float val)
+    public static void PushStyleVar(ImGuiStyleVar idx, float val)
     {
         ImguiNative.PushStyleVar_Float((int)idx, val);
     }
     
-    public static void PushStyleVar(ImGuiStyleVar_ idx, Vector2 val)
+    public static void PushStyleVar(ImGuiStyleVar idx, Vector2 val)
     {
         ImguiNative.PushStyleVar_Vec2((int)idx, val);
     }
@@ -77,7 +77,7 @@ public static unsafe partial class Imgui
         ImguiNative.PopStyleVar(aCount);
     }
 
-    public static bool IsWindowFocused(ImGuiFocusedFlags_ aFlags = ImGuiFocusedFlags_.ImGuiFocusedFlags_None)
+    public static bool IsWindowFocused(ImGuiFocusedFlags aFlags = ImGuiFocusedFlags.None)
     {
         return ImguiNative.IsWindowFocused((int)aFlags) > 0;
     }
@@ -89,12 +89,12 @@ public static unsafe partial class Imgui
         return storage;
     }
     
-    public static void PushStyleColor(ImGuiCol_ aColorType, Vector4 aColor)
+    public static void PushStyleColor(ImGuiCol aColorType, Vector4 aColor)
     {
         ImguiNative.PushStyleColor_Vec4((int)aColorType, aColor);
     }
     
-    public static void PushStyleColor(ImGuiCol_ aColorType, uint aColor)
+    public static void PushStyleColor(ImGuiCol aColorType, uint aColor)
     {
         ImguiNative.PushStyleColor_U32((int)aColorType, aColor);
     }
@@ -104,7 +104,7 @@ public static unsafe partial class Imgui
         ImguiNative.PopStyleColor(aCount);
     }
     
-    public static Vector4 GetStyleColorVec4(ImGuiCol_ aColorType)
+    public static Vector4 GetStyleColorVec4(ImGuiCol aColorType)
     {
         return *ImguiNative.GetStyleColorVec4((int)aColorType);
     }
@@ -152,7 +152,7 @@ public static unsafe partial class Imgui
         return ImguiNative.GetTextLineHeightWithSpacing();
     }
     
-    public static uint GetColorU32(ImGuiCol_ aColorType, float aAlphaMultiply = 1f)
+    public static uint GetColorU32(ImGuiCol aColorType, float aAlphaMultiply = 1f)
     {
         return ImguiNative.GetColorU32_Col((int)aColorType, aAlphaMultiply);
     }
@@ -172,22 +172,22 @@ public static unsafe partial class Imgui
         return new(ImguiNative.GetWindowDrawList());
     }
     
-    public static bool IsItemClicked(ImGuiMouseButton_ aMouseButton = ImGuiMouseButton_.ImGuiMouseButton_Left)
+    public static bool IsItemClicked(ImGuiMouseButton aMouseButton = ImGuiMouseButton.Left)
     {
         return ImguiNative.IsItemClicked((int)aMouseButton) > 0;
     }
     
-    public static void OpenPopup(string aPopupName, ImGuiPopupFlags_ aFlags = 0)
+    public static void OpenPopup(string aPopupName, ImGuiPopupFlags aFlags = 0)
     {
         ImguiNative.OpenPopup_Str(aPopupName.AsBytes(), (int)aFlags);
     }
     
-    public static void OpenPopup(uint aId, ImGuiPopupFlags_ aFlags)
+    public static void OpenPopup(uint aId, ImGuiPopupFlags aFlags)
     {
         ImguiNative.OpenPopup_ID(aId, (int)aFlags);
     }
     
-    public static bool BeginPopup(string aPopupName, ImGuiWindowFlags_ aFlags = 0)
+    public static bool BeginPopup(string aPopupName, ImGuiWindowFlags aFlags = 0)
     {
         return ImguiNative.BeginPopup(aPopupName.AsBytes(), (int)aFlags) > 0;
     }
@@ -202,9 +202,9 @@ public static unsafe partial class Imgui
         ImguiNative.SeparatorText(aLabel.AsBytes());
     }
     
-    public static bool Selectable(string aLabel, bool aSelected = true, ImGuiSelectableFlags_ aFlags = (ImGuiSelectableFlags_)0, Vector2 aSize = new Vector2())
+    public static bool Selectable(string aLabel, bool aSelected = true, ImGuiSelectableFlags aFlags = (ImGuiSelectableFlags)0, Vector2 aSize = new Vector2())
     {
-        ImGuiSelectableFlags_ flags = (ImGuiSelectableFlags_)0;
+        ImGuiSelectableFlags flags = (ImGuiSelectableFlags)0;
         return ImguiNative.Selectable_Bool(aLabel.AsBytes(), aSelected ? (byte)1 : (byte)0, (int)aFlags, aSize) > 0;
     }
     
@@ -213,7 +213,7 @@ public static unsafe partial class Imgui
         ImguiNative.TreePop();
     }
     
-    public static bool TreeNodeEx(string str_id, ImGuiTreeNodeFlags_ flags, string fmt = "")
+    public static bool TreeNodeEx(string str_id, ImGuiTreeNodeFlags flags, string fmt = "")
     {
         ImGuiListClipper clipper = new();
         return ImguiNative.TreeNodeEx_StrStr(str_id.AsBytes(), (int)flags, fmt.AsBytes(), __arglist(0)) > 0;
@@ -224,24 +224,24 @@ public static unsafe partial class Imgui
         return ImguiNative.GetStyle();
     }
 
-    public static bool InputText(string aName, ref string aString, int aCount, ImGuiInputTextFlags_ aFlags = 0)
+    public static bool InputText(string aName, ref string aString, int aCount, ImGuiInputTextFlags aFlags = 0)
     {
         return ImguiNative.InputText(aName.AsBytes(), aString.AsBytes(), (uint)aCount, (int)aFlags, null, null) > 0;
     }
 
-    public static bool InputInt(string aName, ref int aNumber, int aStep = 1, int aStepFast = 100, ImGuiInputTextFlags_ aFlags = 0)
+    public static bool InputInt(string aName, ref int aNumber, int aStep = 1, int aStepFast = 100, ImGuiInputTextFlags aFlags = 0)
     {
         fixed(int* number = &aNumber)
             return ImguiNative.InputInt(aName.AsBytes(), number, aStep, aStepFast, (int)aFlags) > 0;
     }
 
-    public static bool DragFloat(string aName, ref float aNumber, float aSpeed = 1f, float aMin = 0f, float aMax = 0f, string aFormat = "%.3f", ImGuiSliderFlags_ aFlags = 0)
+    public static bool DragFloat(string aName, ref float aNumber, float aSpeed = 1f, float aMin = 0f, float aMax = 0f, string aFormat = "%.3f", ImGuiSliderFlags aFlags = 0)
     {
         fixed(float* number = &aNumber)
             return ImguiNative.DragFloat(aName.AsBytes(), number, aSpeed, aMin , aMax, aFormat.AsBytes(), (int)aFlags) > 0;
     }
 
-    public static bool ColorPicker4(string aName, ref Vector4 aColorAsVec4, ImGuiColorEditFlags_ aFlags = 0)
+    public static bool ColorPicker4(string aName, ref Vector4 aColorAsVec4, ImGuiColorEditFlags aFlags = 0)
     {
         fixed (Vector4* color = &aColorAsVec4)
         {
@@ -249,19 +249,19 @@ public static unsafe partial class Imgui
         }
     }
     
-    public static bool DragFloat2(string aName, ref Vector2 aNumber, float aSpeed = 1f, float aMin = 0f, float aMax = 0f, string aFormat = "%.3f", ImGuiSliderFlags_ aFlags = 0)
+    public static bool DragFloat2(string aName, ref Vector2 aNumber, float aSpeed = 1f, float aMin = 0f, float aMax = 0f, string aFormat = "%.3f", ImGuiSliderFlags aFlags = 0)
     {
         fixed(Vector2* number = &aNumber)
             return ImguiNative.DragFloat2(aName.AsBytes(), (float*)number, aSpeed, aMin , aMax, aFormat.AsBytes(), (int)aFlags) > 0;
     }
 
-    public static bool DragFloat3(string aName, ref Vector3 aNumber, float aSpeed = 1f, float aMin = 0f, float aMax = 0f, string aFormat = "%.3f", ImGuiSliderFlags_ aFlags = 0)
+    public static bool DragFloat3(string aName, ref Vector3 aNumber, float aSpeed = 1f, float aMin = 0f, float aMax = 0f, string aFormat = "%.3f", ImGuiSliderFlags aFlags = 0)
     {
         fixed(Vector3* number = &aNumber)
             return ImguiNative.DragFloat3(aName.AsBytes(), (float*)number, aSpeed, aMin , aMax, aFormat.AsBytes(), (int)aFlags) > 0;
     }
     
-    public static bool DragFloat4(string aName, ref Vector4 aNumber, float aSpeed = 1f, float aMin = 0f, float aMax = 0f, string aFormat = "%.3f", ImGuiSliderFlags_ aFlags = 0)
+    public static bool DragFloat4(string aName, ref Vector4 aNumber, float aSpeed = 1f, float aMin = 0f, float aMax = 0f, string aFormat = "%.3f", ImGuiSliderFlags aFlags = 0)
     {
         fixed(Vector4* number = &aNumber)
             return ImguiNative.DragFloat4(aName.AsBytes(), (float*)number, aSpeed, aMin , aMax, aFormat.AsBytes(), (int)aFlags) > 0;
@@ -287,7 +287,7 @@ public static unsafe partial class Imgui
         return ImguiNative.Button(aLabel.AsBytes(), aSize) > 0;
     }
     
-    public static bool BeginChild(string aLabel, Vector2 aSize = new(), ImGuiChildFlags_ aChildFlags = 0, ImGuiWindowFlags_ aWindowFlags = 0)
+    public static bool BeginChild(string aLabel, Vector2 aSize = new(), ImGuiChildFlags aChildFlags = 0, ImGuiWindowFlags aWindowFlags = 0)
     {
         return ImguiNative.BeginChild_Str(aLabel.AsBytes(), aSize, (int)aChildFlags, (int)aWindowFlags) > 0; 
     }
@@ -302,7 +302,7 @@ public static unsafe partial class Imgui
         ImguiNative.TextColored(aColor, aFormat.AsBytes(), __arglist());
     }
 
-    public static bool BeginCombo(string aName, string aPreviewValue, ImGuiComboFlags_ aComboFlags = 0)
+    public static bool BeginCombo(string aName, string aPreviewValue, ImGuiComboFlags aComboFlags = 0)
     {
         return ImguiNative.BeginCombo(aName.AsBytes(), aPreviewValue.AsBytes(), (int)aComboFlags) > 0;
     }
@@ -317,7 +317,7 @@ public static unsafe partial class Imgui
         ImguiNative.SetItemDefaultFocus();
     }
     
-    public static bool CollapsingHeader(string aHeader, ImGuiTreeNodeFlags_ aFlags)
+    public static bool CollapsingHeader(string aHeader, ImGuiTreeNodeFlags aFlags)
     {
         return ImguiNative.CollapsingHeader_TreeNodeFlags(aHeader.AsBytes(), (int)aFlags) > 0;
     }
@@ -327,12 +327,12 @@ public static unsafe partial class Imgui
         return ImguiNative.GetMainViewport();
     }
 
-    public static void SetNextWindowPos(Vector2 aSize, ImGuiCond_ aCond = 0, Vector2 aPivot = new())
+    public static void SetNextWindowPos(Vector2 aSize, ImGuiCond aCond = 0, Vector2 aPivot = new())
     {
         ImguiNative.SetNextWindowPos(aSize, (int)aCond, aPivot);
     }
 
-    public static void SetNextWindowSize(Vector2 aSize, ImGuiCond_ aCond = 0)
+    public static void SetNextWindowSize(Vector2 aSize, ImGuiCond aCond = 0)
     {
         ImguiNative.SetNextWindowSize(aSize, (int)aCond);
     }
@@ -368,7 +368,7 @@ public static unsafe partial class Imgui
             ImguiNative.PlotLines_FloatPtr(aLabel.AsBytes(), valPtr, aValueCount, aValuesOffset, aOverlayText.AsBytes(), aScaleMin, aScaleMax, aGraphSize, aStride);
     }
 
-    public static void DockSpaceOverViewport(uint aDockspaceId = 0, ImGuiViewport* aViewport = null, ImGuiDockNodeFlags_ aFlags = 0, ImGuiWindowClass* aWindowClass = null)
+    public static void DockSpaceOverViewport(uint aDockspaceId = 0, ImGuiViewport* aViewport = null, ImGuiDockNodeFlags aFlags = 0, ImGuiWindowClass* aWindowClass = null)
     {
         ImguiNative.DockSpaceOverViewport(aDockspaceId, aViewport, (int)aFlags, aWindowClass);
     }
@@ -395,6 +395,12 @@ public static unsafe partial class Imgui
     {
         fixed(bool* enabled = &aEnabled)
             ImguiNative.ShowAboutWindow(enabled);
+    }
+
+    public static bool DragInt(string aName, ref int aInt, float aSpeed = 1f, int aMin = Int32.MinValue, int aMax = Int32.MaxValue, string aFormat = "%d", ImGuiSliderFlags aFlags = 0)
+    {
+        fixed (int* intPtr = &aInt)
+            return ImguiNative.DragInt(aName.AsBytes(), intPtr, aSpeed, aMin, aMax,aFormat.AsBytes(), (int)aFlags) > 0;
     }
 }
 
@@ -445,7 +451,7 @@ public unsafe partial class ImguiDrawList
 
     public void AddText(Vector2 aCursorPosition, uint aRequestedU32Color, string aString)
     {
-        int size = System.Text.ASCIIEncoding.Unicode.GetByteCount(aString);
+        int size = System.Text.UTF8Encoding.Unicode.GetByteCount(aString) + 1;
         sbyte* bytes = aString.AsBytes();
         ImguiNative.ImDrawList_AddText_Vec2(mNativeDrawListPtr, aCursorPosition, aRequestedU32Color, bytes, bytes + size);
     }
@@ -507,12 +513,12 @@ public unsafe partial struct ImguiStyle
     public ref bool AntiAliasedFill => ref Unsafe.AsRef<bool>(&NativePtr->AntiAliasedFill);
     public ref float CurveTessellationTol => ref Unsafe.AsRef<float>(&NativePtr->CurveTessellationTol);
     public ref float CircleTessellationMaxError => ref Unsafe.AsRef<float>(&NativePtr->CircleTessellationMaxError);
-    public RangeAccessor<Vector4> Colors => new RangeAccessor<Vector4>(&NativePtr->Colors.e0, 55);
+    public RangeAccessor<Vector4> Colors => new RangeAccessor<Vector4>(&NativePtr->Colors.e0, (int)ImGuiCol.COUNT);
     public ref float HoverStationaryDelay => ref Unsafe.AsRef<float>(&NativePtr->HoverStationaryDelay);
     public ref float HoverDelayShort => ref Unsafe.AsRef<float>(&NativePtr->HoverDelayShort);
     public ref float HoverDelayNormal => ref Unsafe.AsRef<float>(&NativePtr->HoverDelayNormal);
-    public ref ImGuiHoveredFlags_ HoverFlagsForTooltipMouse => ref Unsafe.AsRef<ImGuiHoveredFlags_>(&NativePtr->HoverFlagsForTooltipMouse);
-    public ref ImGuiHoveredFlags_ HoverFlagsForTooltipNav => ref Unsafe.AsRef<ImGuiHoveredFlags_>(&NativePtr->HoverFlagsForTooltipNav);
+    public ref ImGuiHoveredFlags HoverFlagsForTooltipMouse => ref Unsafe.AsRef<ImGuiHoveredFlags>(&NativePtr->HoverFlagsForTooltipMouse);
+    public ref ImGuiHoveredFlags HoverFlagsForTooltipNav => ref Unsafe.AsRef<ImGuiHoveredFlags>(&NativePtr->HoverFlagsForTooltipNav);
     public void Destroy()
     {
         ImguiNative.ImGuiStyle_destroy((ImGuiStyle*)(NativePtr));

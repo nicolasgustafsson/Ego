@@ -1,7 +1,5 @@
 using System.Reflection;
 using ImguiBindings;
-using ImGuiNET;
-using ImGuiListClipper = ImGuiNET.ImGuiListClipper;
 
 namespace Ego;
 
@@ -10,7 +8,7 @@ public class TreeInspectorNew : Node
     public Node? InspectedNode = null;
     private Node? PreviousInspectedNode = null;
 
-    private ImGuiTreeNodeFlags_ Flags = ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_OpenOnDoubleClick;
+    private ImGuiTreeNodeFlags Flags = ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick;
     private Vector4 EvenColor = new Vector4(1f, 1f, 1f, 0.0392f);
     private Vector4 OddColor = new Vector4(1f, 1f, 1f, 0f);
 
@@ -55,7 +53,7 @@ public class TreeInspectorNew : Node
     
     private unsafe void EDebug()
     {
-        Imgui.Begin("InspectorNew");
+        Imgui.Begin("Inspector");
         if (InspectedNode != null)
         {
             Imgui.PushID(InspectedNode.Guid.ToString());
@@ -69,15 +67,15 @@ public class TreeInspectorNew : Node
         }
         
         Imgui.End();
-        Imgui.Begin("Node Tree New");
+        Imgui.Begin("Node Tree");
 
-        Imgui.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_ItemSpacing, Vector2.Zero);
-        Imgui.PushStyleVar(ImGuiStyleVar_.ImGuiStyleVar_FramePadding, FramePadding);
+        Imgui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
+        Imgui.PushStyleVar(ImGuiStyleVar.FramePadding, FramePadding);
         
         bool parentActive = Imgui.IsWindowFocused();
         
         if (parentActive)
-            Imgui.PushStyleColor(ImGuiCol_.ImGuiCol_Header, Imgui.GetStyleColorVec4(ImGuiCol_.ImGuiCol_TabSelected));
+            Imgui.PushStyleColor(ImGuiCol.Header, Imgui.GetStyleColorVec4(ImGuiCol.TabSelected));
 
         float minX = Imgui.GetCursorScreenPos().X;
         float maxX = minX + Imgui.GetContentRegionAvail().X;
@@ -107,43 +105,49 @@ public class TreeInspectorNew : Node
     
     private unsafe int Tree(Node aNode, int aRows = 0)
     {
-        ImGuiTreeNodeFlags_ flags = Flags;
+        ImGuiTreeNodeFlags flags = Flags;
         if (InspectedNode == aNode) 
-            flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Selected;
+            flags |= ImGuiTreeNodeFlags.Selected;
 
         if (aNode.Children.Length == 0)
-            flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_Leaf;
+            flags |= ImGuiTreeNodeFlags.Leaf;
 
-        flags |= ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen;
+        flags |= ImGuiTreeNodeFlags.DefaultOpen;
         
         aRows++;
         
         if (aNode == InspectedNode)
         {
-            Vector4 color = Imgui.GetStyleColorVec4(ImGuiCol_.ImGuiCol_ScrollbarGrabActive);
+            Imgui.PushStyleColor(ImGuiCol.HeaderHovered, Imgui.GetStyleColorVec4(ImGuiCol.TabSelected));
+            Vector4 color = Imgui.GetStyleColorVec4(ImGuiCol.ScrollbarGrabActive);
 
             color.W = 1f;
-            Imgui.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderHovered, color);
-            Imgui.PushStyleColor(ImGuiCol_.ImGuiCol_HeaderActive, color);
-            Imgui.PushStyleColor(ImGuiCol_.ImGuiCol_Header, color);
+            
+            Imgui.PushStyleColor(ImGuiCol.HeaderActive, color);
         }
 
         Vector2 cursorPosition = Imgui.GetCursorScreenPos();
 
         Imgui.PushID(aNode.GetHashCode());
-        bool wasOpened = Imgui.TreeNodeEx(aNode.GetName(), flags, $"{aNode.GetName()}");
+        
+        bool wasOpened = Imgui.TreeNodeEx(aNode.GetName(), flags, "     " + $"{aNode.GetName()}");
         
         if (aNode == InspectedNode)
         {
             Imgui.PopStyleColor();
             Imgui.PopStyleColor();
-            Imgui.PopStyleColor();
         }
+        ImguiDrawList draw_list = Imgui.GetWindowDrawList();
+
+        Vector4? requestedColor = aNode.GetIconColor();
+        uint requestedU32Color = requestedColor.HasValue ? Imgui.GetColorU32(requestedColor.Value) : Imgui.GetColorU32(ImGuiCol.Text);
+        
+        draw_list.AddText(cursorPosition + FramePadding + new Vector2(15f, 0f), requestedU32Color, $"{aNode.GetIcon()}");
         
         if (Imgui.IsItemClicked())
             InspectedNode = aNode;
         
-        if (Imgui.IsItemClicked(ImGuiMouseButton_.ImGuiMouseButton_Right))
+        if (Imgui.IsItemClicked(ImGuiMouseButton.Right))
         {
             InspectedNode = aNode;
             Imgui.OpenPopup("Context Menu");

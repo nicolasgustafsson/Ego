@@ -1,5 +1,4 @@
-﻿using ImGuiNET;
-
+﻿
 namespace Ego;
 
 [Node]

@@ -1,9 +1,9 @@
-using ImGuiNET;
 
 namespace Rendering;
 
 public static class ImGuiKeyMapping
 {
+    /*
     public static ImGuiMouseButton AsImGuiMouseButton(this MouseButton aMouseButton)
     {
         switch(aMouseButton)
@@ -261,5 +261,5 @@ public static class ImGuiKeyMapping
             case KeyboardKey.Menu:
                 return ImGuiKey.Menu;
         }
-    }
+    }*/
 }

@@ -4,7 +4,6 @@ global using static VulkanApi.Surface;
 global using static VulkanApi.MemoryAllocator;
 global using static VulkanApi.Gpu;
 using VulkanApi;
-using ImGuiNET;
 using SharpGLTF.Schema2;
 using Silk.NET.Windowing;
 using Vortice.ShaderCompiler;

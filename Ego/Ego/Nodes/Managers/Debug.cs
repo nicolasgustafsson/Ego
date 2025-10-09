@@ -1,5 +1,4 @@
-﻿using ImGuiNET;
-using Rendering;
+﻿using Rendering;
 
 namespace Ego;
 
@@ -24,7 +23,7 @@ public partial class Debug : Node
         
         ImGuiDriver.Begin();
        
-        Imgui.DockSpaceOverViewport();
+        Imgui.DockSpaceOverViewport(aFlags: ImGuiDockNodeFlags.PassthruCentralNode);
 
         Imgui.ShowDemoWindow();
         Imgui.ShowAboutWindow();

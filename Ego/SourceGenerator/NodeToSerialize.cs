@@ -253,7 +253,7 @@ public {{ConditionalNew}} static {{Name}} Deserialize(SerializedNode aNode)
                 
                 {{ConditionalEarlyOutInspect}}
                 
-                if (Imgui.CollapsingHeader("{{Name}}", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
+                if (Imgui.CollapsingHeader("{{Name}}", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     {{ConditionalInspectCall}};
                 }

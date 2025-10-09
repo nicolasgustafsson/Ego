@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using ImGuiNET;
 using Utilities;
 
 namespace Ego;
