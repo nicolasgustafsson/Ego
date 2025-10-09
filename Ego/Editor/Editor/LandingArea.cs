@@ -1,4 +1,6 @@
 using NativeFileDialogs.Net;
+using ImGuiViewport = ImguiBindings.ImGuiViewport;
+
 namespace Editor;
 
 [Node]
@@ -10,22 +12,22 @@ public partial class LandingArea : Node
         Debug.EDebug += EDebug;
     }
 
-    private void EDebug()
+    private unsafe void EDebug()
     {
 
-        ImGuiWindowFlags flags = ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoSavedSettings;
-        ImGuiViewportPtr viewport = ImGui.GetMainViewport();
-        ImGui.SetNextWindowPos(viewport.Pos);
-        ImGui.SetNextWindowSize(viewport.Size);
+        ImGuiWindowFlags_ flags = ImGuiWindowFlags_.ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_.ImGuiWindowFlags_NoMove | ImGuiWindowFlags_.ImGuiWindowFlags_NoSavedSettings;
+        ImGuiViewport* viewport = Imgui.GetMainViewport();
+        Imgui.SetNextWindowPos(viewport->Pos);
+        Imgui.SetNextWindowSize(viewport->Size);
         
-        if (ImGui.Begin("Fullscreen window", flags))
+        if (Imgui.Begin("Fullscreen window", flags))
         {
-            if (ImGui.Button("Select Project..."))
+            if (Imgui.Button("Select Project..."))
             {
                 Editor.Instance.SelectProject();
             }
             
-            ImGui.End();
+            Imgui.End();
         }
     }
 

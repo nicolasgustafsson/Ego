@@ -43,7 +43,7 @@ public partial class Editor : Node
     {
         DefaultInspect();
         
-        if (ImGui.Button("Import Texture"))
+        if (Imgui.Button("Import Texture"))
         {
             if (Nfd.OpenDialog(out string? outPath, new Dictionary<string, string>()
             {

@@ -168,7 +168,7 @@ public partial class MeshRenderer : Node3D
 
     private void Inspect()
     {
-        if (ImGui.Button("Load Texture"))
+        if (Imgui.Button("Load Texture"))
         {
             if (Nfd.OpenDialog(out string? outPath, new Dictionary<string, string>()
             {

@@ -7,7 +7,7 @@ public class Context
     public Debug Debug = null!;
     public RendererApi RendererApi = null!;
     public AssetManager AssetManager = null!;
-    public TreeInspector TreeInspector = null!;
+    public TreeInspectorNew TreeInspector = null!;
     public MultithreadingManager MultithreadingManager = null!;
     public PerformanceMonitor PerformanceMonitor = null!;
     public NodeTypeDatabase NodeTypeDatabase = null!;

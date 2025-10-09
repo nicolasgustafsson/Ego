@@ -24,7 +24,7 @@ public partial class TopMenu : Node
     {
         base.Start();
 
-        MenuBarColor = *ImGui.GetStyleColorVec4(ImGuiCol.MenuBarBg);
+        MenuBarColor = Imgui.GetStyleColorVec4(ImGuiCol_.ImGuiCol_MenuBarBg);
         
         Debug.EDebug += OnDebug;
     }
@@ -36,7 +36,7 @@ public partial class TopMenu : Node
             case TopMenuState.Flash:
                 float flashProgress = (float)((DateTime.Now - FlashTime).TotalSeconds).Within(0f, 1f);
                 Vector4 flashColor = Vector4.Lerp(StatusColor.ToVec4(), MenuBarColor, flashProgress);
-                ImGui.PushStyleColor(ImGuiCol.MenuBarBg, flashColor);
+                Imgui.PushStyleColor(ImGuiCol_.ImGuiCol_MenuBarBg, flashColor);
 
                 if (flashProgress > 0.999f)
                     State = TopMenuState.None;
@@ -44,16 +44,16 @@ public partial class TopMenu : Node
                 break;
             
             case TopMenuState.Color:
-                ImGui.PushStyleColor(ImGuiCol.MenuBarBg, StatusColor.ToVec4());
+                Imgui.PushStyleColor(ImGuiCol_.ImGuiCol_MenuBarBg, StatusColor.ToVec4());
                 break;
 
             case TopMenuState.None:
             default:
-                ImGui.PushStyleColor(ImGuiCol.MenuBarBg, MenuBarColor);
+                Imgui.PushStyleColor(ImGuiCol_.ImGuiCol_MenuBarBg, MenuBarColor);
                 break;
         }
         
-        if (!ImGui.BeginMainMenuBar())
+        if (!Imgui.BeginMainMenuBar())
             return;
 
         /*if (ImGui.MenuItem("File"))
@@ -61,25 +61,25 @@ public partial class TopMenu : Node
             ImGui.OpenPopup("File Menu");
         }*/
         
-        if (ImGui.BeginMenu("File"))
+        if (Imgui.BeginMenu("File"))
         {
-            if (ImGui.MenuItem("Open Project..."))
+            if (Imgui.MenuItem("Open Project..."))
             {
                 Editor.Instance.SelectProject();
             }
 
-            ImGui.EndPopup();
+            Imgui.EndPopup();
         }
         
         if ((System.DateTime.Now - StatusTimeStamp).TotalSeconds < 5f)
         {
-            ImGui.Separator();
-            ImGui.Text(StatusMessage);
+            Imgui.Separator();
+            Imgui.Text(StatusMessage);
         }
         
-        ImGui.EndMainMenuBar();
+        Imgui.EndMainMenuBar();
 
-        ImGui.PopStyleColor();
+        Imgui.PopStyleColor();
     }
     
     public void Flash(Color aColor, string aMessage)

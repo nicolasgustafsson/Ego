@@ -253,7 +253,7 @@ public {{ConditionalNew}} static {{Name}} Deserialize(SerializedNode aNode)
                 
                 {{ConditionalEarlyOutInspect}}
                 
-                if (ImGui.CollapsingHeader("{{Name}}", ImGuiTreeNodeFlags.DefaultOpen))
+                if (Imgui.CollapsingHeader("{{Name}}", ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     {{ConditionalInspectCall}};
                 }
@@ -272,7 +272,7 @@ public {{ConditionalNew}} static {{Name}} Deserialize(SerializedNode aNode)
             $$"""
 using MessagePack;
 using Ego;
-using ImGuiNET;
+using ImguiBindings;
 #pragma warning disable
 namespace {{Namespace}};
 public partial class {{Name}}

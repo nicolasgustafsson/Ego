@@ -56,7 +56,7 @@ public partial class PerformanceMonitor : Node
     {
         //ImGui.Begin("Performance Monitor");
         string totalFps = (1d / Time.DeltaTime.TotalSeconds).ToString("0.0") + " fps";
-        ImGui.Text(totalFps);
+        Imgui.Text(totalFps);
         
         lock(Traces)
         {
@@ -72,9 +72,9 @@ public partial class PerformanceMonitor : Node
                 float max = ms.Max();
                 float average = ms.Average();
 
-                ImGui.PushID(help.Key);
-                ImGui.PlotLines($"Min: {min:N1}ms\nMax: {max:N1}ms\nAverage: {average:N1}ms", ref ms[0], help.Value.Size, graph_size: new Vector2(0, 100), values_offset:0, overlay_text:formattedFrameMs, scale_min:0, scale_max:50);
-                ImGui.PopID();
+                Imgui.PushID(help.Key);
+                Imgui.PlotLines($"Min: {min:N1}ms\nMax: {max:N1}ms\nAverage: {average:N1}ms", ref ms[0], help.Value.Size, aGraphSize: new Vector2(0, 100), aValuesOffset:0, aOverlayText:formattedFrameMs, aScaleMin:0, aScaleMax:50);
+                Imgui.PopID();
             }
         }
         //ImGui.End();

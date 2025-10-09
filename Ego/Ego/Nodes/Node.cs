@@ -24,7 +24,7 @@ public partial class Node
     public Debug Debug => MyContext.Debug;
     public RendererApi RendererApi => MyContext.RendererApi;
     public AssetManager AssetManager => MyContext.AssetManager;
-    public TreeInspector TreeInspector => MyContext.TreeInspector;
+    public TreeInspectorNew TreeInspector => MyContext.TreeInspector;
     public MultithreadingManager MultithreadingManager => MyContext.MultithreadingManager;
     public PerformanceMonitor PerformanceMonitor => MyContext.PerformanceMonitor;
     public NodeTypeDatabase NodeTypeDatabase => MyContext.NodeTypeDatabase;

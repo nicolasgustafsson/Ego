@@ -2,72 +2,44 @@ using System.Collections;
 using System.Drawing;
 using System.Reflection;
 using Ego;
+using ImguiBindings;
 using ImGuiNET;
 using Utilities;
 
 public static partial class EmGui
 {
-    /*public static bool Inspect(string aName, ref object aObject)
-    {
-        if (aObject is string aString)
-        {
-            bool changed = Inspect(aName, ref aString);
-            aObject = aString;
-            return changed;
-        }
-        if (aObject is Vector3 aVector3)
-        {
-            bool changed = Inspect(aName, ref aVector3);
-            aObject = aVector3;
-            return changed;
-        }
-        
-        if (aObject is int aInt)
-        {
-            bool changed = Inspect(aName, ref aInt);
-            aObject = aInt;
-            return changed;
-        }
-        if (aObject is Transform aTransform)
-        {
-            bool changed = Inspect(aName, ref aTransform);
-            aObject = aTransform;
-            return changed;
-        }
-        
-        return false;
-    }*/
+
     
     public static bool Inspect(string aName, ref string aString)
     {
-        return ImGui.InputText(aName, ref aString, 200);
+        return Imgui.InputText(aName, ref aString, 200);
     }
     
     public static bool Inspect(string aName, ref int aNumber)
     {
-        return ImGui.InputInt(aName, ref aNumber);
+        return Imgui.InputInt(aName, ref aNumber);
     }
     
     public static bool Inspect(string aName, ref float aNumber)
     {
-        return ImGui.DragFloat(aName, ref aNumber);
+        return Imgui.DragFloat(aName, ref aNumber);
     }
     
     public static bool Inspect(string aName, ref Color aColor)
     {
         Vector4 colorAsVec4 = aColor.ToVec4();
-        return ImGui.ColorPicker4(aName, ref colorAsVec4);
+        return Imgui.ColorPicker4(aName, ref colorAsVec4);
         aColor = colorAsVec4.ToColor();
     }
     
     public static bool Inspect(string aName, ref Vector3 aVector)
     {
-        return ImGui.DragFloat3(aName, ref aVector, 0.1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat);
+        return Imgui.DragFloat3(aName, ref aVector, 0.1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_NoRoundToFormat);
     }
     
     public static bool Inspect(string aName, ref Vector4 aVector)
     {
-        return ImGui.DragFloat4(aName, ref aVector, 0.1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat);
+        return Imgui.DragFloat4(aName, ref aVector, 0.1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags_.ImGuiSliderFlags_NoRoundToFormat);
     }
     
     public static bool Inspect(string aName, ref Transform aTransform)
@@ -85,9 +57,9 @@ public static partial class EmGui
     {
         bool changed = false;
         Vector3 Ypr;
-        Ypr.X = ImGui.GetStateStorage().GetFloat((uint)"yaw".GetHashCode(), aRotation.ToEulerAngle().X);
-        Ypr.Y = ImGui.GetStateStorage().GetFloat((uint)"pitch".GetHashCode(), aRotation.ToEulerAngle().Y);
-        Ypr.Z = ImGui.GetStateStorage().GetFloat((uint)"roll".GetHashCode(), aRotation.ToEulerAngle().Z);
+        Ypr.X = Imgui.GetStateStorage().GetFloat((uint)"yaw".GetHashCode(), aRotation.ToEulerAngle().X);
+        Ypr.Y = Imgui.GetStateStorage().GetFloat((uint)"pitch".GetHashCode(), aRotation.ToEulerAngle().Y);
+        Ypr.Z = Imgui.GetStateStorage().GetFloat((uint)"roll".GetHashCode(), aRotation.ToEulerAngle().Z);
         
         if (ImGui.DragFloat3(aName, ref Ypr, 1f, -99999999f, 99999999f, "%.3f", ImGuiSliderFlags.NoRoundToFormat))
         {
@@ -114,9 +86,9 @@ public static partial class EmGui
             changed = true;
         }
 
-        ImGui.GetStateStorage().SetFloat((uint)"yaw".GetHashCode(), Ypr.X);
-        ImGui.GetStateStorage().SetFloat((uint)"pitch".GetHashCode(), Ypr.Y);
-        ImGui.GetStateStorage().SetFloat((uint)"roll".GetHashCode(), Ypr.Z);
+        Imgui.GetStateStorage().SetFloat((uint)"yaw".GetHashCode(), Ypr.X);
+        Imgui.GetStateStorage().SetFloat((uint)"pitch".GetHashCode(), Ypr.Y);
+        Imgui.GetStateStorage().SetFloat((uint)"roll".GetHashCode(), Ypr.Z);
 
         return changed;
     }
@@ -125,40 +97,40 @@ public static partial class EmGui
     {
         bool changed = false;
 
-        bool expanded = (ImGui.TreeNodeEx(aName, ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.AllowOverlap | ImGuiTreeNodeFlags.FramePadding));
+        bool expanded = (Imgui.TreeNodeEx(aName, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_AllowOverlap | ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_FramePadding));
             
-        ImGui.SameLine();
+        Imgui.SameLine();
         bool wasEmpty = aList.Count == 0;
         if (wasEmpty)
-            ImGui.BeginDisabled();
-        if (ImGui.Button("-"))
+            Imgui.BeginDisabled();
+        if (Imgui.Button("-"))
         {
             aList.RemoveAt(aList.Count - 1);
         }
         if (wasEmpty)
-            ImGui.EndDisabled();
-        ImGui.SameLine();
-        if (ImGui.Button("+"))
+            Imgui.EndDisabled();
+        Imgui.SameLine();
+        if (Imgui.Button("+"))
         {
             Type? itemType = aList.GetType().GenericTypeArguments.FirstOrDefault();
             if (itemType == null)
             {
                 Log.Error($"Could not add item to list {aName}! Item type was null. Your list is weird.", aName);
-                ImGui.EndChild();
-                ImGui.TreePop();
+                Imgui.EndChild();
+                Imgui.TreePop();
                 return false;
             }
 
             aList.Add(Activator.CreateInstance(itemType));
         }
 
-        ImGui.SameLine();
-        ImGui.Text($"Size: {aList.Count}");
+        Imgui.SameLine();
+        Imgui.Text($"Size: {aList.Count}");
 
         if (!expanded) 
             return true;
         
-        if (ImGui.BeginChild(aName, Vector2.Zero, ImGuiChildFlags.Border | ImGuiChildFlags.AlwaysAutoResize | ImGuiChildFlags.AutoResizeY))
+        if (Imgui.BeginChild(aName, Vector2.Zero, ImGuiChildFlags_.ImGuiChildFlags_Borders | ImGuiChildFlags_.ImGuiChildFlags_AlwaysAutoResize | ImGuiChildFlags_.ImGuiChildFlags_AutoResizeY))
         {
             //ImGui.SameLine();
             for(int i = 0; i < aList.Count; i++)
@@ -168,9 +140,9 @@ public static partial class EmGui
                 aList[i] = refObj;
             }
                 
-            ImGui.EndChild();
+            Imgui.EndChild();
         }
-        ImGui.TreePop();
+        Imgui.TreePop();
 
         return changed;
     }
@@ -179,7 +151,7 @@ public static partial class EmGui
     {
         if (aVar == null)
         {
-            ImGui.TextColored(Color.Brown.ToVec4(), $"Variable [{aName}] is null, make sure to create it!");
+            Imgui.TextColored(Color.Brown.ToVec4(), $"Variable [{aName}] is null, make sure to create it!");
             return false;
         }
         
@@ -231,7 +203,7 @@ public static partial class EmGui
             return changed;
         }*/
         
-        if (ImGui.TreeNodeEx(aName, ImGuiTreeNodeFlags.DefaultOpen))
+        if (Imgui.TreeNodeEx(aName, ImGuiTreeNodeFlags_.ImGuiTreeNodeFlags_DefaultOpen))
         {
             foreach(var member in aVar.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public))
             {
@@ -242,7 +214,7 @@ public static partial class EmGui
                 member.SetValue(aVar, val);
             }
 
-            ImGui.TreePop();
+            Imgui.TreePop();
         }
 
         return changed;
@@ -251,22 +223,22 @@ public static partial class EmGui
     public static bool InspectEnum<T>(string aName, ref T aEnum)
     {
             bool newSelection = false;
-            if (ImGui.BeginCombo(aName, aEnum!.ToString()))
+            if (Imgui.BeginCombo(aName, aEnum!.ToString()!))
             {
                 foreach(var iEnum in Enum.GetValues(typeof(T)))
                 {
                     bool selected = Equals(iEnum, aEnum);
-                    if (ImGui.Selectable(iEnum.ToString()))
+                    if (Imgui.Selectable(iEnum.ToString()!))
                     {
                         newSelection = true;
                         aEnum = (T)iEnum;
                     }
                     if (selected)
                     {
-                        ImGui.SetItemDefaultFocus();
+                        Imgui.SetItemDefaultFocus();
                     }
                 }
-                ImGui.EndCombo();
+                Imgui.EndCombo();
             }
 
             return newSelection;

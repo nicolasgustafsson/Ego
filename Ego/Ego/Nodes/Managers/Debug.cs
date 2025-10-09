@@ -17,17 +17,17 @@ public partial class Debug : Node
         ImGuiDriver = new ImGuiDriver(RendererApi.Renderer, Window);
     }
 
-    protected override void Update()
+    protected override unsafe void Update()
     {
         if (ImGuiDriver == null)
             return;
         
         ImGuiDriver.Begin();
        
-        ImGui.DockSpaceOverViewport(0, null, ImGuiDockNodeFlags.PassthruCentralNode);
+        Imgui.DockSpaceOverViewport();
 
-        ImGui.ShowDemoWindow();
-        ImGui.ShowAboutWindow();
+        Imgui.ShowDemoWindow();
+        Imgui.ShowAboutWindow();
 
         EDebug();
         

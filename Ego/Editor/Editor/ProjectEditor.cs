@@ -29,7 +29,6 @@ public partial class ProjectEditor : Node
         
         GameProjectAssemblyLoader = AddChild(new GameProjectAssemblyLoader());
         //SelectProject("../../ExampleProject/ExampleProject.csproj");
-        
     }
     
     public void SelectProject(string aCsProj)
