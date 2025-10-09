@@ -10,7 +10,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ImGuiApi\ImGuiApi.csproj" />
       <ProjectReference Include="..\Platform\Platform.csproj" />
       <ProjectReference Include="..\Rendering\Rendering.csproj" />
       <ProjectReference Include="..\Utilities\Utilities.csproj" />

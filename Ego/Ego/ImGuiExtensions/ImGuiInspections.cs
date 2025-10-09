@@ -7,8 +7,6 @@ using Utilities;
 
 public static partial class EmGui
 {
-
-    
     public static bool Inspect(string aName, ref string aString)
     {
         return Imgui.InputText(aName, ref aString, 200);

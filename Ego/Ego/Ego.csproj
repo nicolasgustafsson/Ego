@@ -25,7 +25,6 @@
       <ProjectReference Include="../Rendering/Rendering.csproj" />
       <ProjectReference Include="../Utilities/Utilities.csproj" />
         <ProjectReference Include="../Platform/Platform.csproj" />
-        <ProjectReference Include="..\ImGuiApi\ImGuiApi.csproj" />
         <ProjectReference Include="..\SourceGenerator\SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
 

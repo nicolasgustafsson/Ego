@@ -8,7 +8,6 @@ public class TreeInspector : Node
     public Node? InspectedNode = null;
     private Node? PreviousInspectedNode = null;
 
-    /*
     private ImGuiTreeNodeFlags Flags = ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.FramePadding | ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.OpenOnDoubleClick;
     private Vector4 EvenColor = new Vector4(1f, 1f, 1f, 0.0392f);
     private Vector4 OddColor = new Vector4(1f, 1f, 1f, 0f);
@@ -23,12 +22,12 @@ public class TreeInspector : Node
 
     unsafe void DrawRowsBackground(int aRowCount, float aLineHeight, float aMinX, float aMaxX, float aYOffset, uint aEvenColor, uint aOddColor)
     {
-        Vector2 pos = ImGui.GetCursorPos();
-        float y0 = ImGui.GetCursorScreenPos().Y + (float)(int)aYOffset; 
+        Vector2 pos = Imgui.GetCursorPos();
+        float y0 = Imgui.GetCursorScreenPos().Y + (float)(int)aYOffset; 
         
-        ImGuiListClipperPtr clipper = new(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
-
-        ImDrawListPtr draw_list = ImGui.GetWindowDrawList();
+        ImguiListClipper clipper = new();
+        
+        ImguiDrawList draw_list = Imgui.GetWindowDrawList();
         
         clipper.Begin(aRowCount, aLineHeight);
         while (clipper.Step())
@@ -39,7 +38,6 @@ public class TreeInspector : Node
                 
                 /*if ((col & IM_COL32_A_MASK) == 0)
                     continue;*/
-    /*
                 
                 float y1 = y0 + (aLineHeight * (float)(row_n));
                 float y2 = y1 + aLineHeight;
@@ -50,62 +48,59 @@ public class TreeInspector : Node
         }
 
         clipper.Destroy();
-        ImGui.SetCursorPos(pos);
+        Imgui.SetCursorPos(pos);
     }
     
     private unsafe void EDebug()
     {
-        Imgui.Begin("Test");
-        Imgui.Text("yahoo");
-        Imgui.End();
-        ImGui.Begin("Inspector");
+        Imgui.Begin("Inspector");
         if (InspectedNode != null)
         {
-            ImGui.PushID(InspectedNode.Guid.ToString());
+            Imgui.PushID(InspectedNode.Guid.ToString());
             if (InspectedNode.Guid != PreviousInspectedNode?.Guid)
-                ImGui.GetStateStorage().Clear();
+                Imgui.GetStateStorage().Clear();
 
             InspectedNode.GeneratedInspect();
 
             PreviousInspectedNode = InspectedNode;
-            ImGui.PopID();
+            Imgui.PopID();
         }
         
-        ImGui.End();
-        ImGui.Begin("Node Tree");
+        Imgui.End();
+        Imgui.Begin("Node Tree");
 
-        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, FramePadding);
+        Imgui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
+        Imgui.PushStyleVar(ImGuiStyleVar.FramePadding, FramePadding);
         
-        bool parentActive = ImGui.IsWindowFocused();
+        bool parentActive = Imgui.IsWindowFocused();
         
         if (parentActive)
-            ImGui.PushStyleColor(ImGuiCol.Header, ImGui.GetStyleColorVec4(ImGuiCol.TabActive)[0]);
+            Imgui.PushStyleColor(ImGuiCol.Header, Imgui.GetStyleColorVec4(ImGuiCol.TabSelected));
 
-        float minX = ImGui.GetCursorScreenPos().X;
-        float maxX = minX + ImGui.GetContentRegionAvail().X;
+        float minX = Imgui.GetCursorScreenPos().X;
+        float maxX = minX + Imgui.GetContentRegionAvail().X;
 
-        float verticalSpacing = ImGui.GetStyle().ItemSpacing.Y;
+        float verticalSpacing = Imgui.GetStyle().ItemSpacing.Y;
         float yOffset = -verticalSpacing * 0.5f;
-        float lineHeight = ImGui.GetTextLineHeight() + verticalSpacing + FramePadding.Y * 2f;
+        float lineHeight = Imgui.GetTextLineHeight() + verticalSpacing + FramePadding.Y * 2f;
 
-        Vector2 cursorPosition = ImGui.GetCursorPos();
+        Vector2 cursorPosition = Imgui.GetCursorPos();
         
         int rowCount = Tree(Parent!);
 
-        Vector2 afterPos = ImGui.GetCursorPos();
+        Vector2 afterPos = Imgui.GetCursorPos();
 
-        ImGui.SetCursorPos(cursorPosition);
-        DrawRowsBackground(rowCount, lineHeight, minX, maxX, yOffset, ImGui.GetColorU32(EvenColor), ImGui.GetColorU32(OddColor));
-        ImGui.SetCursorPos(afterPos);
+        Imgui.SetCursorPos(cursorPosition);
+        DrawRowsBackground(rowCount, lineHeight, minX, maxX, yOffset, Imgui.GetColorU32(EvenColor), Imgui.GetColorU32(OddColor));
+        Imgui.SetCursorPos(afterPos);
         
-        ImGui.PopStyleVar();
-        ImGui.PopStyleVar();
+        Imgui.PopStyleVar();
+        Imgui.PopStyleVar();
         
         if (parentActive)
-            ImGui.PopStyleColor();
+            Imgui.PopStyleColor();
 
-        ImGui.End();
+        Imgui.End();
     }
     
     private unsafe int Tree(Node aNode, int aRows = 0)
@@ -117,56 +112,56 @@ public class TreeInspector : Node
         if (aNode.Children.Length == 0)
             flags |= ImGuiTreeNodeFlags.Leaf;
 
-        //if (aRows == 0)
         flags |= ImGuiTreeNodeFlags.DefaultOpen;
         
         aRows++;
         
         if (aNode == InspectedNode)
         {
-            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, ImGui.GetStyleColorVec4(ImGuiCol.TabActive)[0]);
-            Vector4 color = ImGui.GetStyleColorVec4(ImGuiCol.ScrollbarGrabActive)[0];
+            Imgui.PushStyleColor(ImGuiCol.HeaderHovered, Imgui.GetStyleColorVec4(ImGuiCol.TabSelected));
+            Vector4 color = Imgui.GetStyleColorVec4(ImGuiCol.ScrollbarGrabActive);
 
             color.W = 1f;
             
-            ImGui.PushStyleColor(ImGuiCol.HeaderActive, color);
+            Imgui.PushStyleColor(ImGuiCol.HeaderActive, color);
         }
 
-        Vector2 cursorPosition = ImGui.GetCursorScreenPos();
+        Vector2 cursorPosition = Imgui.GetCursorScreenPos();
 
-        ImGui.PushID(aNode.GetHashCode());
-        bool wasOpened = ImGui.TreeNodeEx(aNode.GetName(), flags, "     " + $"{aNode.GetName()}");
+        Imgui.PushID(aNode.GetHashCode());
+        
+        bool wasOpened = Imgui.TreeNodeEx(aNode.GetName(), flags, "     " + $"{aNode.GetName()}");
         
         if (aNode == InspectedNode)
         {
-            ImGui.PopStyleColor();
-            ImGui.PopStyleColor();
+            Imgui.PopStyleColor();
+            Imgui.PopStyleColor();
         }
-        ImDrawListPtr draw_list = ImGui.GetWindowDrawList();
+        ImguiDrawList draw_list = Imgui.GetWindowDrawList();
 
         Vector4? requestedColor = aNode.GetIconColor();
-        uint requestedU32Color = requestedColor.HasValue ? ImGui.GetColorU32(requestedColor.Value) : ImGui.GetColorU32(ImGuiCol.Text);
+        uint requestedU32Color = requestedColor.HasValue ? Imgui.GetColorU32(requestedColor.Value) : Imgui.GetColorU32(ImGuiCol.Text);
         
-        draw_list.AddText(cursorPosition + FramePadding + new Vector2(15f, 0f), requestedU32Color, aNode.GetIcon().ToString());
-    
-        if (ImGui.IsItemClicked())
+        draw_list.AddText(cursorPosition + FramePadding + new Vector2(15f, 0f), requestedU32Color, $"{aNode.GetIcon()}");
+        
+        if (Imgui.IsItemClicked())
             InspectedNode = aNode;
         
-        if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+        if (Imgui.IsItemClicked(ImGuiMouseButton.Right))
         {
             InspectedNode = aNode;
-            ImGui.OpenPopup("Context Menu");
+            Imgui.OpenPopup("Context Menu");
         }
         
-        if (ImGui.BeginPopup("Context Menu"))
+        if (Imgui.BeginPopup("Context Menu"))
         {
-            ImGui.SeparatorText("Node Actions");
-            if (ImGui.Selectable("Duplicate"))
+            Imgui.SeparatorText("Node Actions");
+            if (Imgui.Selectable("Duplicate"))
             {
                 aNode.Parent!.AddChild(aNode.Duplicate());
             }
             
-            if (ImGui.Selectable("Delete"))
+            if (Imgui.Selectable("Delete"))
             {
                 if (aNode == InspectedNode)
                     InspectedNode = null;
@@ -174,7 +169,7 @@ public class TreeInspector : Node
                 aNode.Destroy();
             }
             
-            ImGui.SeparatorText("Add Node...");
+            Imgui.SeparatorText("Add Node...");
             
             foreach(var keyValue in NodeTypeDatabase.NodeTypes)
             {
@@ -186,14 +181,14 @@ public class TreeInspector : Node
                 if (attribute is null || !attribute.AllowAddingToScene)
                     continue;
                     
-                if (ImGui.Selectable(keyValue.Key))
+                if (Imgui.Selectable(keyValue.Key))
                 {
                     if (Activator.CreateInstance(keyValue.Value) is Node child)
                         aNode.AddChild(child);
                 }
             }
 
-            ImGui.EndPopup();
+            Imgui.EndPopup();
         }
         
         if (wasOpened)
@@ -203,14 +198,14 @@ public class TreeInspector : Node
         }
         
         if (wasOpened)
-            ImGui.TreePop();
+            Imgui.TreePop();
 
-        ImGui.PopID();
+        Imgui.PopID();
         return aRows;
     }
 
     public override char GetIcon()
     {
         return (char)59393;
-    }*/
+    }
 }

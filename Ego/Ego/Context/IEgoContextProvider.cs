@@ -7,7 +7,7 @@ public interface IEgoContextProvider
     public Debug Debug{ get; }
     public RendererApi RendererApi { get; }
     public AssetManager AssetManager { get; }
-    public TreeInspectorNew TreeInspector { get; }
+    public TreeInspector TreeInspector { get; }
     public MultithreadingManager MultithreadingManager { get; }
     public PerformanceMonitor PerformanceMonitor { get;} 
     public NodeTypeDatabase NodeTypeDatabase { get;}

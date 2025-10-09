@@ -40,7 +40,7 @@ public partial class EgoRoot : Node
         MyContext.RendererApi = AddChild(new RendererApi(Window, aSettings.RendererInitSettings));
         MyContext.Debug = AddChild(new Debug());
         MyContext.AssetManager = AddChild(new AssetManager());
-        MyContext.TreeInspector = AddChild(new TreeInspectorNew());
+        MyContext.TreeInspector = AddChild(new TreeInspector());
         MyContext.PerformanceMonitor = AddChild(new PerformanceMonitor());
         MyContext.MaterialBuilder = AddChild(new MaterialBuilder());
         

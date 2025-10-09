@@ -7,6 +7,7 @@ namespace ExampleProject;
 public partial class TestNode : Node3D
 {
     [Inspect] private partial int IconNum { get; set; } = 59392;
+    [Inspect] private partial int Yippee { get; set; } = 59392;
     
     public override void Start()
     {
@@ -27,7 +28,7 @@ public partial class TestNode : Node3D
     
     public void Inspect()
     {
-        //DefaultInspect();
+        DefaultInspect();
 
         int num = IconNum;
         Imgui.DragInt("Icon", ref num);
