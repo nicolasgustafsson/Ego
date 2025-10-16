@@ -3,7 +3,7 @@ namespace VulkanApi;
 
 public unsafe class LogicalDevice : IGpuDestroyable
 {
-    public static LogicalDevice Device;
+    public static LogicalDevice Device = null!;
     public VkDevice VkDevice;
 
     public void LoadFunctions()

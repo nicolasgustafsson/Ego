@@ -9,7 +9,7 @@ public class ComputePipeline : Pipeline
     {
         private List<VkDescriptorSetLayout> Layouts = new();
         private List<VkPushConstantRange> PushConstants = new();
-        private ShaderModule ComputeShader;
+        private ShaderModule ComputeShader = null!;
 
         private uint CurrentOffset = 0;
 

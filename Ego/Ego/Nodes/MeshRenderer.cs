@@ -135,9 +135,7 @@ public partial class MeshRenderer : Node3D
         }*/
         
         int dataSize = (int)image.Width * (int)image.Height * 4;
-        var buffer = dataTransfer.TakeStagingBuffer((uint)dataSize);
-        Image vulkanImage = new(dataTransfer, rawTextureData, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(image.Width, image.Height, 1), true, buffer);
-        dataTransfer.ReturnStagingBuffer(buffer);
+        Image vulkanImage = new(rawTextureData.AsSpan(), VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(image.Width, image.Height, 1), true);
 
         MaterialConstantsBuffer = new(GpuBufferType.Uniform, GpuBufferTransferType.Direct);
         

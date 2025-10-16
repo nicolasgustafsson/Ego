@@ -9,8 +9,8 @@ public class GraphicsPipeline : Pipeline
     {
         private List<VkDescriptorSetLayout> DescriptorLayouts = new();
         private List<VkPushConstantRange> PushConstants = new();
-        private ShaderModule VertexShader;
-        private ShaderModule FragmentShader;
+        private ShaderModule VertexShader = null!;
+        private ShaderModule FragmentShader = null!;
 
         private uint CurrentPushConstantOffset = 0;
         

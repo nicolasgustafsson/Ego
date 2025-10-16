@@ -67,45 +67,16 @@ public unsafe class Image : IGpuDestroyable
         ImageRegistry.PointersToImages.TryAdd((nint)VkImage.Handle, this);
     }
     
-    public Image(IGpuImmediateSubmit aSubmit, byte[] aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps, AllocatedRawBuffer? aStagingBuffer = null)  
-        : this(aSubmit, aData.AsSpan().GetPointerUnsafe(), aFormat, aUsageFlags, aExtent, aMipMaps, aStagingBuffer)
+    public Image(Span<byte> aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps) : this(aFormat, aUsageFlags | VkImageUsageFlags.TransferDst, aExtent, aMipMaps, aIsRenderTexture: false)
     {
-        
+        GpuDataTransferer.Instance.TransferTextureImmediate(this, aData);
     }
-    public Image(IGpuImmediateSubmit aSubmit, byte* aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps, AllocatedRawBuffer? aStagingBuffer = null) : this(aFormat, aUsageFlags | VkImageUsageFlags.TransferDst, aExtent, aMipMaps, aIsRenderTexture: false)
+
+    public Image(byte* aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps) : 
+        this(new Span<byte>(aData, (int)(aExtent.width * aExtent.height * aExtent.depth * 4)), aFormat, aUsageFlags, aExtent, aMipMaps)
     {
-        ulong dataSize = aExtent.width * aExtent.height * aExtent.depth * 4;
-        
-        AllocatedRawBuffer staging = aStagingBuffer;
-        if (staging == null)
-            staging = new(dataSize, VkBufferUsageFlags.TransferSrc, VmaMemoryUsage.CpuToGpu);
-        
-        Buffer.MemoryCopy(aData, staging.AllocationInfo.pMappedData, dataSize, dataSize);
-        
-        aSubmit.ImmediateSubmit(cmd =>
-        {
-            cmd.TransitionImage(this, VkImageLayout.TransferDstOptimal);
-
-            VkBufferImageCopy copyRegion = new();
-            copyRegion.bufferOffset = 0;
-            copyRegion.bufferRowLength = 0;
-            copyRegion.bufferImageHeight = 0;
-
-            copyRegion.imageSubresource.aspectMask = VkImageAspectFlags.Color;
-            copyRegion.imageSubresource.mipLevel = 0;
-            copyRegion.imageSubresource.baseArrayLayer = 0;
-            copyRegion.imageSubresource.layerCount = 1;
-            copyRegion.imageExtent = aExtent;
-
-            vkCmdCopyBufferToImage(cmd.VkCommandBuffer, staging.Buffer, VkImage, VkImageLayout.TransferDstOptimal, 1, &copyRegion);
-
-            cmd.TransitionImage(this, VkImageLayout.ReadOnlyOptimal);
-        });
-        
-        if (aStagingBuffer == null)
-            staging.Destroy();
     }
-    
+
     private void UploadData()
     {
         

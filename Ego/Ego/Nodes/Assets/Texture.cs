@@ -40,10 +40,7 @@ public partial class Texture : Node, IImportable
     {
         GpuDataTransferer dataTransfer = await EgoTask.GpuDataTransfer();
 
-        int dataSize = Width * Height * 4;
-        var buffer = dataTransfer.TakeStagingBuffer((uint)dataSize);
-        Image vulkanImage = new(dataTransfer, aTextureBytes, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(Width, Height, 1), true, buffer);
-        dataTransfer.ReturnStagingBuffer(buffer);
+        Image vulkanImage = new(aTextureBytes, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(Width, Height, 1), true);
 
         await EgoTask.MainThread();
 
