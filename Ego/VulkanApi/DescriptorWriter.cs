@@ -42,6 +42,7 @@ public unsafe class DescriptorWriter
     {
         WriteBuffer(aBinding, aBuffer.Buffer, (ulong)sizeof(T), aOffset, aType);
     }
+    
     public void WriteBuffer(uint aBinding, VkBuffer aBuffer, ulong aSize, ulong aOffset, VkDescriptorType aType)
     {
         VkDescriptorBufferInfo bufferInfo = new();

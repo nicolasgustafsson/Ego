@@ -6,5 +6,5 @@ public struct MeshRenderData
 {
     public MeshData MyMeshData;
     public Material Material;
-    public Matrix4x4 WorldMatrix;
+    public Matrix4x4 WorldMatrix; //MeshData
 }

@@ -9,7 +9,8 @@ public partial class SceneEditor : Node
     public override void Start()
     {
         var scene = AddChild(WorkingScene);
-        scene.AddChild(new Node());
+        var node = scene.AddChild(new Node());
+        node.AddChild(new EditorDummy());
         
         var movement = AddChild(new EditorCameraMovement());
 

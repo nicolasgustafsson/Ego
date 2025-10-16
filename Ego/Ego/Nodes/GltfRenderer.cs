@@ -99,7 +99,7 @@ public partial class GltfRenderer : Node3D
                 surfaces.Add(newSurface);
             }
 
-            Meshes.Add(mesh.LogicalIndex, new MeshData(mesh.Name, surfaces, new MeshBuffers(aRenderer, MemoryAllocator.GlobalAllocator, indices, vertices)));
+            Meshes.Add(mesh.LogicalIndex, new MeshData(mesh.Name, surfaces, new MeshBuffers<Vertex>(aRenderer, MemoryAllocator.GlobalAllocator, indices, vertices)));
             index++;
         }
         

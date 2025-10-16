@@ -5,17 +5,44 @@ namespace Rendering.Materials;
 
 public enum MaterialPassType
 {
-    MainColor,
+    Opaque,
     Transparent,
-    Other
 }
 
 public class Material
 {
     public VkDescriptorSet DescriptorSet;
-    public MaterialPassType MyMaterialPassType = MaterialPassType.MainColor;
+    public MaterialPassType PassType;
     public ShaderObject.Shader VertexShader = null!;
     public ShaderObject.Shader FragmentShader = null!;
+    
+    public Material() { }
+    
+    public unsafe Material(string aVertexShaderPath, string aFragmentShaderPath, Renderer aRenderer)
+    {
+        DescriptorWriter DescriptorWriter = new();
+        DescriptorLayoutBuilder descriptorLayoutBuilder = new();
+        descriptorLayoutBuilder.AddBinding(0, VkDescriptorType.UniformBuffer);
+
+        VkDescriptorSetLayout MaterialLayout = descriptorLayoutBuilder.Build(VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment);
+        
+        List<VkDescriptorSetLayout> layouts = new() { aRenderer.SceneDataLayout, MaterialLayout };
+        VkPushConstantRange range = new();
+        range.offset = 0;
+        range.size = (uint)sizeof(MeshPushConstants);
+        range.stageFlags = VkShaderStageFlags.Vertex;
+        
+        VertexShader = new(VkShaderStageFlags.Vertex, VkShaderStageFlags.Fragment, "Vertex", File.ReadAllBytes(aVertexShaderPath), layouts, range);
+        FragmentShader = new(VkShaderStageFlags.Fragment, VkShaderStageFlags.None, "Fragment", File.ReadAllBytes(aFragmentShaderPath), layouts, range);
+        
+        PassType = MaterialPassType.Opaque;
+
+        
+        DescriptorSet = aRenderer.GlobalDescriptorAllocator.Allocate(MaterialLayout);
+        
+        DescriptorWriter.Clear();
+        DescriptorWriter.UpdateSet(DescriptorSet);
+    }
     
     public void Bind(CommandBufferHandle aCommandBuffer)
     {

@@ -87,7 +87,7 @@ public partial class Renderer
             cmd.BindDescriptorSet(renderData.Material.VertexShader.PipelineLayout, aGlobalDescriptor, VkPipelineBindPoint.Graphics, 0);
             cmd.BindDescriptorSet(renderData.Material.VertexShader.PipelineLayout, renderData.Material.DescriptorSet, VkPipelineBindPoint.Graphics, 1);
 
-            cmd.BindIndexBuffer(renderData.MyMeshData.MeshBuffers.IndexRawBuffer);
+            cmd.BindIndexBuffer(renderData.MyMeshData.MeshBuffers.IndexBuffer);
             
             MeshPushConstants pushConstants = new();
             pushConstants.WorldMatrix = renderData.WorldMatrix; 
@@ -95,6 +95,11 @@ public partial class Renderer
             cmd.SetPushConstants(pushConstants, renderData.Material.VertexShader.PipelineLayout, VkShaderStageFlags.Vertex);
 
             cmd.DrawIndexed(renderData.MyMeshData.Surfaces[0].Count);
+        }
+        
+        foreach(var customRenderCommand in CustomRenderCommands)
+        {
+            customRenderCommand.Render(cmd);
         }
        
         cmd.EndRendering();

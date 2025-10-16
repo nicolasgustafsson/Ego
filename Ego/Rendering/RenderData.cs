@@ -3,6 +3,7 @@ namespace Rendering;
 public class RenderData
 {
     public List<MeshRenderData> MeshRenders = new();
+    public List<IRenderCommand> CustomRenders = new();
     public Matrix4x4 CameraView;
     public Vector4 AmbientColor;
     public Vector4 SunlightColor;

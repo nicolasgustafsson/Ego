@@ -16,7 +16,7 @@ public partial class MeshRenderer : Node3D
     private string ModelPath = "Models/structure.glb";
     private MeshData? MeshData = null;
     private Material Material = null!;
-    private AllocatedBuffer<MaterialBuilder.MaterialConstants> MaterialConstantsBuffer = null!;
+    private GpuBuffer<MaterialBuilder.MaterialConstants> MaterialConstantsBuffer = null!;
 
     [Serialize] private int MeshIndex = 0;
     private string lastPath = "";
@@ -39,15 +39,15 @@ public partial class MeshRenderer : Node3D
     {
         base.Start();
 
-        MaterialConstantsBuffer = new(VkBufferUsageFlags.UniformBuffer, VmaMemoryUsage.CpuToGpu);
+        MaterialConstantsBuffer = new(GpuBufferType.Uniform, GpuBufferTransferType.Direct);
         
         MaterialBuilder.MaterialConstants constants = new();
         
         constants.Color = Vector4.One;
         constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
-        MaterialConstantsBuffer.SetWriteData(constants);
+        MaterialConstantsBuffer.SetData(constants);
         
-        Material = MaterialBuilder.CreateMaterial(MaterialPassType.MainColor,
+        Material = MaterialBuilder.CreateMaterial(MaterialPassType.Opaque,
             RendererApi.Renderer.WhiteImage,
             RendererApi.Renderer.DefaultLinearSampler,
             RendererApi.Renderer.WhiteImage,
@@ -139,15 +139,15 @@ public partial class MeshRenderer : Node3D
         Image vulkanImage = new(dataTransfer, rawTextureData, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(image.Width, image.Height, 1), true, buffer);
         dataTransfer.ReturnStagingBuffer(buffer);
 
-        MaterialConstantsBuffer = new(VkBufferUsageFlags.UniformBuffer, VmaMemoryUsage.CpuToGpu);
+        MaterialConstantsBuffer = new(GpuBufferType.Uniform, GpuBufferTransferType.Direct);
         
         MaterialBuilder.MaterialConstants constants = new();
         
         constants.Color = Vector4.One;
         constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
-        MaterialConstantsBuffer.SetWriteData(constants);
+        MaterialConstantsBuffer.SetData(constants);
         
-        var newMaterial = MaterialBuilder.CreateMaterial(MaterialPassType.MainColor,
+        var newMaterial = MaterialBuilder.CreateMaterial(MaterialPassType.Opaque,
             vulkanImage,
             RendererApi.Renderer.DefaultLinearSampler,
             RendererApi.Renderer.WhiteImage,

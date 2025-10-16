@@ -58,6 +58,7 @@ public partial class Renderer : IGpuImmediateSubmit
     public Action EPostRender = delegate {};
 
     private List<MeshRenderData> MeshRenderData = new();
+    private List<IRenderCommand> CustomRenderCommands = new();
 
     public Window MainWindow;
 
@@ -96,6 +97,7 @@ public partial class Renderer : IGpuImmediateSubmit
             return;
 
         MeshRenderData = aRenderData.MeshRenders;
+        CustomRenderCommands = aRenderData.CustomRenders;
         SceneData.View = aRenderData.CameraView;
         SceneData.Projection = MatrixExtensions.CreatePerspectiveFieldOfView(90f * (float)(Math.PI/180f), (float)RenderImage.Extent.width / (float)RenderImage.Extent.height, 10000f, 0.1f);
         SceneData.Projection[1, 1] *= -1f;

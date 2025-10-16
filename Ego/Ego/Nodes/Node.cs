@@ -28,6 +28,7 @@ public partial class Node
     public PerformanceMonitor PerformanceMonitor => MyContext.PerformanceMonitor;
     public NodeTypeDatabase NodeTypeDatabase => MyContext.NodeTypeDatabase;
     public MaterialBuilder MaterialBuilder => MyContext.MaterialBuilder;
+    public Shapes Shapes => MyContext.Shapes;
 
     private List<Node> xChildren { get; set; } = new();
     private Node? xParent = null;

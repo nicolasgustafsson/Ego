@@ -17,9 +17,9 @@ public class MeshData : IGpuDestroyable
 {
     public string Name;
     public List<GeoSurface> Surfaces;
-    public MeshBuffers MeshBuffers;
+    public MeshBufferBase MeshBuffers;
 
-    public MeshData(string aName, List<GeoSurface> WindowSurfaces, MeshBuffers aMeshBuffers)
+    public MeshData(string aName, List<GeoSurface> WindowSurfaces, MeshBufferBase aMeshBuffers)
     {
         Name = aName;
         Surfaces = WindowSurfaces;
@@ -86,7 +86,7 @@ public class MeshData : IGpuDestroyable
                 surfaces.Add(newSurface);
             }
 
-            meshes.Add(new MeshData(mesh.Name, surfaces, new MeshBuffers(aRenderer, GlobalAllocator, indices, vertices)));
+            meshes.Add(new MeshData(mesh.Name, surfaces, new MeshBuffers<Vertex>(aRenderer, GlobalAllocator, indices, vertices)));
             index++;
         }
         

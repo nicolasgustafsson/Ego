@@ -7,6 +7,7 @@
         <Nullable>enable</Nullable>
         <Configurations>Debug;Release;Development</Configurations>
         <Platforms>AnyCPU</Platforms>
+        <LangVersion>14</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>

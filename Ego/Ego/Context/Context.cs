@@ -12,4 +12,5 @@ public class Context
     public PerformanceMonitor PerformanceMonitor = null!;
     public NodeTypeDatabase NodeTypeDatabase = null!;
     public MaterialBuilder MaterialBuilder = null!;
+    public Shapes Shapes = null!;
 }

@@ -1,5 +1,5 @@
 using System.Buffers;
-using System.Security.Cryptography;
+using Rendering;
 using Rendering.Materials;
 using Vortice.Vulkan;
 using VulkanApi;
@@ -65,17 +65,15 @@ public partial class MaterialBuilder : Node
         OpaqueFragmentShader = new(VkShaderStageFlags.Fragment, VkShaderStageFlags.None, "Fragment", File.ReadAllBytes("Shaders/meshFrag.spv"), layouts, range);
     }
 
-    public Material CreateMaterial(MaterialPassType aPassType, Image aColorImage, Sampler aColorSampler, Image aMetallicRoughnessImage, Sampler aMetallicRoughnessSampler,  AllocatedBuffer<MaterialConstants> aBuffer, int aBufferOffset, DescriptorAllocatorGrowable aDescriptorAllocator)
+    public Material CreateMaterial(MaterialPassType aPassType, Image aColorImage, Sampler aColorSampler, Image aMetallicRoughnessImage, Sampler aMetallicRoughnessSampler, GpuBuffer<MaterialConstants> aBuffer, int aBufferOffset, DescriptorAllocatorGrowable aDescriptorAllocator)
     {
         Material material = new();
 
-        material.MyMaterialPassType = aPassType;
-        
         material.VertexShader = OpaqueVertexShader;
         material.FragmentShader = OpaqueFragmentShader;
 
-
         material.DescriptorSet = aDescriptorAllocator.Allocate(MaterialLayout);
+        material.PassType = aPassType;
 
         DescriptorWriter.Clear();
 
