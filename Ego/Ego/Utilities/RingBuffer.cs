@@ -1,4 +1,7 @@
-﻿namespace Ego;
+﻿using ZLinq;
+using ZLinq.Linq;
+
+namespace Ego;
 
 public class RingBuffer<T>
 {
@@ -20,8 +23,13 @@ public class RingBuffer<T>
         Index %= Size;
     }
     
+    public ValueEnumerable<Concat<TakeLast<FromArray<T>, T>, FromEnumerable<T>, T>, T> AsEnumerable()
+    {
+        return Buffer.AsValueEnumerable().TakeLast(Size - Index).Concat(Buffer.Take(Index));
+    }
+    
     public T[] AsArray()
     {
-        return Buffer.TakeLast(Size - Index).Concat(Buffer.Take(Index)).ToArray();
+        return Buffer.AsValueEnumerable().TakeLast(Size - Index).Concat(Buffer.Take(Index)).ToArray();
     }
 }

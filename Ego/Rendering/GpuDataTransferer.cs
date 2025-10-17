@@ -9,30 +9,24 @@ public class GpuDataTransferer : IGpuDestroyable
     public static GpuDataTransferer Instance = null!;
     private TransferQueue TransferQueue = null!;
 
-    private Fence ImmediateFence = null!;
-    private CommandBuffer ImmediateCommandBuffer = null!;
     private List<AllocatedRawBuffer> BufferPool = new();
     
     public GpuDataTransferer()
     {
         Instance = this;
         TransferQueue = new TransferQueue();
-        ImmediateFence = new();
-        ImmediateCommandBuffer = new(TransferQueue);
     }
     
-    public void ImmediateSubmit(Action<CommandBufferHandle> aAction)
+    private void ImmediateSubmit(Action<CommandBufferHandle> aAction)
     {
-        ImmediateFence.Reset();
-
-        using (var handle = ImmediateCommandBuffer.BeginRecording())
+        //[Perf] Is allocating a new command buffer every submit slow?
+        CommandBuffer immediateCommandBuffer = new(TransferQueue, aOneTime:true);
+        using (var handle = immediateCommandBuffer.BeginRecording())
             aAction(handle);
         
-        TransferQueue.Submit(ImmediateCommandBuffer, ImmediateFence);
-        ImmediateFence.Wait();
+        TransferQueue.Submit(immediateCommandBuffer, null);
     }
     
-    //New API, need to handle thread safety
     public unsafe void TransferTextureImmediate<T>(Image aImage, Span<T> aData) where T : unmanaged
     {
         uint dataSize = (uint)(aData.Length * sizeof(T));
@@ -44,18 +38,7 @@ public class GpuDataTransferer : IGpuDestroyable
         {
             cmd.TransitionImage(aImage, VkImageLayout.TransferDstOptimal);
 
-            VkBufferImageCopy copyRegion = new();
-            copyRegion.bufferOffset = 0;
-            copyRegion.bufferRowLength = 0;
-            copyRegion.bufferImageHeight = 0;
-
-            copyRegion.imageSubresource.aspectMask = VkImageAspectFlags.Color;
-            copyRegion.imageSubresource.mipLevel = 0;
-            copyRegion.imageSubresource.baseArrayLayer = 0;
-            copyRegion.imageSubresource.layerCount = 1;
-            copyRegion.imageExtent = aImage.Extent;
-
-            vkCmdCopyBufferToImage(cmd.VkCommandBuffer, staging.Buffer, aImage.VkImage, VkImageLayout.TransferDstOptimal, 1, &copyRegion);
+            cmd.CopyBufferToImage(staging, aImage, VkImageLayout.TransferDstOptimal);
 
             cmd.TransitionImage(aImage, VkImageLayout.ReadOnlyOptimal);
         });
@@ -63,44 +46,65 @@ public class GpuDataTransferer : IGpuDestroyable
         ReturnStagingBuffer(staging);
     }
     
-    //Use Memory<T>?
-    /*public async Task TransferTextureAsync<T>(Image aImage, Span<T> aData) where T : unmanaged
+    public unsafe void TransferDataImmediate<T>(GpuBuffer aBuffer, Span<T> aData) where T : unmanaged
     {
-        GpuDataTransferer dataTransfer = await EgoTask.GpuDataTransfer();
+        uint dataSize = (uint)(aData.Length * sizeof(T));
+        var staging = TakeStagingBuffer(dataSize);
         
-    }*/
+        Buffer.MemoryCopy(aData.GetPointerUnsafe(), staging.AllocationInfo.pMappedData, dataSize, dataSize);
+        
+        ImmediateSubmit(cmd =>
+        {
+            cmd.CopyBufferToBuffer(staging, aBuffer.MyInternalBuffer, dataSize);
+        });
+        
+        ReturnStagingBuffer(staging);
+    }
 
     public void Destroy()
     {
-        ImmediateFence.Destroy();
-        ImmediateCommandBuffer.Destroy();
+        lock(BufferPool)
+        {
+            foreach(var buffer in BufferPool)
+            {
+                buffer.Destroy();
+            }
+
+            BufferPool.Clear();
+        }
     }
 
-    public AllocatedRawBuffer TakeStagingBuffer(uint aByteSize)
+    private AllocatedRawBuffer TakeStagingBuffer(uint aByteSize)
     {
-        for (int i = 0; i < BufferPool.Count; i++)
+        lock(BufferPool)
         {
-            if (BufferPool[i].AllocationInfo.size >= aByteSize)
+            for (int i = 0; i < BufferPool.Count; i++)
             {
-                var buffer = BufferPool[i];
-                BufferPool.RemoveAt(i);
-                return buffer;
+                if (BufferPool[i].AllocationInfo.size >= aByteSize)
+                {
+                    var buffer = BufferPool[i];
+                    BufferPool.RemoveAt(i);
+                    return buffer;
+                }
             }
+            return new(aByteSize, VkBufferUsageFlags.TransferSrc, VmaMemoryUsage.CpuToGpu);
         }
-        return new(aByteSize, VkBufferUsageFlags.TransferSrc, VmaMemoryUsage.CpuToGpu);
     }
     
-    public void ReturnStagingBuffer(AllocatedRawBuffer aBuffer)
+    private void ReturnStagingBuffer(AllocatedRawBuffer aBuffer)
     {
-        for(int i = 0; i < BufferPool.Count; i++)
+        lock(BufferPool)
         {
-            if (BufferPool[i].AllocationInfo.size > aBuffer.AllocationInfo.size)
+            for(int i = 0; i < BufferPool.Count; i++)
             {
-                BufferPool.Insert(i, aBuffer);
-                return;
+                if (BufferPool[i].AllocationInfo.size > aBuffer.AllocationInfo.size)
+                {
+                    BufferPool.Insert(i, aBuffer);
+                    return;
+                }
             }
-        }
         
-        BufferPool.Add(aBuffer);
+            BufferPool.Add(aBuffer);
+        }
     }
 }

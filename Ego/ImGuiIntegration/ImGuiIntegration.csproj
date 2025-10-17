@@ -14,7 +14,6 @@
       <ProjectReference Include="..\Platform\Platform.csproj" />
       <ProjectReference Include="..\Rendering\Rendering.csproj" />
       <ProjectReference Include="..\Utilities\Utilities.csproj" />
-      <ProjectReference Include="..\VulkanApi\VulkanApi.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -6,10 +6,13 @@ public unsafe class CommandBuffer : IGpuDestroyable
     public VkCommandPool VkCommandPool;
     public VkCommandBuffer VkCommandBuffer;
     
-    public CommandBuffer(Queue aQueue)
+    public CommandBuffer(Queue aQueue, bool aOneTime = false)
     {
         VkCommandPoolCreateInfo createInfo = new();
-        createInfo.flags = VkCommandPoolCreateFlags.ResetCommandBuffer;
+        if (!aOneTime)
+            createInfo.flags = VkCommandPoolCreateFlags.ResetCommandBuffer;
+        else
+            createInfo.flags = VkCommandPoolCreateFlags.Transient;
         createInfo.queueFamilyIndex = aQueue.QueueFamilyIndex;
         
         vkCreateCommandPool(Device.VkDevice, &createInfo, null, out VkCommandPool).CheckResult();
@@ -46,6 +49,30 @@ public unsafe class CommandBufferHandle : IDisposable
         vkBeginCommandBuffer(VkCommandBuffer, VkCommandBufferUsageFlags.OneTimeSubmit).CheckResult();
     }
     
+    public void CopyBufferToBuffer(AllocatedRawBuffer aFrom, AllocatedRawBuffer aTo, uint aSize)
+    {
+        VkBufferCopy aCopy = new();
+        aCopy.dstOffset = 0;
+        aCopy.srcOffset = 0;
+        aCopy.size = aSize;
+        Vortice.Vulkan.Vulkan.vkCmdCopyBuffer(VkCommandBuffer, aFrom.Buffer, aTo.Buffer, 1, &aCopy);
+    }
+    
+    public void CopyBufferToImage(AllocatedRawBuffer aBuffer, Image aImage, VkImageLayout aLayout)
+    {
+        VkBufferImageCopy copyRegion = new();
+        copyRegion.bufferOffset = 0;
+        copyRegion.bufferRowLength = 0;
+        copyRegion.bufferImageHeight = 0;
+
+        copyRegion.imageSubresource.aspectMask = VkImageAspectFlags.Color;
+        copyRegion.imageSubresource.mipLevel = 0;
+        copyRegion.imageSubresource.baseArrayLayer = 0;
+        copyRegion.imageSubresource.layerCount = 1;
+        copyRegion.imageExtent = aImage.Extent;
+        
+        vkCmdCopyBufferToImage(VkCommandBuffer, aBuffer.Buffer, aImage.VkImage, VkImageLayout.TransferDstOptimal, 1, &copyRegion);
+    }
     public void TransitionImage(Image aImage, VkImageLayout aTo)
     {
         TransitionImage(aImage.VkImage, aImage.CurrentLayout, aTo);

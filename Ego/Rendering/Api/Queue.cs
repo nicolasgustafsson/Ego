@@ -43,12 +43,15 @@ public unsafe class Queue
         return info;
     }
     
-    public void Submit(CommandBuffer aCommandBuffer, Fence aFence)
+    public void Submit(CommandBuffer aCommandBuffer, Fence? aFence)
     {
         VkCommandBufferSubmitInfo cmdInfo = GetCommandBufferSubmitInfo(aCommandBuffer);
 
         VkSubmitInfo2 submitInfo = GetSubmitInfo(&cmdInfo, null, null);
-        vkQueueSubmit2(VkQueue, 1, &submitInfo, aFence.VkFence).CheckResult();
+        if (aFence != null)
+            vkQueueSubmit2(VkQueue, 1, &submitInfo, aFence.VkFence).CheckResult();
+        else
+            vkQueueSubmit2(VkQueue, 1, &submitInfo, VkFence.Null).CheckResult();
     }
     
     protected Queue(uint aQueueFamilyIndex)

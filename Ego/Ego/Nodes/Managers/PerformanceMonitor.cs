@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Vortice.ShaderCompiler;
+using ZLinq;
 
 namespace Ego;
 
@@ -61,15 +62,22 @@ public partial class PerformanceMonitor : Node
         {
             foreach(KeyValuePair<string, RingBuffer<TimeSpan>> help in Traces)
             {
-                var ms = help.Value.AsArray().Select(val => (float)val.TotalMilliseconds).ToArray();
-
-                float currentFrameMs = ms.Last();
+                var msEnumerable = help.Value.AsEnumerable().Select(val => (float)val.TotalMilliseconds);
+                
+                Span<float> ms = stackalloc float[msEnumerable.Count()];
+                
+                for(int i = 0; i < msEnumerable.Count(); i++)
+                {
+                    ms[i] = msEnumerable.ElementAt(i);
+                }
+                
+                float currentFrameMs = ms.AsValueEnumerable().Last();
 
                 string formattedFrameMs = help.Key + ": " + currentFrameMs.ToString("0.00") + "ms";
 
-                float min = ms.Min();
-                float max = ms.Max();
-                float average = ms.Average();
+                float min = ms.AsValueEnumerable().Min();
+                float max = ms.AsValueEnumerable().Max();
+                float average = ms.AsValueEnumerable().Average();
 
                 Imgui.PushID(help.Key);
                 Imgui.PlotLines($"Min: {min:N1}ms\nMax: {max:N1}ms\nAverage: {average:N1}ms", ref ms[0], help.Value.Size, aGraphSize: new Vector2(0, 100), aValuesOffset:0, aOverlayText:formattedFrameMs, aScaleMin:0, aScaleMax:50);

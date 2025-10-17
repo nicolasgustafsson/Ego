@@ -13,7 +13,6 @@
     <ItemGroup>
       <ProjectReference Include="..\Platform\Platform.csproj" />
       <ProjectReference Include="..\Utilities\Utilities.csproj" />
-      <ProjectReference Include="..\VulkanApi\VulkanApi.csproj" />
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.8.2" />

@@ -8,13 +8,13 @@ public enum GpuBufferType
     Constant,    //For data that is constant. Vertex buffers for instance.
     Dynamic,     //Data that is expected to change often. Use for particles, lines, etc
     Uniform,     //Same as above, but gets preloaded into cache. Use for small data that will be used for all shader invocations. World Matrices, Material settings(dissolve amount), etc
-    Index        //Index buffer.
+    Index,       //Index buffer.
 }
 
 public enum GpuBufferTransferType
 {
     Direct,            //Immediately uploads directly to buffer - Simplest method, but slower access.
-    Staging,           //Uses a staging buffer to upload to buffer
+    Staging,           //Uses a staging buffer to upload to buffer - High throughput, but not guaranteed to be valid immediately
 }
 
 public abstract class GpuBuffer : IGpuDestroyable
@@ -34,9 +34,14 @@ public abstract class GpuBuffer : IGpuDestroyable
 public class GpuBuffer<T> : GpuBuffer where T : unmanaged
 {
     public new AllocatedBuffer<T> MyInternalBuffer;
+    private GpuBufferType myBufferType;
+    private GpuBufferTransferType myTransferType;
     
     public GpuBuffer(GpuBufferType aBufferType, GpuBufferTransferType aTransferType, uint aElementCount = 1)
     {
+        myBufferType = aBufferType;
+        myTransferType = aTransferType;
+        
         VkBufferUsageFlags flags = VkBufferUsageFlags.None;
         VmaMemoryUsage memoryUsage = VmaMemoryUsage.Unknown;
         
@@ -73,12 +78,32 @@ public class GpuBuffer<T> : GpuBuffer where T : unmanaged
     
     public void SetData(T aValue)
     {
-        MyInternalBuffer.SetWriteData(aValue);
+        switch (myTransferType)
+        {
+            case GpuBufferTransferType.Direct:
+                MyInternalBuffer.SetWriteData(aValue);
+                break;
+            case GpuBufferTransferType.Staging:
+                GpuDataTransferer.Instance.TransferDataImmediate(this, [aValue]);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
     
-    public void SetData(Span<T> aValue, ulong aOffset = 0)
+    public void SetData(Span<T> aValue)
     {
-        MyInternalBuffer.SetWriteData(aValue, aOffset);
+        switch (myTransferType)
+        {
+            case GpuBufferTransferType.Direct:
+                MyInternalBuffer.SetWriteData(aValue);
+                break;
+            case GpuBufferTransferType.Staging:
+                GpuDataTransferer.Instance.TransferDataImmediate(this, aValue);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 }
 
