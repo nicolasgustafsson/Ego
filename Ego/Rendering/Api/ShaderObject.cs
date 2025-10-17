@@ -57,7 +57,7 @@ public class ShaderObject : IGpuDestroyable
             layoutCreateInfo.setLayoutCount = (uint)aLayouts.Count;
             layoutCreateInfo.pSetLayouts = aLayouts.AsSpan().GetPointerUnsafe();
 
-            vkCreatePipelineLayout(Device.VkDevice, &layoutCreateInfo, null, out PipelineLayout);
+            VkApiDevice.vkCreatePipelineLayout(Device.VkDevice, &layoutCreateInfo, null, out PipelineLayout);
             
             Build();
         }
@@ -66,7 +66,7 @@ public class ShaderObject : IGpuDestroyable
         {
             fixed(VkShaderEXT* shaderP = &VkShader)
             {
-                vkCreateShadersEXT(LogicalDevice.Device.VkDevice, 1, VkShaderCreateInfo, null, shaderP).CheckResult();
+                VkApiDevice.vkCreateShadersEXT(LogicalDevice.Device.VkDevice, 1, VkShaderCreateInfo, null, shaderP).CheckResult();
             }
         }
 

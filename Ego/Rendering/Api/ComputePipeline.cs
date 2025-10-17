@@ -69,14 +69,14 @@ public class ComputePipeline : Pipeline
             computeLayout.pPushConstantRanges = PushConstants.AsSpan().GetPointerUnsafe();
             computeLayout.pushConstantRangeCount = (uint)PushConstants.Count();
 
-            vkCreatePipelineLayout(Device.VkDevice, &computeLayout, null, out computePipeline.VkLayout).CheckResult();
+            VkApiDevice.vkCreatePipelineLayout(Device.VkDevice, &computeLayout, null, out computePipeline.VkLayout).CheckResult();
 
             VkComputePipelineCreateInfo computePipelineCreateInfo = new();
             computePipelineCreateInfo.layout = computePipeline.VkLayout;
             computePipelineCreateInfo.stage = ComputeShader.GetCreateInfo(VkShaderStageFlags.Compute);
 
             VkPipeline pipeline;
-            vkCreateComputePipelines(Device.VkDevice, VkPipelineCache.Null, computePipelineCreateInfo, &pipeline).CheckResult();
+            VkApiDevice.vkCreateComputePipelines(Device.VkDevice, VkPipelineCache.Null, computePipelineCreateInfo, &pipeline).CheckResult();
 
             computePipeline.VkPipeline = pipeline;
             computePipeline.BindPoint = VkPipelineBindPoint.Compute;

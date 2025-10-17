@@ -11,7 +11,7 @@ public unsafe class RenderQueue : Queue
         VkSemaphoreSubmitInfo signalInfo = GetSemaphoreSubmitInfo(VkPipelineStageFlags2.AllGraphics, aRenderFinishedSemaphore);
 
         VkSubmitInfo2 submitInfo = GetSubmitInfo(&cmdInfo, &waitInfo, &signalInfo);
-        vkQueueSubmit2(VkQueue, 1, &submitInfo, aRenderFence.VkFence).CheckResult();
+        VkApiDevice.vkQueueSubmit2(VkQueue, 1, &submitInfo, aRenderFence.VkFence).CheckResult();
     }
     
     //Currently the draw queue handles presenting too; this might be changed in the future
@@ -27,6 +27,6 @@ public unsafe class RenderQueue : Queue
         presentInfo.waitSemaphoreCount = 1;
         presentInfo.pImageIndices = &aImageIndex;
 
-        return vkQueuePresentKHR(VkQueue, &presentInfo);
+        return VkApiDevice.vkQueuePresentKHR(VkQueue, &presentInfo);
     }
 }

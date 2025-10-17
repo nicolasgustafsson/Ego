@@ -8,7 +8,7 @@ public unsafe class Pipeline : IGpuDestroyable
     
     public void Destroy()
     {
-        vkDestroyPipelineLayout(Device.VkDevice, VkLayout);
-        vkDestroyPipeline(Device.VkDevice, VkPipeline);
+        VkApiDevice.vkDestroyPipelineLayout(Device.VkDevice, VkLayout);
+        VkApiDevice.vkDestroyPipeline(Device.VkDevice, VkPipeline);
     }
 }

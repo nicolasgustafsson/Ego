@@ -193,7 +193,7 @@ public class GraphicsPipeline : Pipeline
 
             VkPipelineLayout layout = new();
 
-            vkCreatePipelineLayout(Device.VkDevice, &layoutCreateInfo, null, out layout).CheckResult();
+            VkApiDevice.vkCreatePipelineLayout(Device.VkDevice, &layoutCreateInfo, null, out layout).CheckResult();
             
             GraphicsPipeline graphicsPipeline = new();
             VkPipelineViewportStateCreateInfo viewportStateCreateInfo = new();
@@ -258,7 +258,7 @@ public class GraphicsPipeline : Pipeline
 
             pipelineCreateInfo.pDynamicState = &dynamicInfo;
 
-            vkCreateGraphicsPipeline(Device.VkDevice, pipelineCreateInfo, out VkPipeline pipeline).CheckResult("Could not create pipeline :(");
+            VkApiDevice.vkCreateGraphicsPipeline(Device.VkDevice, pipelineCreateInfo, out VkPipeline pipeline).CheckResult("Could not create pipeline :(");
 
             graphicsPipeline.VkPipeline = pipeline;
             graphicsPipeline.VkLayout = layout;
@@ -269,8 +269,8 @@ public class GraphicsPipeline : Pipeline
 
         public void Dispose()
         {
-            vkDestroyShaderModule(Device.VkDevice, FragmentShader.Module); 
-            vkDestroyShaderModule(Device.VkDevice, VertexShader.Module); 
+            VkApiDevice.vkDestroyShaderModule(Device.VkDevice, FragmentShader.Module); 
+            VkApiDevice.vkDestroyShaderModule(Device.VkDevice, VertexShader.Module); 
         }
     }
     

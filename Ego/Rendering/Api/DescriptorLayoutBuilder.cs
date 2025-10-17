@@ -39,7 +39,7 @@ public unsafe class DescriptorLayoutBuilder
         createInfo.pBindings = bindingsArray;
         createInfo.flags = aFlags;
 
-        vkCreateDescriptorSetLayout(Device.VkDevice, &createInfo, null, out VkDescriptorSetLayout layout).CheckResult();
+        VkApiDevice.vkCreateDescriptorSetLayout(Device.VkDevice, &createInfo, null, out VkDescriptorSetLayout layout).CheckResult();
         
         return layout;
     }

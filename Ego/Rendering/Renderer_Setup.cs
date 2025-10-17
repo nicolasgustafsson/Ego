@@ -170,7 +170,7 @@ public partial class Renderer
 
         CleanupQueue.Add(() =>
         {
-            vkDestroyDescriptorSetLayout(Device.VkDevice, RenderImageDescriptorLayout);
+            VkApiDevice.vkDestroyDescriptorSetLayout(Device.VkDevice, RenderImageDescriptorLayout);
         });
         
         {
@@ -180,7 +180,7 @@ public partial class Renderer
 
             CleanupQueue.Add(() =>
             {
-                vkDestroyDescriptorSetLayout(Device.VkDevice, SingleTextureLayout);
+                VkApiDevice.vkDestroyDescriptorSetLayout(Device.VkDevice, SingleTextureLayout);
             });
         }
 
@@ -192,7 +192,7 @@ public partial class Renderer
             SceneDataLayout = builder.Build(VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment);
             CleanupQueue.Add(() =>
             {
-                vkDestroyDescriptorSetLayout(Device.VkDevice, SceneDataLayout);
+                VkApiDevice.vkDestroyDescriptorSetLayout(Device.VkDevice, SceneDataLayout);
             });
         }
         

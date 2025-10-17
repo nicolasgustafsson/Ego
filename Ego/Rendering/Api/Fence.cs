@@ -6,12 +6,12 @@ public unsafe class Fence : IGpuDestroyable
     
     public Fence()
     {
-        vkCreateFence(Device.VkDevice, VkFenceCreateFlags.Signaled, out VkFence).CheckResult();
+        VkApiDevice.vkCreateFence(Device.VkDevice, VkFenceCreateFlags.Signaled, out VkFence).CheckResult();
     }
     
     public void Destroy()
     {
-        vkDestroyFence(Device.VkDevice, VkFence);
+        VkApiDevice.vkDestroyFence(Device.VkDevice, VkFence);
     }
     
     public void Wait()

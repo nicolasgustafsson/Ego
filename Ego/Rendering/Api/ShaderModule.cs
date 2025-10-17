@@ -14,7 +14,7 @@ public unsafe class ShaderModule : IGpuDestroyable
             createInfo.pCode = (uint*)sourcePointer;
         }
 
-        vkCreateShaderModule(Device.VkDevice, &createInfo, null, out Module).CheckResult();
+        VkApiDevice.vkCreateShaderModule(Device.VkDevice, &createInfo, null, out Module).CheckResult();
     }
     
     public static ShaderModule? Load(string aFilePath)
@@ -29,7 +29,7 @@ public unsafe class ShaderModule : IGpuDestroyable
 
     public void Destroy()
     {
-        vkDestroyShaderModule(Device.VkDevice, Module);
+        VkApiDevice.vkDestroyShaderModule(Device.VkDevice, Module);
     }
     
     public VkPipelineShaderStageCreateInfo GetCreateInfo(VkShaderStageFlags aStage)

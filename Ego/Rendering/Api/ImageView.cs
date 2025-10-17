@@ -19,11 +19,11 @@ public unsafe class ImageView : IGpuDestroyable
         createInfo.subresourceRange.baseArrayLayer = 0;
         createInfo.subresourceRange.layerCount = 1;
 
-        vkCreateImageView(Device.VkDevice, &createInfo, null, out VkImageView).CheckResult();
+        VkApiDevice.vkCreateImageView(Device.VkDevice, &createInfo, null, out VkImageView).CheckResult();
     }
     
     public void Destroy()
     {
-        vkDestroyImageView(Device.VkDevice, VkImageView, null);
+        VkApiDevice.vkDestroyImageView(Device.VkDevice, VkImageView, null);
     }
 }

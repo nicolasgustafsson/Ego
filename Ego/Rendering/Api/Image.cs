@@ -52,7 +52,7 @@ public unsafe class Image : IGpuDestroyable
         {
             createInfo.sharingMode = VkSharingMode.Concurrent;
             ReadOnlySpan<uint> queueFamilies = [GpuInstance.GraphicsFamily, GpuInstance.TransferFamily]; 
-            createInfo.pQueueFamilyIndices = queueFamilies.GetPointer();
+            createInfo.pQueueFamilyIndices = queueFamilies.GetPointerUnsafe();
             createInfo.queueFamilyIndexCount = (uint)queueFamilies.Length;
         }
 

@@ -10,11 +10,11 @@ public unsafe class Sampler : IGpuDestroyable
         samplerCreateInfo.minFilter = aFilter;
         samplerCreateInfo.magFilter = aFilter;
 
-        vkCreateSampler(Device.VkDevice, &samplerCreateInfo, null, out VkSampler).CheckResult();
+        VkApiDevice.vkCreateSampler(Device.VkDevice, &samplerCreateInfo, null, out VkSampler).CheckResult();
     }
     
     public void Destroy()
     {
-        vkDestroySampler(Device.VkDevice, VkSampler);
+        VkApiDevice.vkDestroySampler(Device.VkDevice, VkSampler);
     }
 }

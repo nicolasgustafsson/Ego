@@ -101,6 +101,6 @@ public unsafe class DescriptorWriter
             descriptorSets[i] = write.Write;
         }
 
-        vkUpdateDescriptorSets(Device.VkDevice, new ReadOnlySpan<VkWriteDescriptorSet>(descriptorSets));
+        VkApiDevice.vkUpdateDescriptorSets(Device.VkDevice, new Span<VkWriteDescriptorSet>(descriptorSets));
     }
 }

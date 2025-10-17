@@ -49,15 +49,15 @@ public unsafe class Queue
 
         VkSubmitInfo2 submitInfo = GetSubmitInfo(&cmdInfo, null, null);
         if (aFence != null)
-            vkQueueSubmit2(VkQueue, 1, &submitInfo, aFence.VkFence).CheckResult();
+            VkApiDevice.vkQueueSubmit2(VkQueue, 1, &submitInfo, aFence.VkFence).CheckResult();
         else
-            vkQueueSubmit2(VkQueue, 1, &submitInfo, VkFence.Null).CheckResult();
+            VkApiDevice.vkQueueSubmit2(VkQueue, 1, &submitInfo, VkFence.Null).CheckResult();
     }
     
     protected Queue(uint aQueueFamilyIndex)
     {
         QueueFamilyIndex = aQueueFamilyIndex;
-        vkGetDeviceQueue(Device.VkDevice, aQueueFamilyIndex, 0, out VkQueue);
+        VkApiDevice.vkGetDeviceQueue(Device.VkDevice, aQueueFamilyIndex, 0, out VkQueue);
     }
     
 }

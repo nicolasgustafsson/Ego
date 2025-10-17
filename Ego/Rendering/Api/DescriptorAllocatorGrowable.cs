@@ -36,13 +36,14 @@ public unsafe class DescriptorAllocatorGrowable : IGpuDestroyable
     
     public void ClearPools()
     {
+
         foreach(var pool in ReadyPools)
         {
-            vkResetDescriptorPool(Device.VkDevice, pool, 0);
+            VkApiDevice.vkResetDescriptorPool(Device.VkDevice, pool, 0);
         }
         foreach(var pool in FullPools)
         {
-            vkResetDescriptorPool(Device.VkDevice, pool, 0);
+            VkApiDevice.vkResetDescriptorPool(Device.VkDevice, pool, 0);
             ReadyPools.Push(pool);
         }
 
@@ -53,12 +54,12 @@ public unsafe class DescriptorAllocatorGrowable : IGpuDestroyable
     {
         foreach(var pool in FullPools)
         {
-            vkDestroyDescriptorPool(Device.VkDevice, pool, null);
+            VkApiDevice.vkDestroyDescriptorPool(Device.VkDevice, pool, null);
         }
-        
+
         foreach(var pool in ReadyPools)
         {
-            vkDestroyDescriptorPool(Device.VkDevice, pool, null);
+            VkApiDevice.vkDestroyDescriptorPool(Device.VkDevice, pool, null);
         }
     }
     
@@ -71,7 +72,7 @@ public unsafe class DescriptorAllocatorGrowable : IGpuDestroyable
         allocInfo.pSetLayouts = &aLayout;
 
         VkDescriptorSet descriptorSet;
-        VkResult result = vkAllocateDescriptorSets(Device.VkDevice, &allocInfo, &descriptorSet);
+        VkResult result = VkApiDevice.vkAllocateDescriptorSets(Device.VkDevice, &allocInfo, &descriptorSet);
         
         if (result is VkResult.ErrorOutOfPoolMemory or VkResult.ErrorFragmentedPool)
         {
@@ -111,7 +112,7 @@ public unsafe class DescriptorAllocatorGrowable : IGpuDestroyable
         createInfo.poolSizeCount = (uint)Ratios.Count;
         createInfo.pPoolSizes = sizes.AsSpan().GetPointerUnsafe();
 
-        vkCreateDescriptorPool(Device.VkDevice, &createInfo, null, out var pool).CheckResult();
+        VkApiDevice.vkCreateDescriptorPool(Device.VkDevice, &createInfo, null, out var pool).CheckResult();
 
         return pool;
     }

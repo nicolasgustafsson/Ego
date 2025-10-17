@@ -38,9 +38,11 @@ public unsafe class Swapchain : IGpuDestroyable
         createInfo.oldSwapchain = VkSwapchainKHR.Null;
         createInfo.surface = aSurface.VkSurface;
 
-        vkCreateSwapchainKHR(Device.VkDevice, &createInfo, null, out VkSwapchain).CheckResult();
+        VkApiDevice.vkCreateSwapchainKHR(Device.VkDevice, &createInfo, null, out VkSwapchain).CheckResult();
         
-        ReadOnlySpan<VkImage> images = vkGetSwapchainImagesKHR(Device.VkDevice, VkSwapchain);
+        VkApiDevice.vkGetSwapchainImagesKHR(Device.VkDevice, VkSwapchain, out uint count);
+        Span<VkImage> images = new VkImage[count];
+        VkApiDevice.vkGetSwapchainImagesKHR(Device.VkDevice, VkSwapchain, images);
         Images = images.ToArray().ToList();
     }
     
@@ -57,6 +59,6 @@ public unsafe class Swapchain : IGpuDestroyable
     
     public void Destroy()
     {
-        vkDestroySwapchainKHR(Device.VkDevice, VkSwapchain);
+        VkApiDevice.vkDestroySwapchainKHR(Device.VkDevice, VkSwapchain);
     }
 }

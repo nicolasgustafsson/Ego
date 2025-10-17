@@ -59,13 +59,13 @@ public unsafe class MeshBuffers<T> : MeshBufferBase where T : unmanaged
             vertexCopy.dstOffset = 0;
             vertexCopy.srcOffset = 0;
             vertexCopy.size = vertexBufferSize;
-            Vortice.Vulkan.Vulkan.vkCmdCopyBuffer(cmd.VkCommandBuffer, stagingRawBuffer.Buffer, VertexBuffer.MyInternalBuffer.Buffer, 1, &vertexCopy);
+            VkApiDevice.vkCmdCopyBuffer(cmd.VkCommandBuffer, stagingRawBuffer.Buffer, VertexBuffer.MyInternalBuffer.Buffer, 1, &vertexCopy);
             
             VkBufferCopy indexCopy = new();
             indexCopy.dstOffset = 0;
             indexCopy.srcOffset = vertexBufferSize;
             indexCopy.size = indexBufferSize;
-            Vortice.Vulkan.Vulkan.vkCmdCopyBuffer(cmd.VkCommandBuffer, stagingRawBuffer.Buffer, IndexBuffer.MyInternalBuffer.Buffer, 1, &indexCopy);
+            VkApiDevice.vkCmdCopyBuffer(cmd.VkCommandBuffer, stagingRawBuffer.Buffer, IndexBuffer.MyInternalBuffer.Buffer, 1, &indexCopy);
         });
 
         stagingRawBuffer.Destroy();

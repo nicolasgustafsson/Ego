@@ -1,4 +1,6 @@
-﻿namespace VulkanApi;
+﻿using Vortice.ShaderCompiler;
+
+namespace VulkanApi;
 
 public unsafe class AllocatedRawBuffer : IGpuDestroyable
 {
@@ -15,7 +17,7 @@ public unsafe class AllocatedRawBuffer : IGpuDestroyable
         bufferCreateInfo.sharingMode = VkSharingMode.Concurrent;
 
         ReadOnlySpan<uint> queueFamilies = [GpuInstance.GraphicsFamily, GpuInstance.TransferFamily]; 
-        bufferCreateInfo.pQueueFamilyIndices = queueFamilies.GetPointer();
+        bufferCreateInfo.pQueueFamilyIndices = queueFamilies.GetPointerUnsafe();
         bufferCreateInfo.queueFamilyIndexCount = (uint)queueFamilies.Length;
 
         VmaAllocationCreateInfo allocationInfo = new();
@@ -35,7 +37,7 @@ public unsafe class AllocatedRawBuffer : IGpuDestroyable
         VkBufferDeviceAddressInfo deviceAddressInfo = new();
         deviceAddressInfo.buffer = Buffer; 
 
-        return vkGetBufferDeviceAddress(Device.VkDevice, &deviceAddressInfo);
+        return VkApiDevice.vkGetBufferDeviceAddress(Device.VkDevice, &deviceAddressInfo);
     }
     
     public void Map(MemoryAllocator aAllocator, byte** aData)

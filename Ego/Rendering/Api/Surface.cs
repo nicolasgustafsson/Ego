@@ -24,7 +24,7 @@ public unsafe class Surface : IGpuDestroyable
                 };
                 fixed (VkSurfaceKHR* surfacePtr = &VkSurface)
                 {
-                    vkCreateWin32SurfaceKHR(aApi.VkInstance, &createInfo, null, surfacePtr).CheckResult();
+                    VkApiInstance.vkCreateWin32SurfaceKHR(aApi.VkInstance, &createInfo, null, surfacePtr).CheckResult();
                 }
                 break;
             }
@@ -37,7 +37,7 @@ public unsafe class Surface : IGpuDestroyable
                 };
                 fixed (VkSurfaceKHR* surfacePtr = &VkSurface)
                 {
-                    vkCreateXlibSurfaceKHR(aApi.VkInstance, &createInfo, null, surfacePtr).CheckResult();
+                    VkApiInstance.vkCreateXlibSurfaceKHR(aApi.VkInstance, &createInfo, null, surfacePtr).CheckResult();
                 }
                 break;
             }
@@ -50,7 +50,7 @@ public unsafe class Surface : IGpuDestroyable
                 };
                 fixed (VkSurfaceKHR* surfacePtr = &VkSurface)
                 {
-                    vkCreateWaylandSurfaceKHR(aApi.VkInstance, &createInfo, null, surfacePtr).CheckResult();
+                    VkApiInstance.vkCreateWaylandSurfaceKHR(aApi.VkInstance, &createInfo, null, surfacePtr).CheckResult();
                 }
                 break;
             }
@@ -79,6 +79,6 @@ public unsafe class Surface : IGpuDestroyable
     
     public void Destroy()
     {
-        vkDestroySurfaceKHR(ApiInstance.VkInstance, VkSurface);
+        VkApiInstance.vkDestroySurfaceKHR(ApiInstance.VkInstance, VkSurface);
     }
 }

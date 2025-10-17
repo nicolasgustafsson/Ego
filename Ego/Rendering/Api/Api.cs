@@ -16,6 +16,7 @@ public unsafe class Api : IGpuDestroyable
 {
     public static Api ApiInstance = null!;
     public VkInstance VkInstance;
+    public static VkInstanceApi VkApiInstance = null!;
     private VkDebugUtilsMessengerEXT DebugMessenger = VkDebugUtilsMessengerEXT.Null;
     
     public Api(Window aWindow, List<string> aInstanceExtensions)
@@ -67,8 +68,9 @@ public unsafe class Api : IGpuDestroyable
         info.pNext = &debugUtilsCreateInfo;
         
         vkCreateInstance(&info, null, out VkInstance).CheckResult();
-        vkLoadInstanceOnly(VkInstance);
         
+
+        VkApiInstance = GetApi(VkInstance);
         
 #if DEBUG
         vkCreateDebugUtilsMessengerEXT(VkInstance, &debugUtilsCreateInfo, null, out DebugMessenger).CheckResult();
@@ -78,8 +80,8 @@ public unsafe class Api : IGpuDestroyable
     
     public void Destroy()
     {
-        vkDestroyDebugUtilsMessengerEXT(VkInstance, DebugMessenger);
-        vkDestroyInstance(VkInstance);
+        VkApiInstance.vkDestroyDebugUtilsMessengerEXT(VkInstance, DebugMessenger);
+        VkApiInstance.vkDestroyInstance(VkInstance);
     }
     
     [UnmanagedCallersOnly]
