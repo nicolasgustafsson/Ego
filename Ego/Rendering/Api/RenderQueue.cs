@@ -4,10 +4,10 @@ public unsafe class RenderQueue : Queue
 {
     public RenderQueue() : base(GpuInstance.GraphicsFamily) { }
     
-    public void Submit(CommandBuffer aCommandBuffer, Semaphore aImageAvailableSemaphore, Semaphore aRenderFinishedSemaphore, Fence aRenderFence)
+    public void Submit(CommandBuffer aCommandBuffer, Semaphore aWaitSemaphore, Semaphore aRenderFinishedSemaphore, Fence aRenderFence)
     {
         VkCommandBufferSubmitInfo cmdInfo = GetCommandBufferSubmitInfo(aCommandBuffer);
-        VkSemaphoreSubmitInfo waitInfo = GetSemaphoreSubmitInfo(VkPipelineStageFlags2.ColorAttachmentOutput, aImageAvailableSemaphore);
+        VkSemaphoreSubmitInfo waitInfo = GetSemaphoreSubmitInfo(VkPipelineStageFlags2.ColorAttachmentOutput, aWaitSemaphore);
         VkSemaphoreSubmitInfo signalInfo = GetSemaphoreSubmitInfo(VkPipelineStageFlags2.AllGraphics, aRenderFinishedSemaphore);
 
         VkSubmitInfo2 submitInfo = GetSubmitInfo(&cmdInfo, &waitInfo, &signalInfo);

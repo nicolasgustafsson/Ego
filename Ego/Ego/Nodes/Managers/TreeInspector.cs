@@ -12,6 +12,8 @@ public class TreeInspector : Node
     private Vector4 EvenColor = new Vector4(1f, 1f, 1f, 0.0392f);
     private Vector4 OddColor = new Vector4(1f, 1f, 1f, 0f);
 
+    [Inspect] private float Indent = 16f;
+
     private Vector2 FramePadding = new Vector2(0f, 3f);
 
     public override void Start()
@@ -77,6 +79,8 @@ public class TreeInspector : Node
         if (parentActive)
             Imgui.PushStyleColor(ImGuiCol.Header, Imgui.GetStyleColorVec4(ImGuiCol.TabSelected));
 
+        Imgui.PushStyleVar(ImGuiStyleVar.IndentSpacing, Indent);
+
         float minX = Imgui.GetCursorScreenPos().X;
         float maxX = minX + Imgui.GetContentRegionAvail().X;
 
@@ -96,6 +100,7 @@ public class TreeInspector : Node
         
         Imgui.PopStyleVar();
         Imgui.PopStyleVar();
+        Imgui.PopStyleVar();
         
         if (parentActive)
             Imgui.PopStyleColor();
@@ -113,6 +118,9 @@ public class TreeInspector : Node
             flags |= ImGuiTreeNodeFlags.Leaf;
 
         flags |= ImGuiTreeNodeFlags.DefaultOpen;
+        flags |= ImGuiTreeNodeFlags.DrawLinesToNodes;
+
+        bool first = aRows == 0;
         
         aRows++;
         
@@ -128,6 +136,8 @@ public class TreeInspector : Node
 
         Vector2 cursorPosition = Imgui.GetCursorScreenPos();
 
+        Imgui.SetCursorScreenPos(cursorPosition);
+
         Imgui.PushID(aNode.GetHashCode());
         
         bool wasOpened = Imgui.TreeNodeEx(aNode.GetName(), flags, "     " + $"{aNode.GetName()}");
@@ -142,7 +152,7 @@ public class TreeInspector : Node
         Vector4? requestedColor = aNode.GetIconColor();
         uint requestedU32Color = requestedColor.HasValue ? Imgui.GetColorU32(requestedColor.Value) : Imgui.GetColorU32(ImGuiCol.Text);
         
-        draw_list.AddText(cursorPosition + FramePadding + new Vector2(15f, 0f), requestedU32Color, $"{aNode.GetIcon()}");
+        draw_list.AddText(cursorPosition + FramePadding + new Vector2(16f, 0f), requestedU32Color, $"{aNode.GetIcon()}");
         
         if (Imgui.IsItemClicked())
             InspectedNode = aNode;

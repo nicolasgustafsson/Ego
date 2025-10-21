@@ -116,6 +116,16 @@ public static unsafe partial class Imgui
         return pos;
     }
     
+    public static void Indent(float aIndent)
+    {
+        ImguiNative.Indent(aIndent);
+    }
+    
+    public static void Unindent(float aUnindent)
+    {
+        ImguiNative.Unindent(aUnindent);
+    }
+    
     public static Vector2 GetCursorPos()
     {
         Vector2 pos;
@@ -133,6 +143,11 @@ public static unsafe partial class Imgui
     public static void SetCursorPos(Vector2 aPos)
     {
         ImguiNative.SetCursorPos(aPos);
+    }
+    
+    public static void SetCursorScreenPos(Vector2 aPos)
+    {
+        ImguiNative.SetCursorScreenPos(aPos);
     }
     
     public static Vector2 GetContentRegionAvail()

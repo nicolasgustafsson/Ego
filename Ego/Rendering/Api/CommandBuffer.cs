@@ -5,15 +5,18 @@ public unsafe class CommandBuffer : IGpuDestroyable
 {
     public VkCommandPool VkCommandPool;
     public VkCommandBuffer VkCommandBuffer;
+    private bool Transient = false;
     
-    public CommandBuffer(Queue aQueue, bool aOneTime = false)
+    public CommandBuffer(Queue aQueue, bool aTransient = false)
     {
         VkCommandPoolCreateInfo createInfo = new();
-        if (!aOneTime)
+        if (!aTransient)
             createInfo.flags = VkCommandPoolCreateFlags.ResetCommandBuffer;
         else
             createInfo.flags = VkCommandPoolCreateFlags.Transient;
         createInfo.queueFamilyIndex = aQueue.QueueFamilyIndex;
+
+        Transient = aTransient;
         
         VkApiDevice.vkCreateCommandPool(Device.VkDevice, &createInfo, null, out VkCommandPool).CheckResult();
 
@@ -32,7 +35,7 @@ public unsafe class CommandBuffer : IGpuDestroyable
     
     public CommandBufferHandle BeginRecording()
     {
-        return new CommandBufferHandle(this);
+        return new CommandBufferHandle(this, !Transient);
     }
 }
 
@@ -41,11 +44,12 @@ public unsafe class CommandBufferHandle : IDisposable
     private CommandBuffer CommandBuffer;
     public VkCommandBuffer VkCommandBuffer => CommandBuffer.VkCommandBuffer;
     
-    internal CommandBufferHandle(CommandBuffer aCommandBuffer)
+    internal CommandBufferHandle(CommandBuffer aCommandBuffer, bool aShouldReset)
     {
         CommandBuffer = aCommandBuffer;
 
-        VkApiDevice.vkResetCommandBuffer(VkCommandBuffer, VkCommandBufferResetFlags.None).CheckResult();
+        if (aShouldReset)
+            VkApiDevice.vkResetCommandBuffer(VkCommandBuffer, VkCommandBufferResetFlags.None).CheckResult();
         VkApiDevice.vkBeginCommandBuffer(VkCommandBuffer, VkCommandBufferUsageFlags.OneTimeSubmit).CheckResult();
     }
     

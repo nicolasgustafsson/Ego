@@ -32,11 +32,11 @@ public class Material
         range.size = (uint)sizeof(MeshPushConstants);
         range.stageFlags = VkShaderStageFlags.Vertex;
         
-        VertexShader = new(VkShaderStageFlags.Vertex, VkShaderStageFlags.Fragment, "Vertex", File.ReadAllBytes(aVertexShaderPath), layouts, range);
-        FragmentShader = new(VkShaderStageFlags.Fragment, VkShaderStageFlags.None, "Fragment", File.ReadAllBytes(aFragmentShaderPath), layouts, range);
+        VertexShader = new(VkShaderStageFlags.Vertex, File.ReadAllBytes(aVertexShaderPath), layouts, range);
+        FragmentShader = new(VkShaderStageFlags.Fragment, File.ReadAllBytes(aFragmentShaderPath), layouts, range);
         
         PassType = MaterialPassType.Opaque;
-
+        
         
         DescriptorSet = aRenderer.GlobalDescriptorAllocator.Allocate(MaterialLayout);
         

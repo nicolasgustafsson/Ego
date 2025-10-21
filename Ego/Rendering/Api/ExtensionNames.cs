@@ -17,6 +17,8 @@ public static class ExtensionNames
         public static readonly string Swapchain = "VK_KHR_swapchain";
         public static readonly string Synchronization2 = "VK_KHR_synchronization2";
         public static readonly string ShaderObjects = "VK_EXT_shader_object";
+        public static readonly string Maintenance1 = "VK_EXT_swapchain_maintenance1";
+        public static readonly string UnifiedImageLayouts = "VK_KHR_unified_image_layouts"; //not supported by most GPU's yet i crie
     }
 }
 
@@ -34,5 +36,7 @@ public static partial class Defaults
         ExtensionNames.Device.Swapchain,
         ExtensionNames.Device.Synchronization2,
         ExtensionNames.Device.ShaderObjects,
+        //ExtensionNames.Device.Maintenance1,
+        //ExtensionNames.Device.UnifiedImageLayouts
     ];
 }

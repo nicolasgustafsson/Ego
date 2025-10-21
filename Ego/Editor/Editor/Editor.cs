@@ -15,10 +15,12 @@ public partial class Editor : Node
     public TopMenu TopMenu = null!;
 
     public MeshRenderer MeshRenderer;
+    private string EditorDirectory;
 
     public static Editor Instance;
     public override void Start()
     {
+        EditorDirectory = Environment.CurrentDirectory;
         Instance = this;
         base.Start();
         

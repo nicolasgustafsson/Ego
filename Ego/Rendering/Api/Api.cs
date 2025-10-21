@@ -73,7 +73,7 @@ public unsafe class Api : IGpuDestroyable
         VkApiInstance = GetApi(VkInstance);
         
 #if DEBUG
-        vkCreateDebugUtilsMessengerEXT(VkInstance, &debugUtilsCreateInfo, null, out DebugMessenger).CheckResult();
+        VkApiInstance.vkCreateDebugUtilsMessengerEXT(VkInstance, &debugUtilsCreateInfo, null, out DebugMessenger).CheckResult();
 #endif
         ApiInstance = this;
     }

@@ -20,7 +20,7 @@ public class GpuDataTransferer : IGpuDestroyable
     private void ImmediateSubmit(Action<CommandBufferHandle> aAction)
     {
         //[Perf] Is allocating a new command buffer every submit slow?
-        CommandBuffer immediateCommandBuffer = new(TransferQueue, aOneTime:true);
+        CommandBuffer immediateCommandBuffer = new(TransferQueue, aTransient:true);
         using (var handle = immediateCommandBuffer.BeginRecording())
             aAction(handle);
         

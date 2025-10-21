@@ -15,18 +15,20 @@ public class ShaderObject : IGpuDestroyable
         public VkShaderStageFlags VkStage;
         public VkShaderStageFlags VkNextStage;
         public VkShaderEXT VkShader = VkShaderEXT.Null;
-        private string Name = "Shader";
         private VkShaderCreateInfoEXT VkShaderCreateInfo;
-        private byte[] SpirvSource;
         public List<VkDescriptorSetLayout> Layouts;
         public VkPipelineLayout PipelineLayout;
         
-        public Shader(VkShaderStageFlags aStage, VkShaderStageFlags aNextStage, string aName, byte[] aSpirvSource, List<VkDescriptorSetLayout> aLayouts, VkPushConstantRange aPushConstantRange)
+        public Shader(VkShaderStageFlags aStage, byte[] aSpirvSource, List<VkDescriptorSetLayout> aLayouts, VkPushConstantRange aPushConstantRange)
         {
             VkStage = aStage;
-            VkNextStage = aNextStage;
-            Name = aName;
-            SpirvSource = aSpirvSource;
+
+            VkShaderStageFlags nextStage = VkShaderStageFlags.None;
+
+            if (aStage is VkShaderStageFlags.Vertex or VkShaderStageFlags.MeshEXT)
+                nextStage = VkShaderStageFlags.Fragment;
+            
+            VkNextStage = nextStage;
 
             VkShaderCreateInfo = new();
 

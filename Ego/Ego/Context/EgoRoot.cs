@@ -43,6 +43,7 @@ public partial class EgoRoot : Node
         MyContext.TreeInspector = AddChild(new TreeInspector());
         MyContext.PerformanceMonitor = AddChild(new PerformanceMonitor());
         MyContext.MaterialBuilder = AddChild(new MaterialBuilder());
+        MyContext.ShaderCompiler = AddChild(new ShaderCompiler());
         MyContext.Shapes = AddChild(new Shapes());
         
         T childObject = AddChild(new T());

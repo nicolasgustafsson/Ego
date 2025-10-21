@@ -61,8 +61,8 @@ public partial class MaterialBuilder : Node
         range.size = (uint)sizeof(MeshPushConstants);
         range.stageFlags = VkShaderStageFlags.Vertex;
         
-        OpaqueVertexShader = new(VkShaderStageFlags.Vertex, VkShaderStageFlags.Fragment, "Vertex", File.ReadAllBytes("Shaders/meshVert.spv"), layouts, range);
-        OpaqueFragmentShader = new(VkShaderStageFlags.Fragment, VkShaderStageFlags.None, "Fragment", File.ReadAllBytes("Shaders/meshFrag.spv"), layouts, range);
+        OpaqueVertexShader = new(VkShaderStageFlags.Vertex, File.ReadAllBytes("Shaders/meshVert.spv"), layouts, range);
+        OpaqueFragmentShader = new(VkShaderStageFlags.Fragment, File.ReadAllBytes("Shaders/meshFrag.spv"), layouts, range);
     }
 
     public Material CreateMaterial(MaterialPassType aPassType, Image aColorImage, Sampler aColorSampler, Image aMetallicRoughnessImage, Sampler aMetallicRoughnessSampler, GpuBuffer<MaterialConstants> aBuffer, int aBufferOffset, DescriptorAllocatorGrowable aDescriptorAllocator)

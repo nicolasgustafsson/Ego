@@ -21,7 +21,7 @@ public partial class Renderer : IGpuImmediateSubmit
     private Image DepthImage = null!;
     public DescriptorAllocatorGrowable GlobalDescriptorAllocator = new();
 
-    private ShaderObject.Shader GradientShader = null!;
+    public ShaderObject.Shader GradientShader = null!;
         
     private ComputePipeline GradientPipeline = null!;
     private GraphicsPipeline TrianglePipeline = null!;
@@ -31,7 +31,7 @@ public partial class Renderer : IGpuImmediateSubmit
     
     private List<ImageView> ImageViews = new();
     private VkDescriptorSet RenderImageDescriptorSet;
-    private VkDescriptorSetLayout RenderImageDescriptorLayout;
+    public VkDescriptorSetLayout RenderImageDescriptorLayout;
 
     private VkDescriptorSetLayout SingleTextureLayout;
 

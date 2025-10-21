@@ -18,6 +18,7 @@
       <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.8.2" />
       <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0031" />
       <PackageReference Include="SharpGLTF.Toolkit" Version="1.0.0-alpha0031" />
+      <PackageReference Include="Slangc.NET" Version="2025.19.1" />
       <PackageReference Include="Vortice.ShaderCompiler" Version="1.7.3" />
       <PackageReference Include="Vortice.Vulkan" Version="3.0.3" />
       <PackageReference Include="Vortice.VulkanMemoryAllocator" Version="1.6.3" />
@@ -83,18 +84,6 @@
       <None Update="Models\house2.glb">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="Shaders\Imgui.vert">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="Shaders\Imgui.frag">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="Shaders\imguiFrag.spv">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="Shaders\imguiVert.spv">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
       <None Update="Shaders\vert.spv">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
@@ -129,6 +118,9 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="Shaders\lineVert.spv">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Shaders\background.slang">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

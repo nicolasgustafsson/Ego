@@ -137,13 +137,12 @@ public partial class Renderer
     
     private unsafe void InitializeBackgroundPipelines()
     {
+        
         VkPushConstantRange range = new();
         range.offset = 0;
         range.stageFlags = VkShaderStageFlags.Compute;
         range.size = (uint)sizeof(PushConstants);
-        GradientShader = new(VkShaderStageFlags.Compute, VkShaderStageFlags.None, "Background", File.ReadAllBytes("Shaders/comp.spv"), new() { RenderImageDescriptorLayout }, range);
-        //GradientPipeline = //ComputePipeline.StartBuild().SetComputeShader("Shaders/comp.spv").AddLayout(RenderImageDescriptorLayout).AddPushConstant<PushConstants>().Build();
-        //CleanupQueue.Add(GradientPipeline);
+        GradientShader = new(VkShaderStageFlags.Compute, File.ReadAllBytes("Shaders/comp.spv"), new() { RenderImageDescriptorLayout }, range);
     }
 
     private void CreateRenderImage()
@@ -160,6 +159,7 @@ public partial class Renderer
         List<DescriptorAllocatorGrowable.PoolSizeRatio> sizes = new List<DescriptorAllocatorGrowable.PoolSizeRatio>
         {
             new() { Ratio = 1f, Type = VkDescriptorType.StorageImage},
+            new() { Ratio = 1f, Type = VkDescriptorType.UniformBuffer},
             new() { Ratio = 1f, Type = VkDescriptorType.CombinedImageSampler},
         };
 
