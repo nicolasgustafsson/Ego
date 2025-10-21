@@ -49,7 +49,7 @@ public partial class Renderer
             RenderGeometry(cmd, globalDescriptor);
             
             cmd.BeginRendering(RenderImage, DepthImage);
-            ERenderImgui(cmd);
+            ERenderImgui(cmd.VkCommandBuffer);
             cmd.EndRendering();
 
             cmd.TransitionImage(RenderImage, VkImageLayout.TransferSrcOptimal);

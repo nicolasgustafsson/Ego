@@ -54,7 +54,7 @@ public partial class Renderer : IGpuImmediateSubmit
     private ulong FrameCount = 0;
     private bool WantsResize = false;
     
-    public Action<CommandBufferHandle> ERenderImgui = delegate {};
+    public Action<VkCommandBuffer> ERenderImgui = delegate {};
     public Action EPostRender = delegate {};
 
     private List<MeshRenderData> MeshRenderData = new();

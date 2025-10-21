@@ -1,4 +1,5 @@
 ﻿using Rendering;
+using VulkanApi;
 
 namespace Ego;
 
@@ -13,7 +14,8 @@ public partial class Debug : Node
     {
         base.Start();
 
-        ImGuiDriver = new ImGuiDriver(RendererApi.Renderer, Window);
+        ImGuiDriver = new ImGuiDriver(Window, VkApiInstance.Instance, GpuInstance.VkPhysicalDevice, Device.VkDevice, RendererApi.Renderer.RenderQueue.QueueFamilyIndex, RendererApi.Renderer.RenderQueue.VkQueue);
+        RendererApi.Renderer.ERenderImgui += ImGuiDriver.Render;
     }
 
     protected override unsafe void Update()

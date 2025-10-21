@@ -82,7 +82,6 @@ public partial class ShaderCompiler : Node
             return retVal;
         }
 
-
         Log.Info($"File exists already! Reusing shader...");
         
         VkPushConstantRange range = new();

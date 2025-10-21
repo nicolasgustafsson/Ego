@@ -1,6 +1,5 @@
 ﻿
 using System.Numerics;
-using VulkanApi;
 //using ImGuiNET;
 
 /*

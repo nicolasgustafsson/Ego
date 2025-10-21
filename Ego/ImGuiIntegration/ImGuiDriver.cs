@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using ImguiBindings;
-using VulkanApi;
 using Platform;
 using Silk.NET.GLFW;
 using Utilities;
@@ -32,12 +31,12 @@ internal static partial class Helpers
     }
 }
 
-public class ImGuiDriver : IGpuDestroyable
+public class ImGuiDriver
 {
     private VkPipelineRenderingCreateInfo pipelineCreateInfo = new(); 
     private VkFormat format;
     
-    public unsafe ImGuiDriver(Renderer aRenderer, Window aMainWindow)
+    public unsafe ImGuiDriver(Window aMainWindow, VkInstance aInstance, VkPhysicalDevice aPhysicalDevice, VkDevice aLogicalDevice, uint aQueueFamilyIndex, nint aQueueHandle)
     {
         var ctx = ImguiNative.CreateContext(null);
         var IO = ImguiNative.GetIO_ContextPtr(ctx);
@@ -53,17 +52,13 @@ public class ImGuiDriver : IGpuDestroyable
         var font = ImguiNative.ImFontAtlas_AddFontFromFileTTF(IO->Fonts, new string("Roboto-Regular.ttf").AsBytes(), 15f, fontConfig, null);
         //fontConfig->MergeMode = 1;
 
-        
-        List<ushort> iconRange = new(300);
-
-        
         ImguiNative.ImGui_ImplGlfw_InitForVulkan((GLFWwindow*)aMainWindow.NativeWindow.Glfw, 1);
         var info = new ImGui_ImplVulkan_InitInfo();
-        info.Instance = VulkanApi.Api.ApiInstance.VkInstance.Handle;
-        info.PhysicalDevice = VulkanApi.Gpu.GpuInstance.VkPhysicalDevice.Handle;
-        info.Device = VulkanApi.LogicalDevice.Device.VkDevice.Handle;
-        info.QueueFamily = aRenderer.RenderQueue.QueueFamilyIndex;
-        info.Queue = aRenderer.RenderQueue.VkQueue.Handle;
+        info.Instance = aInstance.Handle;
+        info.PhysicalDevice = aPhysicalDevice.Handle;
+        info.Device = aLogicalDevice.Handle;
+        info.QueueFamily = aQueueFamilyIndex;
+        info.Queue = aQueueHandle;
         info.PipelineCache = 0;
         info.DescriptorPool = 0;
         info.DescriptorPoolSize = 100;
@@ -95,7 +90,6 @@ public class ImGuiDriver : IGpuDestroyable
 
         ImguiNative.ImFontConfig_destroy(fontConfig);
         
-        aRenderer.ERenderImgui += Render;
         
         SetupThemeNew();
     }
@@ -194,12 +188,12 @@ public class ImGuiDriver : IGpuDestroyable
         myLock.Exit();
     }
 
-    public unsafe void Render(CommandBufferHandle cmd)
+    public unsafe void Render(VkCommandBuffer cmd)
     {
         lock(myLock)
         {
             var drawData2 = ImguiNative.GetDrawData();
-            ImguiNative.ImGui_ImplVulkan_RenderDrawData(drawData2, cmd.VkCommandBuffer.Handle, 0);
+            ImguiNative.ImGui_ImplVulkan_RenderDrawData(drawData2, cmd.Handle, 0);
         }
     }
     
