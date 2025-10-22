@@ -43,7 +43,13 @@ public partial class Shapes : Node
         List<uint> indices = new() {0, 2, 3, 2, 0, 1 };
         
         LineMesh = new MeshData("Line", (new[]{new GeoSurface(){StartIndex = 0, Count = 6}}).ToList(), new MeshBuffers<LineVertex>(RendererApi.Renderer, MemoryAllocator.GlobalAllocator, indices, vertices));
-        LineMaterial = new Material("Shaders/lineVert.spv", "Shaders/lineFrag.spv", RendererApi.Renderer);
+        DescriptorLayoutBuilder descriptorLayoutBuilder = new();
+        descriptorLayoutBuilder.AddBinding(0, VkDescriptorType.UniformBuffer);
+
+        VkDescriptorSetLayout MaterialLayout = descriptorLayoutBuilder.Build(VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment);
+        var vertexShader = ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/line.slang", VkShaderStageFlags.Vertex, new() { RendererApi.Renderer.SceneDataLayout, MaterialLayout }, "vertex");
+        var pixelShader = ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/line.slang", VkShaderStageFlags.Fragment, new() { RendererApi.Renderer.SceneDataLayout, MaterialLayout }, "pixel");
+        LineMaterial = new Material(vertexShader!, pixelShader!, RendererApi.Renderer);
     }
 
     public void DrawLine(Vector3 aStart, Vector3 aEnd)

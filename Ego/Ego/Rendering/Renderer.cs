@@ -61,6 +61,8 @@ public partial class Renderer : IGpuImmediateSubmit
     private List<IRenderCommand> CustomRenderCommands = new();
 
     public Window MainWindow;
+    
+    
 
     public Renderer(Window aWindow) : this(aWindow, new())
     {
@@ -72,9 +74,13 @@ public partial class Renderer : IGpuImmediateSubmit
         PreferredPresentMode = aSettings.PresentMode;
         
         MainWindow = aWindow;
-        Init(aWindow);
     }
-    
+
+    public override void Start()
+    {
+        Init(MainWindow);
+    }
+
     public void WaitUntilIdle()
     {
         Device.WaitUntilIdle();

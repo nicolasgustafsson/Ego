@@ -1,8 +1,10 @@
 global using Utilities;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using Vortice.Vulkan;
 using static Vortice.Vulkan.Vulkan;
 using System.Runtime.InteropServices;
+using Ego;
 using VulkanApi;
 using Vortice.ShaderCompiler;
 
@@ -13,8 +15,14 @@ public struct RendererInitSettings()
     public VkPresentModeKHR PresentMode = VkPresentModeKHR.Fifo;
 }
 
-public partial class Renderer
+[Node(AllowAddingToScene = false)]
+public partial class Renderer : Node
 {
+    private Renderer()
+    {
+        MainWindow = null!;
+    }
+    
     private void Init(Window aWindow)
     {
         InitVulkan(aWindow);
@@ -137,12 +145,7 @@ public partial class Renderer
     
     private unsafe void InitializeBackgroundPipelines()
     {
-        
-        VkPushConstantRange range = new();
-        range.offset = 0;
-        range.stageFlags = VkShaderStageFlags.Compute;
-        range.size = (uint)sizeof(PushConstants);
-        GradientShader = new(VkShaderStageFlags.Compute, File.ReadAllBytes("Shaders/comp.spv"), new() { RenderImageDescriptorLayout }, range);
+        GradientShader = ShaderCompiler.LoadShaderImmediate<PushConstants>("Shaders/background.slang", VkShaderStageFlags.Compute, new() { RenderImageDescriptorLayout })!;
     }
 
     private void CreateRenderImage()

@@ -20,6 +20,8 @@ public partial class RendererApi : ParallelBranch<RendererApi>
     public RendererApi(Window aWindow, RendererInitSettings aRendererSettings)
     {
         Renderer = new Renderer(aWindow, aRendererSettings);
+
+        AddChild(Renderer);
     }
     
     public void WaitUntilIdle()

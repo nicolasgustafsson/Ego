@@ -91,10 +91,15 @@ public unsafe class Gpu
         VkPhysicalDeviceShaderObjectFeaturesEXT shaderObjectFeaturesExt = new();
         shaderObjectFeaturesExt.shaderObject = true;
         
+        
+        VkPhysicalDeviceVulkan11Features device11Features = new();
+        device11Features.shaderDrawParameters = true;
+        device11Features.pNext = &shaderObjectFeaturesExt;
+        
         VkPhysicalDeviceVulkan12Features device12Features = new();
         device12Features.bufferDeviceAddress = true;
         device12Features.descriptorIndexing = true;
-        device12Features.pNext = &shaderObjectFeaturesExt;
+        device12Features.pNext = &device11Features;
 
         VkPhysicalDeviceVulkan13Features device13Features = new();
         device13Features.synchronization2 = true;

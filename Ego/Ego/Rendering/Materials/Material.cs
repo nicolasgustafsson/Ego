@@ -18,6 +18,28 @@ public class Material
     
     public Material() { }
     
+    
+    
+    public unsafe Material(ShaderObject.Shader aVertexShader, ShaderObject.Shader aFragmentShader, Renderer aRenderer)
+    {
+        DescriptorWriter DescriptorWriter = new();
+        DescriptorLayoutBuilder descriptorLayoutBuilder = new();
+        descriptorLayoutBuilder.AddBinding(0, VkDescriptorType.UniformBuffer);
+
+        VkDescriptorSetLayout MaterialLayout = descriptorLayoutBuilder.Build(VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment);
+        
+        VertexShader = aVertexShader;
+        FragmentShader = aFragmentShader;
+        
+        PassType = MaterialPassType.Opaque;
+        
+        
+        DescriptorSet = aRenderer.GlobalDescriptorAllocator.Allocate(MaterialLayout);
+        
+        DescriptorWriter.Clear();
+        DescriptorWriter.UpdateSet(DescriptorSet);
+    }
+    
     public unsafe Material(string aVertexShaderPath, string aFragmentShaderPath, Renderer aRenderer)
     {
         DescriptorWriter DescriptorWriter = new();

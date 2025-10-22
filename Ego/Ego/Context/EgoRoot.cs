@@ -35,6 +35,7 @@ public partial class EgoRoot : Node
         //Important that this is high up - its Update will launch off any parallel tasks
         MyContext.MultithreadingManager = AddChild(new MultithreadingManager());
         
+        MyContext.ShaderCompiler = AddChild(new ShaderCompiler());
         MyContext.Time = AddChild(new TimeKeeper());
         MyContext.Window = new Window(aSettings.Name, aSettings.WindowSize);
         MyContext.RendererApi = AddChild(new RendererApi(Window, aSettings.RendererInitSettings));
@@ -43,7 +44,6 @@ public partial class EgoRoot : Node
         MyContext.TreeInspector = AddChild(new TreeInspector());
         MyContext.PerformanceMonitor = AddChild(new PerformanceMonitor());
         MyContext.MaterialBuilder = AddChild(new MaterialBuilder());
-        MyContext.ShaderCompiler = AddChild(new ShaderCompiler());
         MyContext.Shapes = AddChild(new Shapes());
         
         T childObject = AddChild(new T());
