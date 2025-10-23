@@ -48,13 +48,13 @@ public partial class MeshRenderer : Node3D
         
         constants.Color = Vector4.One;
         constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
-        constants.ColorTexture = RendererApi.Renderer.WhiteImage.Index;
+        constants.ColorTexture = RendererApi.Renderer.WhiteImage.Index!.Value;
         MaterialConstantsBuffer.SetData(constants);
         
         List<VkDescriptorSetLayout> layouts = new() { RendererApi.Renderer.SceneDataLayout, RendererApi.Renderer.BindlessTextureLayout };
         Material = new Material(
-            ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/meshVert.slang", VkShaderStageFlags.Vertex, layouts)!, 
-            ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/meshFrag.slang", VkShaderStageFlags.Fragment, layouts)!, RendererApi.Renderer, MaterialConstantsBuffer);
+            ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/mesh.slang", VkShaderStageFlags.Vertex, layouts, "vertex")!, 
+            ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/mesh.slang", VkShaderStageFlags.Fragment, layouts, "pixel")!, MaterialConstantsBuffer);
     }
 
     public override void OnDestroy()
@@ -142,7 +142,7 @@ public partial class MeshRenderer : Node3D
         
         constants.Color = myColor;
         constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
-        constants.ColorTexture = vulkanImage.Index;
+        constants.ColorTexture = vulkanImage.Index!.Value;
         MaterialConstantsBuffer.SetData(constants);
         
         await EgoTask.MainThread();
@@ -176,7 +176,7 @@ public partial class MeshRenderer : Node3D
         
             constants.Color = myColor;
             constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
-            constants.ColorTexture = myPreviousVulkanImage?.Index ?? RendererApi.Renderer.WhiteImage.Index;
+            constants.ColorTexture = myPreviousVulkanImage?.Index!.Value ?? RendererApi.Renderer.WhiteImage.Index!.Value;
             MaterialConstantsBuffer.SetData(constants);
         }
     }

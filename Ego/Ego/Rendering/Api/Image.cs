@@ -13,7 +13,7 @@ public unsafe class Image : IGpuDestroyable
     public VmaAllocation Allocation;
     public VkExtent3D Extent;
     public VkFormat ImageFormat;
-    public int Index;
+    public int? Index;
     
     public VkImageLayout CurrentLayout = VkImageLayout.Undefined;
     
@@ -61,7 +61,8 @@ public unsafe class Image : IGpuDestroyable
 
         ImageView = new(VkImage, aFormat, (int)(aUsageFlags & VkImageUsageFlags.DepthStencilAttachment) != 0 ? VkImageAspectFlags.Depth : VkImageAspectFlags.Color, createInfo.mipLevels);
 
-        AddToRegistry();
+        if ((aUsageFlags & VkImageUsageFlags.Sampled) > 0)
+            AddToRegistry();
     }
     
     public Image(Span<byte> aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps) : this(aFormat, aUsageFlags | VkImageUsageFlags.TransferDst, aExtent, aMipMaps, aIsRenderTexture: false)

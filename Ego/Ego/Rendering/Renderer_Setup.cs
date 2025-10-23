@@ -161,9 +161,10 @@ public partial class Renderer : Node
     {
         List<DescriptorAllocatorGrowable.PoolSizeRatio> sizes =
         [
-            new() { Ratio = 10f, Type = VkDescriptorType.StorageImage },
+            new() { Ratio = 1f, Type = VkDescriptorType.StorageImage },
             new() { Ratio = 24f, Type = VkDescriptorType.UniformBuffer },
-            new() { Ratio = 10f, Type = VkDescriptorType.CombinedImageSampler },
+            new() { Ratio = 1f, Type = VkDescriptorType.CombinedImageSampler },
+            new() { Ratio = 1f, Type = VkDescriptorType.Sampler },
             new() { Ratio = 24f, Type = VkDescriptorType.SampledImage }
         ];
 

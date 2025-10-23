@@ -1,6 +1,5 @@
 #include "sceneData.slang"
 
-
 struct GLTFMaterialData
 {
     float4 ColorFactors;
@@ -16,6 +15,7 @@ struct Vertex
     float Uv_y;
     float4 Color;
 };
+
 struct VertexBuffer
 {
     Vertex Vertices[];
@@ -45,7 +45,7 @@ struct InputData
 InputData PushConstants; 
 
 [shader("vertex")]
-VertexStageOutput main(uint aVertexId : SV_VertexID)
+VertexStageOutput vertex(uint aVertexId : SV_VertexID)
 {
     Vertex v = PushConstants.VertexBuffer->Vertices[aVertexId];
 
@@ -61,4 +61,15 @@ VertexStageOutput main(uint aVertexId : SV_VertexID)
     output.OutVertex.Uv.y = v.Uv_y; 
     
     return output; 
+}
+
+[shader("pixel")]
+float4 pixel(float3 inNormal, float3 inColor, float2 inUV) : SV_Target0
+{
+    float lightValue = max(dot(inNormal, sceneData.sunlightDirection.xyz), 0.1f);
+
+    float3 color = inColor * textures[PushConstants.MaterialBuffer->TextureIndex].Sample(linearSampler, inUV).xyz;
+    float3 ambient = color *  sceneData.ambientColor.xyz;
+
+    return float4(color * lightValue *  sceneData.sunlightColor.w + ambient, 1.0f);
 }

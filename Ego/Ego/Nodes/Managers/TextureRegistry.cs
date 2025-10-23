@@ -37,8 +37,8 @@ public static class ImageRegistry
     
     public static void RemoveImage(Image aImage)
     {
-        myImages[aImage.Index] = null;
+        myImages[aImage.Index!.Value] = null;
 
-        myFreeIndices.Add(aImage.Index);
+        myFreeIndices.Add(aImage.Index!.Value);
     }
 }

@@ -105,7 +105,6 @@ public partial class ShaderCompiler : Node
         }
 
         bool shouldCompile = ShaderNeedsCompilation<TPushConstant>(aSlangPath, spirvPath);
-        shouldCompile = true;
         
         if (shouldCompile)
         {
@@ -114,7 +113,7 @@ public partial class ShaderCompiler : Node
             return retVal;
         }
 
-        Log.Info($"File {aSlangPath} exists already! Reusing shader...");
+        Log.Info($"File {aSlangPath} with entry {aEntryPoint} exists already! Reusing shader...");
         
         VkPushConstantRange range = new();
         range.offset = 0;
@@ -170,7 +169,7 @@ public partial class ShaderCompiler : Node
             //var blob = Slangc.NET.SlangCompiler.Compile(aPath, "-target", "spirv", "-entry", aEntryPoint);
             var blob = SlangCompiler2.CompileWithReflection(new []{aPath, "-target", "spirv", "-entry", aEntryPoint}, out SlangReflection reflection);
             
-            Log.Info($"Successfully compiled {aPath} in {watch.GetTime().TotalMilliseconds}ms!");
+            Log.Info($"Successfully compiled {aPath} with entry {aEntryPoint} in {watch.GetTime().TotalMilliseconds}ms!");
             VkPushConstantRange range = new();
             range.offset = 0;
             range.stageFlags = VkShaderStageFlags.Fragment | VkShaderStageFlags.Vertex | VkShaderStageFlags.Compute | VkShaderStageFlags.MeshEXT;

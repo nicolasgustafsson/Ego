@@ -133,7 +133,7 @@ public partial class Renderer
         {
             if (image == null)
                 continue;
-            writer.WriteImage(0, image.ImageView, null, VkImageLayout.ReadOnlyOptimal, VkDescriptorType.SampledImage, (uint)image.Index);
+            writer.WriteImage(0, image.ImageView, null, VkImageLayout.ReadOnlyOptimal, VkDescriptorType.SampledImage, (uint)image.Index!.Value);
         }
 
         writer.WriteImage(1, null, DefaultLinearSampler, VkImageLayout.ReadOnlyOptimal, VkDescriptorType.Sampler);

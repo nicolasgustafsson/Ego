@@ -56,7 +56,7 @@ public partial class Shapes : Node
         VkDescriptorSetLayout MaterialLayout = descriptorLayoutBuilder.Build(VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment);
         var vertexShader = ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/line.slang", VkShaderStageFlags.Vertex, new() { RendererApi.Renderer.SceneDataLayout, RendererApi.Renderer.BindlessTextureLayout, MaterialLayout }, "vertex");
         var pixelShader = ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/line.slang", VkShaderStageFlags.Fragment, new() { RendererApi.Renderer.SceneDataLayout, RendererApi.Renderer.BindlessTextureLayout, MaterialLayout }, "pixel");
-        LineMaterial = new Material(vertexShader!, pixelShader!, RendererApi.Renderer, GarbageBuffer);
+        LineMaterial = new Material(vertexShader!, pixelShader!, GarbageBuffer);
     }
 
     public void DrawLine(Vector3 aStart, Vector3 aEnd)

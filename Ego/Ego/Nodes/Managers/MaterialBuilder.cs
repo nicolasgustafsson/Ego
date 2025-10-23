@@ -44,23 +44,7 @@ public partial class MaterialBuilder : Node
     {
         base.Start();
 
-        BuildDefaultShaders();
     }
-
-    private unsafe void BuildDefaultShaders()
-    {
-        DescriptorLayoutBuilder descriptorLayoutBuilder = new();
-        descriptorLayoutBuilder.AddBinding(1, VkDescriptorType.CombinedImageSampler);
-        descriptorLayoutBuilder.AddBinding(2, VkDescriptorType.CombinedImageSampler);
-
-        MaterialLayout = descriptorLayoutBuilder.Build(VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment);
-        
-        List<VkDescriptorSetLayout> layouts = new() { RendererApi.Renderer.SceneDataLayout, RendererApi.Renderer.BindlessTextureLayout, MaterialLayout };
-
-        OpaqueVertexShader = ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/meshVert.slang", VkShaderStageFlags.Vertex, layouts)!;
-        OpaqueFragmentShader = ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/meshFrag.slang", VkShaderStageFlags.Fragment, layouts)!;
-    }
-
     public Material CreateMaterial(MaterialPassType aPassType, Image aColorImage, Sampler aColorSampler, Image aMetallicRoughnessImage, Sampler aMetallicRoughnessSampler, GpuBuffer<MaterialConstants> aBuffer, int aBufferOffset, DescriptorAllocatorGrowable aDescriptorAllocator)
     {
         Material material = new();

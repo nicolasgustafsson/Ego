@@ -75,7 +75,7 @@ public unsafe class DescriptorLayoutBuilder
         // Each pBinding has a corresponding pBindingFlags.
         VkDescriptorSetLayoutBindingFlagsCreateInfo binding_flags = new();
         binding_flags.sType          = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
-        binding_flags.bindingCount   = 1;
+        binding_flags.bindingCount   = 0;
         binding_flags.pBindingFlags  = &flags; 
         
         createInfo.pNext = &binding_flags;

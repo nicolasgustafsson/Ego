@@ -19,7 +19,7 @@ public class Material
     public Material() { }
     
     //Todo: Uniform buffer should be created dynamically based on shader reflection, instead of being sent in here.
-    public unsafe Material(ShaderObject.Shader aVertexShader, ShaderObject.Shader aFragmentShader, Renderer aRenderer, GpuBuffer aUniformBuffer)
+    public unsafe Material(ShaderObject.Shader aVertexShader, ShaderObject.Shader aFragmentShader, GpuBuffer aUniformBuffer)
     {
         UniformBuffer = aUniformBuffer;
         VertexShader = aVertexShader;
