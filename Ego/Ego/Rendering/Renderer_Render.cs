@@ -89,7 +89,6 @@ public partial class Renderer
             
             cmd.BindDescriptorSet(renderData.Material.VertexShader.PipelineLayout, aGlobalDescriptor, VkPipelineBindPoint.Graphics, 0);
             cmd.BindDescriptorSet(renderData.Material.VertexShader.PipelineLayout, TextureRegistryDescriptorSet, VkPipelineBindPoint.Graphics, 1);
-            cmd.BindDescriptorSet(renderData.Material.VertexShader.PipelineLayout, renderData.Material.DescriptorSet, VkPipelineBindPoint.Graphics, 2);
 
             cmd.BindIndexBuffer(renderData.MyMeshData.MeshBuffers.IndexBuffer);
             

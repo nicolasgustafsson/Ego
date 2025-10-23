@@ -26,7 +26,7 @@ public partial class MeshRenderer : Node3D
     private static int index = 0;
     private Image? myPreviousVulkanImage = null;
 
-    private Vector4 myColor;
+    private Vector4 myColor = Vector4.One;
     
     public MeshRenderer()
     {
@@ -48,14 +48,13 @@ public partial class MeshRenderer : Node3D
         
         constants.Color = Vector4.One;
         constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
-        constants.ColorTexture = RendererApi.Renderer.CheckerBoardImage.Index;
+        constants.ColorTexture = RendererApi.Renderer.WhiteImage.Index;
         MaterialConstantsBuffer.SetData(constants);
         
-        Material = MaterialBuilder.CreateMaterial(MaterialPassType.Opaque,
-            RendererApi.Renderer.WhiteImage,
-            RendererApi.Renderer.DefaultLinearSampler,
-            RendererApi.Renderer.WhiteImage,
-            RendererApi.Renderer.DefaultLinearSampler, MaterialConstantsBuffer, 0, RendererApi.Renderer.GlobalDescriptorAllocator);
+        List<VkDescriptorSetLayout> layouts = new() { RendererApi.Renderer.SceneDataLayout, RendererApi.Renderer.BindlessTextureLayout };
+        Material = new Material(
+            ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/meshVert.slang", VkShaderStageFlags.Vertex, layouts)!, 
+            ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/meshFrag.slang", VkShaderStageFlags.Fragment, layouts)!, RendererApi.Renderer, MaterialConstantsBuffer);
     }
 
     public override void OnDestroy()
@@ -139,28 +138,21 @@ public partial class MeshRenderer : Node3D
         int dataSize = (int)image.Width * (int)image.Height * 4;
         Image vulkanImage = new(rawTextureData.AsSpan(), VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(image.Width, image.Height, 1), true);
 
-        MaterialConstantsBuffer = new(GpuBufferType.Uniform, GpuBufferTransferType.Direct);
-        
         MaterialBuilder.MaterialConstants constants = new();
         
-        constants.Color = Vector4.One;
+        constants.Color = myColor;
         constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
+        constants.ColorTexture = vulkanImage.Index;
         MaterialConstantsBuffer.SetData(constants);
         
-        var newMaterial = MaterialBuilder.CreateMaterial(MaterialPassType.Opaque,
-            vulkanImage,
-            RendererApi.Renderer.DefaultLinearSampler,
-            RendererApi.Renderer.WhiteImage,
-            RendererApi.Renderer.DefaultLinearSampler, MaterialConstantsBuffer, 0, RendererApi.Renderer.GlobalDescriptorAllocator);
-        
         await EgoTask.MainThread();
-
-        Material = newMaterial;
 
         Image? toDelete = myPreviousVulkanImage;
         myPreviousVulkanImage = vulkanImage;
 
         //Destroy the previous image.
+        await EgoTask.Renderer();
+        await EgoTask.Renderer();
         await EgoTask.Renderer();
         toDelete?.Destroy();
     }
@@ -184,6 +176,7 @@ public partial class MeshRenderer : Node3D
         
             constants.Color = myColor;
             constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
+            constants.ColorTexture = myPreviousVulkanImage?.Index ?? RendererApi.Renderer.WhiteImage.Index;
             MaterialConstantsBuffer.SetData(constants);
         }
     }

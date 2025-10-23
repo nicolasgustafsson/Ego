@@ -106,6 +106,7 @@ public unsafe class Gpu
         device12Features.descriptorBindingUpdateUnusedWhilePending = true;
         device12Features.descriptorBindingPartiallyBound = true;
         device12Features.descriptorBindingVariableDescriptorCount = true;
+        device12Features.runtimeDescriptorArray = true;
         device12Features.pNext = &device11Features;
 
         VkPhysicalDeviceVulkan13Features device13Features = new();

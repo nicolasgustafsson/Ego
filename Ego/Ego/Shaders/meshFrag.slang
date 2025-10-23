@@ -30,8 +30,7 @@ struct VertexBuffer
 [[vk::push_constant]] 
 InputData PushConstants; 
 
-layout(set = 2, binding = 1) uniform Sampler2D colorTex;
-layout(set = 2, binding = 2) uniform Sampler2D metalRoughTex;
+
 [shader("pixel")]
 float4 main(float3 inNormal, float3 inColor, float2 inUV) : SV_Target0
 {

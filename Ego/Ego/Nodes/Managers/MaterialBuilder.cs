@@ -68,7 +68,6 @@ public partial class MaterialBuilder : Node
         material.VertexShader = OpaqueVertexShader;
         material.FragmentShader = OpaqueFragmentShader;
 
-        material.DescriptorSet = aDescriptorAllocator.Allocate(MaterialLayout);
         material.PassType = aPassType;
         material.UniformBuffer = aBuffer;
 
@@ -76,7 +75,6 @@ public partial class MaterialBuilder : Node
         DescriptorWriter.WriteImage(1, aColorImage.ImageView, aColorSampler, VkImageLayout.ReadOnlyOptimal, VkDescriptorType.CombinedImageSampler);
         DescriptorWriter.WriteImage(2, aMetallicRoughnessImage.ImageView, aMetallicRoughnessSampler, VkImageLayout.ReadOnlyOptimal, VkDescriptorType.CombinedImageSampler);
 
-        DescriptorWriter.UpdateSet(material.DescriptorSet);
 
         return material;
     }
