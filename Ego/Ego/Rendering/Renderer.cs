@@ -48,8 +48,12 @@ public partial class Renderer : IGpuImmediateSubmit
     public Sampler DefaultNearestSampler = null!;
     public Sampler DefaultLinearSampler = null!;
 
+    public int TextureCount = 2048;
+    private VkDescriptorSet TextureRegistryDescriptorSet;
+
     private SceneData SceneData = new SceneData();
     public VkDescriptorSetLayout SceneDataLayout;
+    public VkDescriptorSetLayout BindlessTextureLayout;
     
     private ulong FrameCount = 0;
     private bool WantsResize = false;

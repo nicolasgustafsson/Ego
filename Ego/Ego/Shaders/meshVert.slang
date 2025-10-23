@@ -1,58 +1,64 @@
-#include "input_structures.slang"
+#include "sceneData.slang"
+
+
+struct GLTFMaterialData
+{
+    float4 ColorFactors;
+    float4 MetalRoughness;
+    int TextureIndex;
+};
 
 struct Vertex 
 {
-
-    float3 position;
-    float uv_x;
-    float3 normal;
-    float uv_y;
-    float4 color;
+    float3 Position;
+    float Uv_x;
+    float3 Normal;
+    float Uv_y;
+    float4 Color;
 };
+struct VertexBuffer
+{
+    Vertex Vertices[];
+}
 
-struct outputThing
+struct OutVertex
 {
     float3 Normal;
     float3 Color;
-    float2 UV;
+    float2 Uv;
 };
 
 struct VertexStageOutput
 {
-    outputThing    coarseVertex    : outputThing;
-    float4          sv_position     : SV_Position;
+    OutVertex       OutVertex    : OutVertex;
+    float4          Position     : SV_Position;
 };
-
-struct VertexBuffer
-{
-    Vertex vertices[];
-}
 
 struct InputData 
 {
-    float4x4 render_matrix;
+    float4x4 RenderMatrix;
     VertexBuffer* VertexBuffer;
+    GLTFMaterialData* MaterialBuffer;
 };
 
 [[vk::push_constant]] 
 InputData PushConstants; 
 
 [shader("vertex")]
-VertexStageOutput main(uint vertexID : SV_VertexID)
+VertexStageOutput main(uint aVertexId : SV_VertexID)
 {
-    Vertex v = PushConstants.VertexBuffer->vertices[vertexID];
+    Vertex v = PushConstants.VertexBuffer->Vertices[aVertexId];
 
     VertexStageOutput output;
     
-    float4 position = float4(v.position, 1.0f);
+    float4 position = float4(v.Position, 1.0f);
 
-    output.sv_position =  mul(mul(position, PushConstants.render_matrix), sceneData.viewproj);
+    output.Position =  mul(mul(position, PushConstants.RenderMatrix), sceneData.viewproj);
     
-
-    output.coarseVertex.Normal = mul(float4(v.normal, 0.f), PushConstants.render_matrix).xyz;
-    output.coarseVertex.Color = v.color.xyz * materialData.colorFactors.xyz;
-    output.coarseVertex.UV.x = v.uv_x;
-    output.coarseVertex.UV.y = v.uv_y;
+    output.OutVertex.Normal = mul(float4(v.Normal, 0.f), PushConstants.RenderMatrix).xyz;
+    output.OutVertex.Color = v.Color.xyz * PushConstants.MaterialBuffer.ColorFactors.xyz;
+    output.OutVertex.Uv.x = v.Uv_x;
+    output.OutVertex.Uv.y = v.Uv_y; 
     
     return output; 
 }

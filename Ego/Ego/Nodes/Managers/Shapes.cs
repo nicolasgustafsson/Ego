@@ -29,11 +29,16 @@ public partial class Shapes : Node
         }
     }
     
+    private struct Garbage
+    {
+        public float PieceOfGarbage;
+    }
+    
     private List<LineDrawCommand> DrawCommands = new();
 
     private MeshData LineMesh = null!;
     private Material LineMaterial = null!;
-    
+    private GpuBuffer<Garbage> GarbageBuffer = null!;
 
     public override void Start()
     {
@@ -41,15 +46,17 @@ public partial class Shapes : Node
         
         List<LineVertex> vertices = new(){new(0f, 0f, 0f), new(1f, 0f, 0f), new(1f, 1f, 0f), new(0f, 1f, 0f)};
         List<uint> indices = new() {0, 2, 3, 2, 0, 1 };
+
+        GarbageBuffer = new(GpuBufferType.Uniform, GpuBufferTransferType.Direct);
         
         LineMesh = new MeshData("Line", (new[]{new GeoSurface(){StartIndex = 0, Count = 6}}).ToList(), new MeshBuffers<LineVertex>(RendererApi.Renderer, MemoryAllocator.GlobalAllocator, indices, vertices));
         DescriptorLayoutBuilder descriptorLayoutBuilder = new();
         descriptorLayoutBuilder.AddBinding(0, VkDescriptorType.UniformBuffer);
 
         VkDescriptorSetLayout MaterialLayout = descriptorLayoutBuilder.Build(VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment);
-        var vertexShader = ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/line.slang", VkShaderStageFlags.Vertex, new() { RendererApi.Renderer.SceneDataLayout, MaterialLayout }, "vertex");
-        var pixelShader = ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/line.slang", VkShaderStageFlags.Fragment, new() { RendererApi.Renderer.SceneDataLayout, MaterialLayout }, "pixel");
-        LineMaterial = new Material(vertexShader!, pixelShader!, RendererApi.Renderer);
+        var vertexShader = ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/line.slang", VkShaderStageFlags.Vertex, new() { RendererApi.Renderer.SceneDataLayout, RendererApi.Renderer.BindlessTextureLayout, MaterialLayout }, "vertex");
+        var pixelShader = ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/line.slang", VkShaderStageFlags.Fragment, new() { RendererApi.Renderer.SceneDataLayout, RendererApi.Renderer.BindlessTextureLayout, MaterialLayout }, "pixel");
+        LineMaterial = new Material(vertexShader!, pixelShader!, RendererApi.Renderer, GarbageBuffer);
     }
 
     public void DrawLine(Vector3 aStart, Vector3 aEnd)

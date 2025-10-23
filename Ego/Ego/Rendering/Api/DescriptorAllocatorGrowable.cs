@@ -87,6 +87,39 @@ public unsafe class DescriptorAllocatorGrowable : IGpuDestroyable
         return descriptorSet;
     }
     
+    public VkDescriptorSet AllocateVariable(VkDescriptorSetLayout aLayout, int aCount)
+    {
+        var pool = AcquirePool();
+        VkDescriptorSetAllocateInfo allocInfo = new();
+        allocInfo.descriptorPool = pool;
+        allocInfo.descriptorSetCount = 1;
+        allocInfo.pSetLayouts = &aLayout;
+
+        VkDescriptorSetVariableDescriptorCountAllocateInfo variableInfo = new();
+
+        variableInfo.descriptorSetCount = 1;
+
+        uint count = (uint)aCount;
+        variableInfo.pDescriptorCounts = &count;
+
+        allocInfo.pNext = &variableInfo;
+        
+        VkDescriptorSet descriptorSet;
+        VkResult result = VkApiDevice.vkAllocateDescriptorSets(Device.VkDevice, &allocInfo, &descriptorSet);
+        
+        if (result is VkResult.ErrorOutOfPoolMemory or VkResult.ErrorFragmentedPool)
+        {
+            FullPools.Add(pool);
+            return Allocate(aLayout);
+        }
+        
+        result.CheckResult();
+
+        ReadyPools.Push(pool);
+
+        return descriptorSet;
+    }
+    
     private void Grow()
     {
         SetsPerPool = (uint)(SetsPerPool * 1.5f).AtMost(MaxPoolSize);
@@ -107,7 +140,7 @@ public unsafe class DescriptorAllocatorGrowable : IGpuDestroyable
     {
         List<VkDescriptorPoolSize> sizes = Ratios.Select(ratio => new VkDescriptorPoolSize(ratio.Type, (uint)(ratio.Ratio * (float)SetsPerPool))).ToList();
         VkDescriptorPoolCreateInfo createInfo = new();
-        createInfo.flags = VkDescriptorPoolCreateFlags.None;
+        createInfo.flags = VkDescriptorPoolCreateFlags.UpdateAfterBind;
         createInfo.maxSets = SetsPerPool;
         createInfo.poolSizeCount = (uint)Ratios.Count;
         createInfo.pPoolSizes = sizes.AsSpan().GetPointerUnsafe();

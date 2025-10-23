@@ -48,7 +48,7 @@
       <None Update="Shaders\meshVert.slang">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="Shaders\input_structures.slang">
+      <None Update="Shaders\sceneData.slang">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="Models\basicmesh.glb">

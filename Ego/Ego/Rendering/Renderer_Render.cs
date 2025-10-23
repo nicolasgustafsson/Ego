@@ -1,3 +1,4 @@
+using Ego;
 using Utilities;
 
 namespace Rendering;
@@ -35,6 +36,7 @@ public partial class Renderer
         uint imageIndex = nextImageAcquisition.imageIndex;
         
         VkDescriptorSet globalDescriptor = UpdateSceneData();
+        UpdateBindlessTextures();
         
         using (CommandBufferHandle cmd = CurrentFrame.CommandBuffer.BeginRecording())
         {
@@ -76,6 +78,7 @@ public partial class Renderer
         return RenderResult.Success;
     }
 
+
     private void RenderGeometry(CommandBufferHandle cmd, VkDescriptorSet aGlobalDescriptor)
     {
         cmd.BeginRendering(RenderImage, DepthImage);
@@ -85,14 +88,16 @@ public partial class Renderer
             renderData.Material.Bind(cmd);
             
             cmd.BindDescriptorSet(renderData.Material.VertexShader.PipelineLayout, aGlobalDescriptor, VkPipelineBindPoint.Graphics, 0);
-            cmd.BindDescriptorSet(renderData.Material.VertexShader.PipelineLayout, renderData.Material.DescriptorSet, VkPipelineBindPoint.Graphics, 1);
+            cmd.BindDescriptorSet(renderData.Material.VertexShader.PipelineLayout, TextureRegistryDescriptorSet, VkPipelineBindPoint.Graphics, 1);
+            cmd.BindDescriptorSet(renderData.Material.VertexShader.PipelineLayout, renderData.Material.DescriptorSet, VkPipelineBindPoint.Graphics, 2);
 
             cmd.BindIndexBuffer(renderData.MyMeshData.MeshBuffers.IndexBuffer);
             
             MeshPushConstants pushConstants = new();
+            pushConstants.MaterialUniformBufferAddress = renderData.Material.UniformBuffer.GetDeviceAddress();
             pushConstants.WorldMatrix = renderData.WorldMatrix; 
             pushConstants.VertexBufferAddress = renderData.MyMeshData.MeshBuffers.VertexBufferAddress;
-            cmd.SetPushConstants(pushConstants, renderData.Material.VertexShader.PipelineLayout, VkShaderStageFlags.Vertex);
+            cmd.SetPushConstants(pushConstants, renderData.Material.VertexShader.PipelineLayout);
 
             cmd.DrawIndexed(renderData.MyMeshData.Surfaces[0].Count);
         }
@@ -120,6 +125,22 @@ public partial class Renderer
 
         return globalDescriptor;
     }
+    
+    private void UpdateBindlessTextures()
+    {
+        DescriptorWriter writer = new();
+        
+        foreach(var image in ImageRegistry.GetAllImages())
+        {
+            if (image == null)
+                continue;
+            writer.WriteImage(0, image.ImageView, null, VkImageLayout.ReadOnlyOptimal, VkDescriptorType.SampledImage, (uint)image.Index);
+        }
+
+        writer.WriteImage(1, null, DefaultLinearSampler, VkImageLayout.ReadOnlyOptimal, VkDescriptorType.Sampler);
+        
+        writer.UpdateSet(TextureRegistryDescriptorSet);
+    }
 
     private void RenderBackground(CommandBufferHandle cmd)
     {
@@ -130,7 +151,7 @@ public partial class Renderer
         PushConstants pushConstants = new();
         pushConstants.data1.X = 0f;
 
-        cmd.SetPushConstants(pushConstants, GradientShader.PipelineLayout, VkShaderStageFlags.Compute);
+        cmd.SetPushConstants(pushConstants, GradientShader.PipelineLayout);
 
         cmd.DispatchCompute((uint)Math.Ceiling(Swapchain.Extents.width / 16d), (uint)Math.Ceiling(Swapchain.Extents.height / 16d));
     }

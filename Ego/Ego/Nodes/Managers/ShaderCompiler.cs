@@ -1,4 +1,7 @@
+using System.Runtime.InteropServices;
+using System.Text;
 using NativeFileDialogs.Net;
+using Slangc.NET;
 using Vortice.Vulkan;
 using VulkanApi;
 
@@ -57,7 +60,7 @@ public partial class ShaderCompiler : Node
 
         var MaterialLayout = descriptorLayoutBuilder.Build(VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment);
         
-        List<VkDescriptorSetLayout> layouts = new() { RendererApi.Renderer.SceneDataLayout, MaterialLayout };
+        List<VkDescriptorSetLayout> layouts = new() { RendererApi.Renderer.SceneDataLayout, RendererApi.Renderer.BindlessTextureLayout, MaterialLayout };
  
         var shader = await LoadShader<MeshPushConstants>(ShaderPath, ShaderType, layouts);
     }
@@ -115,7 +118,7 @@ public partial class ShaderCompiler : Node
         
         VkPushConstantRange range = new();
         range.offset = 0;
-        range.stageFlags = aShaderType;
+        range.stageFlags = VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment | VkShaderStageFlags.Compute | VkShaderStageFlags.MeshEXT;
         range.size = GetSize<TPushConstant>();
         ShaderObject.Shader shader = new(aShaderType, File.ReadAllBytes(spirvPath), aLayouts, range);
 
@@ -146,7 +149,11 @@ public partial class ShaderCompiler : Node
     private string GetSpirvPath(string aPath, string aEntryPoint)
     {
         return Path.GetFileNameWithoutExtension(aPath) + $"-{aEntryPoint}.spirv";
-        
+    }
+    
+    private string GetReflectionPath(string aPath, string aEntryPoint)
+    {
+        return Path.GetFileNameWithoutExtension(aPath) + $"-{aEntryPoint}-reflection.json";
     }
     
     unsafe uint GetSize<TPushConstant>()
@@ -160,17 +167,20 @@ public partial class ShaderCompiler : Node
         try
         {
             QuickWatch watch = new($"Shader Compilation");
-            var blob = Slangc.NET.SlangCompiler.Compile(aPath, "-target", "spirv", "-entry", aEntryPoint);
+            //var blob = Slangc.NET.SlangCompiler.Compile(aPath, "-target", "spirv", "-entry", aEntryPoint);
+            var blob = SlangCompiler2.CompileWithReflection(new []{aPath, "-target", "spirv", "-entry", aEntryPoint}, out SlangReflection reflection);
+            
             Log.Info($"Successfully compiled {aPath} in {watch.GetTime().TotalMilliseconds}ms!");
             VkPushConstantRange range = new();
             range.offset = 0;
-            range.stageFlags = aShaderType;
+            range.stageFlags = VkShaderStageFlags.Fragment | VkShaderStageFlags.Vertex | VkShaderStageFlags.Compute | VkShaderStageFlags.MeshEXT;
             range.size = GetSize<TPushConstant>();
             ShaderObject.Shader shader = new(aShaderType, blob, aLayouts, range);
             
             if (aSaveToFile)
             {
                 Save(GetSpirvPath(aPath, aEntryPoint), blob);
+                File.WriteAllText(GetReflectionPath(aPath, aEntryPoint), reflection.Json);
             }
             return shader;
         }
@@ -181,4 +191,82 @@ public partial class ShaderCompiler : Node
 
         return null;
     }
+
+}
+
+
+//Need to create this class because if it tries to parse the json it throws nullreferenceexception
+public static class SlangCompiler2
+{
+  private static readonly SlangSession session;
+
+  static SlangCompiler2()
+  {
+    NativeLibrary.TryLoad("dxcompiler", out IntPtr _);
+    string lowerInvariant = RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
+    if (OperatingSystem.IsWindows())
+    {
+      string path1 = Path.Combine(AppContext.BaseDirectory, "runtimes", "win-" + lowerInvariant, "native");
+      NativeLibrary.Load(Path.Combine(path1, "slang-glslang.dll"));
+      NativeLibrary.Load(Path.Combine(path1, "slang.dll"));
+    }
+    else if (OperatingSystem.IsLinux())
+    {
+      string path1 = Path.Combine(AppContext.BaseDirectory, "runtimes", "linux-" + lowerInvariant, "native");
+      NativeLibrary.Load(Path.Combine(path1, "libslang-glslang.so"));
+      NativeLibrary.Load(Path.Combine(path1, "libslang.so"));
+    }
+    else
+    {
+      if (!OperatingSystem.IsMacOS())
+        throw new PlatformNotSupportedException("Slangc.NET is not supported on this platform.");
+      string path1 = Path.Combine(AppContext.BaseDirectory, "runtimes", "osx-" + lowerInvariant, "native");
+      NativeLibrary.Load(Path.Combine(path1, "libslang-glslang.dylib"));
+      NativeLibrary.Load(Path.Combine(path1, "libslang.dylib"));
+    }
+    SlangCompiler2.session = new SlangSession();
+  }
+
+  public static byte[] Compile(params string[] args)
+  {
+    using (SlangCompileRequest compileRequest = SlangCompiler2.session.CreateCompileRequest())
+    {
+      SlangCompiler2.Compile(compileRequest, args);
+      return compileRequest.GetResult();
+    }
+  }
+
+  public static byte[] CompileWithReflection(string[] args, out SlangReflection reflection)
+  {
+    using (SlangCompileRequest compileRequest = SlangCompiler2.session.CreateCompileRequest())
+    {
+      SlangCompiler2.Compile(compileRequest, args);
+      reflection = new SlangReflection(compileRequest.Handle, false);
+      return compileRequest.GetResult();
+    }
+  }
+
+  private static unsafe SlangCompileRequest Compile(SlangCompileRequest request, string[] args)
+  {
+    StringBuilder stringBuilder = new StringBuilder();
+    GCHandle userData = GCHandle.Alloc((object) stringBuilder);
+    try
+    {
+      // ISSUE: reference to a compiler-generated field
+      // ISSUE: reference to a compiler-generated field
+      request.SetDiagnosticCallback(SlangCompiler2.DiagnosticCallback, (void*) (IntPtr) userData);
+      if (request.ProcessCommandLineArguments(args) != 0)
+        throw new Exception(stringBuilder.ToString());
+      return request.Compile() == 0 ? request : throw new Exception(stringBuilder.ToString());
+    }
+    finally
+    {
+      userData.Free();
+    }
+  }
+
+  private static unsafe void DiagnosticCallback(char* message, void* userData)
+  {
+    ((StringBuilder) ((GCHandle) (IntPtr) userData).Target!).Append(Marshal.PtrToStringAnsi((IntPtr) message) ?? string.Empty);
+  }
 }

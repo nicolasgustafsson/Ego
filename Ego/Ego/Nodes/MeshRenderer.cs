@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Drawing;
 using ImageMagick;
 using Microsoft.IO;
 using NativeFileDialogs.Net;
@@ -24,6 +25,8 @@ public partial class MeshRenderer : Node3D
 
     private static int index = 0;
     private Image? myPreviousVulkanImage = null;
+
+    private Vector4 myColor;
     
     public MeshRenderer()
     {
@@ -45,6 +48,7 @@ public partial class MeshRenderer : Node3D
         
         constants.Color = Vector4.One;
         constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
+        constants.ColorTexture = RendererApi.Renderer.CheckerBoardImage.Index;
         MaterialConstantsBuffer.SetData(constants);
         
         Material = MaterialBuilder.CreateMaterial(MaterialPassType.Opaque,
@@ -102,8 +106,6 @@ public partial class MeshRenderer : Node3D
         //using FileStream stream = File.OpenRead(aPath);
 
         //ImageResult image = ImageResult.FromStream(stream);
-        
-        GpuDataTransferer dataTransfer = await EgoTask.GpuDataTransfer();
         
         /*
         int components = (int)image.Comp;
@@ -174,6 +176,15 @@ public partial class MeshRenderer : Node3D
             {
                 myLoadTextureTask = LoadATexture(outPath);
             }
+        }
+        
+        if (Imgui.ColorPicker4("Color", ref myColor))
+        {
+            MaterialBuilder.MaterialConstants constants = new();
+        
+            constants.Color = myColor;
+            constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
+            MaterialConstantsBuffer.SetData(constants);
         }
     }
 }

@@ -17,7 +17,7 @@ public class ShaderObject : IGpuDestroyable
         public VkShaderEXT VkShader = VkShaderEXT.Null;
         private VkShaderCreateInfoEXT VkShaderCreateInfo;
         public List<VkDescriptorSetLayout> Layouts;
-        public VkPipelineLayout PipelineLayout;
+        public VkPipelineLayout PipelineLayout; 
         
         public Shader(VkShaderStageFlags aStage, byte[] aSpirvSource, List<VkDescriptorSetLayout> aLayouts, VkPushConstantRange aPushConstantRange)
         {

@@ -1,5 +1,4 @@
-#include "input_structures.slang"
-
+#include "sceneData.slang"
 
 struct Vertex 
 {

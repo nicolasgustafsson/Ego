@@ -35,11 +35,10 @@ public partial class Texture : Node, IImportable
     private Image? VulkanImage;
     public int Width;
     public int Height;
+    public int? Index = null;
     
     private async Task UploadToGpu(byte[] aTextureBytes)
     {
-        GpuDataTransferer dataTransfer = await EgoTask.GpuDataTransfer();
-
         Image vulkanImage = new(aTextureBytes, VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(Width, Height, 1), true);
 
         await EgoTask.MainThread();

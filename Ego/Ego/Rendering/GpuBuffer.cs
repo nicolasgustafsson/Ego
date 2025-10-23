@@ -54,7 +54,7 @@ public class GpuBuffer<T> : GpuBuffer where T : unmanaged
                 flags = VkBufferUsageFlags.StorageBuffer | VkBufferUsageFlags.ShaderDeviceAddress;
                 break;
             case GpuBufferType.Uniform:
-                flags = VkBufferUsageFlags.UniformBuffer;
+                flags = VkBufferUsageFlags.UniformBuffer | VkBufferUsageFlags.ShaderDeviceAddress;
                 break;
             case GpuBufferType.Index:
                 flags = VkBufferUsageFlags.IndexBuffer |  VkBufferUsageFlags.TransferDst;

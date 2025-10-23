@@ -156,6 +156,11 @@ public unsafe class CommandBufferHandle : IDisposable
         VkApiDevice.vkCmdClearColorImage(VkCommandBuffer, aImage.VkImage, aImageLayout, &aColor, 1, &clearRange);
     }
     
+    public void SetPushConstants<T>(T aPushConstants, VkPipelineLayout aLayout) where T : unmanaged
+    {
+        VkApiDevice.vkCmdPushConstants(VkCommandBuffer, aLayout, VkShaderStageFlags.Fragment | VkShaderStageFlags.Vertex | VkShaderStageFlags.Compute | VkShaderStageFlags.MeshEXT, 0, (uint)sizeof(T), &aPushConstants);
+    }
+    
     public void SetPushConstants<T>(T aPushConstants, VkPipelineLayout aLayout, VkShaderStageFlags aShaderStages) where T : unmanaged
     {
         VkApiDevice.vkCmdPushConstants(VkCommandBuffer, aLayout, aShaderStages, 0, (uint)sizeof(T), &aPushConstants);
@@ -267,6 +272,7 @@ public unsafe class CommandBufferHandle : IDisposable
     
     public void DrawIndexed(uint aIndexCount)
     {
+        VkApiDevice.vkCmdSetVertexInputEXT(VkCommandBuffer, 0, null, 0, null);
         VkApiDevice.vkCmdDrawIndexed(VkCommandBuffer, (uint)aIndexCount, 1, 0, 0, 0);
     }
     

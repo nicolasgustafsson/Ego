@@ -59,7 +59,7 @@ public partial class Renderer : Node
         
         CreateFrameData();
 
-        CreateDefaultImages();
+        CreateDefaultImages(); 
         
         InitializeDescriptors();
 
@@ -159,15 +159,16 @@ public partial class Renderer : Node
 
     private unsafe void InitializeDescriptors()
     {
-        List<DescriptorAllocatorGrowable.PoolSizeRatio> sizes = new List<DescriptorAllocatorGrowable.PoolSizeRatio>
-        {
-            new() { Ratio = 1f, Type = VkDescriptorType.StorageImage},
-            new() { Ratio = 1f, Type = VkDescriptorType.UniformBuffer},
-            new() { Ratio = 1f, Type = VkDescriptorType.CombinedImageSampler},
-        };
+        List<DescriptorAllocatorGrowable.PoolSizeRatio> sizes =
+        [
+            new() { Ratio = 10f, Type = VkDescriptorType.StorageImage },
+            new() { Ratio = 24f, Type = VkDescriptorType.UniformBuffer },
+            new() { Ratio = 10f, Type = VkDescriptorType.CombinedImageSampler },
+            new() { Ratio = 24f, Type = VkDescriptorType.SampledImage }
+        ];
 
         GlobalDescriptorAllocator = new();
-        GlobalDescriptorAllocator.InitPool(10, sizes);
+        GlobalDescriptorAllocator.InitPool(100, sizes);
 
         CreateRenderImageDescriptor();
 
@@ -198,7 +199,31 @@ public partial class Renderer : Node
                 VkApiDevice.vkDestroyDescriptorSetLayout(Device.VkDevice, SceneDataLayout);
             });
         }
+
+        CreateBindlessDescriptors();
+    }
+    
+    private void CreateBindlessDescriptors()
+    {
+        DescriptorLayoutBuilder builder = new();
+        builder.AddBinding(0, VkDescriptorType.SampledImage, TextureCount);
+        builder.AddBinding(1, VkDescriptorType.Sampler);
+        var layout = builder.BuildBindless(VkShaderStageFlags.Fragment, VkDescriptorSetLayoutCreateFlags.None);
+
+        BindlessTextureLayout = layout;
         
+        /*
+        VkDescriptorSetAllocateInfo allocate_info = vkb::initializers::descriptor_set_allocate_info(descriptors.descriptor_pool, &descriptors.set_layout, 1);
+
+        // Just like descriptor flags, for each descriptor set we allocate, we can describe how large the descriptor array should be.
+        VkDescriptorSetVariableDescriptorCountAllocateInfoEXT variable_info{};
+        variable_info.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT;
+        variable_info.descriptorSetCount = 1;
+        allocate_info.pNext              = &variable_info;
+
+        variable_info.pDescriptorCounts = &NumDescriptorsStreaming;
+        */
+        TextureRegistryDescriptorSet = GlobalDescriptorAllocator.AllocateVariable(layout, TextureCount);
     }
 
     private void CreateRenderImageDescriptor()

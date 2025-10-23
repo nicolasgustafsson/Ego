@@ -87,9 +87,11 @@ public unsafe class Gpu
         ReadOnlySpan<VkDeviceQueueCreateInfo> queues = [deviceQueueCreateInfo, transferQueueCreateInfo];
 
         VkPhysicalDeviceFeatures deviceFeatures = new();
+
         
         VkPhysicalDeviceShaderObjectFeaturesEXT shaderObjectFeaturesExt = new();
         shaderObjectFeaturesExt.shaderObject = true;
+        //shaderObjectFeaturesExt.pNext = &descriptorIndexingFeatures;
         
         
         VkPhysicalDeviceVulkan11Features device11Features = new();
@@ -99,6 +101,11 @@ public unsafe class Gpu
         VkPhysicalDeviceVulkan12Features device12Features = new();
         device12Features.bufferDeviceAddress = true;
         device12Features.descriptorIndexing = true;
+        device12Features.descriptorBindingSampledImageUpdateAfterBind = true;
+        device12Features.shaderSampledImageArrayNonUniformIndexing = true;
+        device12Features.descriptorBindingUpdateUnusedWhilePending = true;
+        device12Features.descriptorBindingPartiallyBound = true;
+        device12Features.descriptorBindingVariableDescriptorCount = true;
         device12Features.pNext = &device11Features;
 
         VkPhysicalDeviceVulkan13Features device13Features = new();

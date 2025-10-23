@@ -76,4 +76,5 @@ public struct MeshPushConstants
 {
     public Matrix4x4 WorldMatrix;
     public VkDeviceAddress VertexBufferAddress;
+    public VkDeviceAddress MaterialUniformBufferAddress;
 }

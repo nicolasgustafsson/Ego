@@ -21,9 +21,10 @@ public partial class MaterialBuilder : Node
     {
         public Vector4 Color;
         public Vector4 MetallicRoughness;
-        
+        public int ColorTexture;
+
         //This has to have an alignment of 256 for whichever reason https://vkguide.dev/docs/new_chapter_4/materials/
-        public Vector4 Padding1;
+        /*public Vector4 Padding1;
         public Vector4 Padding2;
         public Vector4 Padding3;
         public Vector4 Padding4;
@@ -36,7 +37,7 @@ public partial class MaterialBuilder : Node
         public Vector4 Padding11;
         public Vector4 Padding12;
         public Vector4 Padding13;
-        public Vector4 Padding14;
+        public Vector4 Padding14;*/
     }
     
     public override void Start()
@@ -49,20 +50,15 @@ public partial class MaterialBuilder : Node
     private unsafe void BuildDefaultShaders()
     {
         DescriptorLayoutBuilder descriptorLayoutBuilder = new();
-        descriptorLayoutBuilder.AddBinding(0, VkDescriptorType.UniformBuffer);
         descriptorLayoutBuilder.AddBinding(1, VkDescriptorType.CombinedImageSampler);
         descriptorLayoutBuilder.AddBinding(2, VkDescriptorType.CombinedImageSampler);
 
         MaterialLayout = descriptorLayoutBuilder.Build(VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment);
         
-        List<VkDescriptorSetLayout> layouts = new() { RendererApi.Renderer.SceneDataLayout, MaterialLayout };
-        VkPushConstantRange range = new();
-        range.offset = 0;
-        range.size = (uint)sizeof(MeshPushConstants);
-        range.stageFlags = VkShaderStageFlags.Vertex;
+        List<VkDescriptorSetLayout> layouts = new() { RendererApi.Renderer.SceneDataLayout, RendererApi.Renderer.BindlessTextureLayout, MaterialLayout };
 
-        OpaqueVertexShader = ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/meshVert.slang", VkShaderStageFlags.Vertex, layouts)!;//new(VkShaderStageFlags.Vertex, File.ReadAllBytes("Shaders/meshVert.spv"), layouts, range);
-        OpaqueFragmentShader = ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/meshFrag.slang", VkShaderStageFlags.Fragment, layouts)!;//new(VkShaderStageFlags.Vertex, File.ReadAllBytes("Shaders/meshVert.spv"), layouts, range);
+        OpaqueVertexShader = ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/meshVert.slang", VkShaderStageFlags.Vertex, layouts)!;
+        OpaqueFragmentShader = ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/meshFrag.slang", VkShaderStageFlags.Fragment, layouts)!;
     }
 
     public Material CreateMaterial(MaterialPassType aPassType, Image aColorImage, Sampler aColorSampler, Image aMetallicRoughnessImage, Sampler aMetallicRoughnessSampler, GpuBuffer<MaterialConstants> aBuffer, int aBufferOffset, DescriptorAllocatorGrowable aDescriptorAllocator)
@@ -74,10 +70,9 @@ public partial class MaterialBuilder : Node
 
         material.DescriptorSet = aDescriptorAllocator.Allocate(MaterialLayout);
         material.PassType = aPassType;
+        material.UniformBuffer = aBuffer;
 
         DescriptorWriter.Clear();
-
-        DescriptorWriter.WriteBuffer(0, aBuffer, (ulong)aBufferOffset, VkDescriptorType.UniformBuffer);
         DescriptorWriter.WriteImage(1, aColorImage.ImageView, aColorSampler, VkImageLayout.ReadOnlyOptimal, VkDescriptorType.CombinedImageSampler);
         DescriptorWriter.WriteImage(2, aMetallicRoughnessImage.ImageView, aMetallicRoughnessSampler, VkImageLayout.ReadOnlyOptimal, VkDescriptorType.CombinedImageSampler);
 

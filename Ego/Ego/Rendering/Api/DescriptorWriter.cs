@@ -21,11 +21,11 @@ public unsafe class DescriptorWriter
     private List<VkDescriptorBufferInfo> BufferInfos = new(); 
     private List<DescriptorWrite> Writes = new();
     
-    public void WriteImage(uint aBinding, ImageView aImageView, Sampler? aSampler, VkImageLayout aImageLayout, VkDescriptorType aType)
+    public void WriteImage(uint aBinding, ImageView? aImageView, Sampler? aSampler, VkImageLayout aImageLayout, VkDescriptorType aType, uint aArrayElement = 0)
     {
         VkDescriptorImageInfo imageInfo = new();
         imageInfo.sampler = aSampler?.VkSampler ?? VkSampler.Null;
-        imageInfo.imageView = aImageView.VkImageView;
+        imageInfo.imageView = aImageView?.VkImageView ?? VkImageView.Null;
         imageInfo.imageLayout = aImageLayout;
 
         ImageInfos.Add(imageInfo);
@@ -34,6 +34,7 @@ public unsafe class DescriptorWriter
         write.dstBinding = aBinding;
         write.descriptorCount = 1;
         write.descriptorType = aType;
+        write.dstArrayElement = aArrayElement;
 
         Writes.Add(new(write, DescriptorWrite.WriteType.Image, ImageInfos.Count - 1));
     }

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Numerics;
+using Ego;
 using Rendering;
 using Vortice.ShaderCompiler;
 
@@ -12,13 +13,9 @@ public unsafe class Image : IGpuDestroyable
     public VmaAllocation Allocation;
     public VkExtent3D Extent;
     public VkFormat ImageFormat;
+    public int Index;
     
     public VkImageLayout CurrentLayout = VkImageLayout.Undefined;
-    
-    public IntPtr GetHandle()
-    {
-        return (IntPtr)VkImage.Handle;
-    }
     
     public Image(VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps, bool aIsRenderTexture)
     {
@@ -64,7 +61,7 @@ public unsafe class Image : IGpuDestroyable
 
         ImageView = new(VkImage, aFormat, (int)(aUsageFlags & VkImageUsageFlags.DepthStencilAttachment) != 0 ? VkImageAspectFlags.Depth : VkImageAspectFlags.Color, createInfo.mipLevels);
 
-        ImageRegistry.PointersToImages.TryAdd((nint)VkImage.Handle, this);
+        AddToRegistry();
     }
     
     public Image(Span<byte> aData, VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps) : this(aFormat, aUsageFlags | VkImageUsageFlags.TransferDst, aExtent, aMipMaps, aIsRenderTexture: false)
@@ -76,17 +73,21 @@ public unsafe class Image : IGpuDestroyable
         this(new Span<byte>(aData, (int)(aExtent.width * aExtent.height * aExtent.depth * 4)), aFormat, aUsageFlags, aExtent, aMipMaps)
     {
     }
-
-    private void UploadData()
-    {
-        
-    }
     
+    //Todo: We should wait a few frames before actually destroying, so that the renderer will stop using it.
     public void Destroy()
     {
         ImageView.Destroy();
 
         Vma.vmaDestroyImage(GlobalAllocator.VmaAllocator, VkImage, Allocation);
+        
+        if (Index != null)
+            ImageRegistry.RemoveImage(this);
+    }
+    
+    public void AddToRegistry()
+    {
+        Index = ImageRegistry.AddImage(this);
     }
 
     public VkRenderingAttachmentInfo GetAttachmentInfo(VkClearValue? aClear,  VkImageLayout aLayout = VkImageLayout.ColorAttachmentOptimal)

@@ -10,7 +10,6 @@ public partial class SceneEditor : Node
     {
         var scene = AddChild(WorkingScene);
         var node = scene.AddChild(new Node());
-        node.AddChild(new EditorDummy());
         
         var movement = AddChild(new EditorCameraMovement());
 

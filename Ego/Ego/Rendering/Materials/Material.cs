@@ -11,17 +11,18 @@ public enum MaterialPassType
 
 public class Material
 {
-    public VkDescriptorSet DescriptorSet;
+    public VkDescriptorSet DescriptorSet; //Todo: This should disappear! We should have a global descriptor texture set and push constants will handle uniform buffer
     public MaterialPassType PassType;
     public ShaderObject.Shader VertexShader = null!;
     public ShaderObject.Shader FragmentShader = null!;
+    public GpuBuffer UniformBuffer = null!;
     
     public Material() { }
     
-    
-    
-    public unsafe Material(ShaderObject.Shader aVertexShader, ShaderObject.Shader aFragmentShader, Renderer aRenderer)
+    //Todo: Uniform buffer should be created dynamically based on shader reflection.
+    public unsafe Material(ShaderObject.Shader aVertexShader, ShaderObject.Shader aFragmentShader, Renderer aRenderer, GpuBuffer aUniformBuffer)
     {
+        UniformBuffer = aUniformBuffer;
         DescriptorWriter DescriptorWriter = new();
         DescriptorLayoutBuilder descriptorLayoutBuilder = new();
         descriptorLayoutBuilder.AddBinding(0, VkDescriptorType.UniformBuffer);
@@ -29,36 +30,9 @@ public class Material
         VkDescriptorSetLayout MaterialLayout = descriptorLayoutBuilder.Build(VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment);
         
         VertexShader = aVertexShader;
-        FragmentShader = aFragmentShader;
+        FragmentShader = aFragmentShader; 
         
         PassType = MaterialPassType.Opaque;
-        
-        
-        DescriptorSet = aRenderer.GlobalDescriptorAllocator.Allocate(MaterialLayout);
-        
-        DescriptorWriter.Clear();
-        DescriptorWriter.UpdateSet(DescriptorSet);
-    }
-    
-    public unsafe Material(string aVertexShaderPath, string aFragmentShaderPath, Renderer aRenderer)
-    {
-        DescriptorWriter DescriptorWriter = new();
-        DescriptorLayoutBuilder descriptorLayoutBuilder = new();
-        descriptorLayoutBuilder.AddBinding(0, VkDescriptorType.UniformBuffer);
-
-        VkDescriptorSetLayout MaterialLayout = descriptorLayoutBuilder.Build(VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment);
-        
-        List<VkDescriptorSetLayout> layouts = new() { aRenderer.SceneDataLayout, MaterialLayout };
-        VkPushConstantRange range = new();
-        range.offset = 0;
-        range.size = (uint)sizeof(MeshPushConstants);
-        range.stageFlags = VkShaderStageFlags.Vertex;
-        
-        VertexShader = new(VkShaderStageFlags.Vertex, File.ReadAllBytes(aVertexShaderPath), layouts, range);
-        FragmentShader = new(VkShaderStageFlags.Fragment, File.ReadAllBytes(aFragmentShaderPath), layouts, range);
-        
-        PassType = MaterialPassType.Opaque;
-        
         
         DescriptorSet = aRenderer.GlobalDescriptorAllocator.Allocate(MaterialLayout);
         
