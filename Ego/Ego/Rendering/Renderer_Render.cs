@@ -92,7 +92,7 @@ public partial class Renderer
 
             cmd.BindIndexBuffer(renderData.MyMeshData.MeshBuffers.IndexBuffer);
             
-            MeshPushConstants pushConstants = new();
+            DefaultPushConstants pushConstants = new();
             pushConstants.MaterialUniformBufferAddress = renderData.Material.UniformBuffer.GetDeviceAddress();
             pushConstants.WorldMatrix = renderData.WorldMatrix; 
             pushConstants.VertexBufferAddress = renderData.MyMeshData.MeshBuffers.VertexBufferAddress;
@@ -101,10 +101,6 @@ public partial class Renderer
             cmd.DrawIndexed(renderData.MyMeshData.Surfaces[0].Count);
         }
         
-        foreach(var customRenderCommand in CustomRenderCommands)
-        {
-            customRenderCommand.Render(cmd);
-        }
        
         cmd.EndRendering();
     }

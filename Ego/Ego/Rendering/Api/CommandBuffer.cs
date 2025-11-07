@@ -293,7 +293,7 @@ public unsafe class CommandBufferHandle : IDisposable
         VkRenderingInfo renderingInfo = aDrawImage.GetRenderingInfo(new VkExtent2D(aDrawImage.Extent.width, aDrawImage.Extent.height), attachmentInfo, depthAttachmentInfo);
 
         VkApiDevice.vkCmdBeginRendering(VkCommandBuffer, &renderingInfo);
-
+        
         VkViewport dynamicViewport = new();
         dynamicViewport.x = 0;
         dynamicViewport.y = 0;

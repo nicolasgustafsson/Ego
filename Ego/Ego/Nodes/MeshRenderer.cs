@@ -5,6 +5,7 @@ using Microsoft.IO;
 using NativeFileDialogs.Net;
 using Rendering;
 using Rendering.Materials;
+using SharpGLTF.Materials;
 using StbImageSharp;
 using Vortice.Vulkan;
 using VulkanApi;
@@ -17,7 +18,7 @@ public partial class MeshRenderer : Node3D
     private string ModelPath = "Models/structure.glb";
     private MeshData? MeshData = null;
     private Material Material = null!;
-    private GpuBuffer<MaterialBuilder.MaterialConstants> MaterialConstantsBuffer = null!;
+    private GpuBuffer<MaterialConstants> MaterialConstantsBuffer = null!;
 
     [Serialize] private int MeshIndex = 0;
     private string lastPath = "";
@@ -44,17 +45,13 @@ public partial class MeshRenderer : Node3D
 
         MaterialConstantsBuffer = new(GpuBufferType.Uniform, GpuBufferTransferType.Direct);
         
-        MaterialBuilder.MaterialConstants constants = new();
-        
+        MaterialConstants constants = new();
         constants.Color = Vector4.One;
         constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
         constants.ColorTexture = RendererApi.Renderer.WhiteImage.Index!.Value;
         MaterialConstantsBuffer.SetData(constants);
-        
-        List<VkDescriptorSetLayout> layouts = new() { RendererApi.Renderer.SceneDataLayout, RendererApi.Renderer.BindlessTextureLayout };
-        Material = new Material(
-            ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/mesh.slang", VkShaderStageFlags.Vertex, layouts, "vertex")!, 
-            ShaderCompiler.LoadShaderImmediate<MeshPushConstants>("Shaders/mesh.slang", VkShaderStageFlags.Fragment, layouts, "pixel")!, MaterialConstantsBuffer);
+
+        Material = new Material("Shaders/mesh.slang", MaterialConstantsBuffer, this);
     }
 
     public override void OnDestroy()
@@ -101,44 +98,10 @@ public partial class MeshRenderer : Node3D
         image.Format = MagickFormat.Rgba;
         
         var rawTextureData = image.ToByteArray();
-
-        //using FileStream stream = File.OpenRead(aPath);
-
-        //ImageResult image = ImageResult.FromStream(stream);
         
-        /*
-        int components = (int)image.Comp;
-        
-        if (components == 0)
-            components = 4;
-
-        VkFormat formatToUse;
-        switch(image.Comp)
-        {
-            case ColorComponents.Default:
-                formatToUse = VkFormat.R8G8B8A8Unorm;
-                break;
-            case ColorComponents.Grey:
-                formatToUse = VkFormat.R8Unorm;
-                break;
-            case ColorComponents.GreyAlpha:
-                formatToUse = VkFormat.R8G8Unorm;
-                break;
-            case ColorComponents.RedGreenBlue:
-                formatToUse = VkFormat.R8G8B8Unorm;
-                break;
-            case ColorComponents.RedGreenBlueAlpha:
-                formatToUse = VkFormat.R8G8B8A8Unorm;
-                break;
-            default:
-                formatToUse = VkFormat.R8G8B8A8Unorm;
-                break;
-        }*/
-        
-        int dataSize = (int)image.Width * (int)image.Height * 4;
         Image vulkanImage = new(rawTextureData.AsSpan(), VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(image.Width, image.Height, 1), true);
 
-        MaterialBuilder.MaterialConstants constants = new();
+        MaterialConstants constants = new();
         
         constants.Color = myColor;
         constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
@@ -151,8 +114,6 @@ public partial class MeshRenderer : Node3D
         myPreviousVulkanImage = vulkanImage;
 
         //Destroy the previous image.
-        await EgoTask.Renderer();
-        await EgoTask.Renderer();
         await EgoTask.Renderer();
         toDelete?.Destroy();
     }
@@ -172,7 +133,7 @@ public partial class MeshRenderer : Node3D
         
         if (Imgui.ColorPicker4("Color", ref myColor))
         {
-            MaterialBuilder.MaterialConstants constants = new();
+            MaterialConstants constants = new();
         
             constants.Color = myColor;
             constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);

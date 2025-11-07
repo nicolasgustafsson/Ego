@@ -43,7 +43,6 @@ public partial class EgoRoot : Node
         MyContext.AssetManager = AddChild(new AssetManager());
         MyContext.TreeInspector = AddChild(new TreeInspector());
         MyContext.PerformanceMonitor = AddChild(new PerformanceMonitor());
-        MyContext.MaterialBuilder = AddChild(new MaterialBuilder());
         MyContext.Shapes = AddChild(new Shapes());
         
         T childObject = AddChild(new T());

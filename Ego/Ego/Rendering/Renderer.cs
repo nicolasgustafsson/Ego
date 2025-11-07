@@ -112,10 +112,14 @@ public partial class Renderer : IGpuImmediateSubmit
         SceneData.Projection = MatrixExtensions.CreatePerspectiveFieldOfView(90f * (float)(Math.PI/180f), (float)RenderImage.Extent.width / (float)RenderImage.Extent.height, 10000f, 0.1f);
         SceneData.Projection[1, 1] *= -1f;
         SceneData.ViewProjection = SceneData.View * SceneData.Projection;
+        Matrix4x4.Invert(SceneData.View, out SceneData.InverseView);
+        Matrix4x4.Invert(SceneData.ViewProjection, out SceneData.InverseViewProj);
 
         SceneData.AmbientColor = aRenderData.AmbientColor;
         SceneData.SunlightColor = aRenderData.SunlightColor;
         SceneData.SunlightDirection = aRenderData.SunlightDirection;
+        SceneData.Time = (float)Time.ElapsedTime.TotalSeconds;
+        SceneData.FieldOfView = 90f;
         
         RenderResult result = RenderInternal();
         

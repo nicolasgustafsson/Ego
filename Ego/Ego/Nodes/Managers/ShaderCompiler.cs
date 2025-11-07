@@ -20,6 +20,7 @@ public partial class ShaderCompiler : Node
 {
     public string ShaderPath = "Shaders/meshVert.slang";
     [Inspect] public VkShaderStageFlags ShaderType = VkShaderStageFlags.Vertex;
+    public Dictionary<string, ShaderObject.Shader> CompiledShaders = new();
     
     public void Inspect()
     {
@@ -41,7 +42,6 @@ public partial class ShaderCompiler : Node
             try
             {
                 CreateShader();
-                //ChangeBackgroundShader(ShaderPath);
             }
             catch (Exception e)
             {
@@ -62,20 +62,22 @@ public partial class ShaderCompiler : Node
         
         List<VkDescriptorSetLayout> layouts = new() { RendererApi.Renderer.SceneDataLayout, RendererApi.Renderer.BindlessTextureLayout, MaterialLayout };
  
-        var shader = await LoadShader<MeshPushConstants>(ShaderPath, ShaderType, layouts);
-    }
-    
-    private async Task ChangeBackgroundShader(string aShaderPath)
-    {
-        List<VkDescriptorSetLayout> layouts = new() { RendererApi.Renderer.RenderImageDescriptorLayout };
-        var shader = await LoadShader<PushConstants>(aShaderPath, VkShaderStageFlags.Compute, layouts);
-        if (shader != null)
-            RendererApi.Renderer.GradientShader = shader;
+        var shader = await LoadShader<DefaultPushConstants>(ShaderPath, ShaderType, layouts);
     }
     
     public async Task<ShaderObject.Shader?> LoadShader<TPushConstant>(string aSlangPath,  VkShaderStageFlags aShaderType, List<VkDescriptorSetLayout> aLayouts, string aEntryPoint = "main")
     {
         return await CompileIfNewer<TPushConstant>(aSlangPath, true, aShaderType, aLayouts, aEntryPoint);
+    }
+    
+    public async Task<ShaderObject.Shader?> LoadShader(string aSlangPath,  VkShaderStageFlags aShaderType, List<VkDescriptorSetLayout> aLayouts, string aEntryPoint = "main")
+    {
+        return await LoadShader<DefaultPushConstants>(aSlangPath, aShaderType, aLayouts, aEntryPoint);
+    }
+    
+    public ShaderObject.Shader? LoadShaderImmediate(string aSlangPath,  VkShaderStageFlags aShaderType, List<VkDescriptorSetLayout> aLayouts, string aEntryPoint = "main")
+    {
+        return LoadShaderImmediate<DefaultPushConstants>(aSlangPath, aShaderType, aLayouts, aEntryPoint);
     }
     
     public ShaderObject.Shader? LoadShaderImmediate<TPushConstant>(string aSlangPath,  VkShaderStageFlags aShaderType, List<VkDescriptorSetLayout> aLayouts, string aEntryPoint = "main")
@@ -112,6 +114,9 @@ public partial class ShaderCompiler : Node
 
             return retVal;
         }
+        
+        if (CompiledShaders.TryGetValue(spirvPath, out ShaderObject.Shader? value))
+            return value;
 
         Log.Info($"File {aSlangPath} with entry {aEntryPoint} exists already! Reusing shader...");
         
@@ -120,6 +125,8 @@ public partial class ShaderCompiler : Node
         range.stageFlags = VkShaderStageFlags.Vertex | VkShaderStageFlags.Fragment | VkShaderStageFlags.Compute | VkShaderStageFlags.MeshEXT;
         range.size = GetSize<TPushConstant>();
         ShaderObject.Shader shader = new(aShaderType, File.ReadAllBytes(spirvPath), aLayouts, range);
+
+        CompiledShaders.Add(spirvPath, shader);
 
         return shader;
     }

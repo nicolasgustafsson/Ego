@@ -27,7 +27,6 @@ public partial class Node
     public MultithreadingManager MultithreadingManager => MyContext.MultithreadingManager;
     public PerformanceMonitor PerformanceMonitor => MyContext.PerformanceMonitor;
     public NodeTypeDatabase NodeTypeDatabase => MyContext.NodeTypeDatabase;
-    public MaterialBuilder MaterialBuilder => MyContext.MaterialBuilder;
     public ShaderCompiler ShaderCompiler => MyContext.ShaderCompiler;
     public Shapes Shapes => MyContext.Shapes;
 

@@ -72,7 +72,7 @@ public unsafe class MeshBuffers<T> : MeshBufferBase where T : unmanaged
     }
 }
 
-public struct MeshPushConstants
+public struct DefaultPushConstants
 {
     public Matrix4x4 WorldMatrix;
     public VkDeviceAddress VertexBufferAddress;
