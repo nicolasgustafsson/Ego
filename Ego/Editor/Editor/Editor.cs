@@ -20,7 +20,7 @@ public partial class Editor : Node
     public static Editor Instance;
     public override void Start()
     {
-        EditorDirectory = Environment.CurrentDirectory;
+        EditorDirectory = Directory.GetCurrentDirectory();
         Instance = this;
         base.Start();
         

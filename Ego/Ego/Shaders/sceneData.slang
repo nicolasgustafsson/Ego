@@ -8,7 +8,8 @@ struct SceneData
     float4 ambientColor;
     float4 sunlightDirection; //w for sun power
     float4 sunlightColor;
-    float fieldOfView;
+    float3 cameraPosition;
+    float3 cameraDirection;
     float time;
 };
 

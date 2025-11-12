@@ -83,15 +83,17 @@ VertexStageOutput vertex(uint vertexID : SV_VertexID)
     float3 end = float3(PushConstants.render_matrix[1][0], PushConstants.render_matrix[1][1], PushConstants.render_matrix[1][2]);
     float thickness = PushConstants.render_matrix[2][0];
     
-    float verticalMovement = (position.y - 0.5);
+    float verticalMovement = (position.y * 0.5);
     position.xyz = lerp(start, end, position.x);
     
-    float3 normal = normalize(cross(end - start, (mul(float4(0, 0, 1, 1), sceneData.inverseViewProj)).xyz));
+    float3 cameraPosition = sceneData.cameraPosition;
+    float3 cameraDirection = mul(float4(0, 0, 1, 1), sceneData.inverseView).xyz;
+    float3 normal = normalize(cross(cameraDirection - cameraPosition, (end - start)));
     
-    position.xyz -= normal * verticalMovement * thickness;
+    position.xyz += normal * verticalMovement * thickness;
     VertexStageOutput output;
     output.sv_position = mul(position, sceneData.viewProj);
-    output.coarseVertex.Color = float3(1.0f, 1.0f, 1.0f); 
+    output.coarseVertex.Color = float3(0, 1, 1); 
     
     return output;
 }

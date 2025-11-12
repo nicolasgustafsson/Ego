@@ -119,6 +119,7 @@ public partial class Renderer : IGpuImmediateSubmit
         SceneData.SunlightColor = aRenderData.SunlightColor;
         SceneData.SunlightDirection = aRenderData.SunlightDirection;
         SceneData.Time = (float)Time.ElapsedTime.TotalSeconds;
+        SceneData.CameraPosition = aRenderData.CameraPosition;
         SceneData.FieldOfView = 90f;
         
         RenderResult result = RenderInternal();

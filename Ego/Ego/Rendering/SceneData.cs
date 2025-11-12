@@ -12,6 +12,7 @@ public struct SceneData
     public Vector4 AmbientColor;
     public Vector4 SunlightDirection;
     public Vector4 SunlightColor;
+    public Vector3 CameraPosition;
     public float FieldOfView;
     public float Time;
 

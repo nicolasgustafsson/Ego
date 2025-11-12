@@ -106,7 +106,7 @@ public partial class ShaderCompiler : Node
             return null;
         }
 
-        bool shouldCompile = ShaderNeedsCompilation<TPushConstant>(aSlangPath, spirvPath);
+        bool shouldCompile = true;//ShaderNeedsCompilation<TPushConstant>(aSlangPath, spirvPath);
         
         if (shouldCompile)
         {

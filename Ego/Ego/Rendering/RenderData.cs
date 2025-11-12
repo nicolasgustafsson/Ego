@@ -8,6 +8,7 @@ public class RenderData
     public Vector4 AmbientColor;
     public Vector4 SunlightColor;
     public Vector4 SunlightDirection;
+    public Vector3 CameraPosition;
     
     public void RenderMesh(MeshRenderData aRenderData)
     {
@@ -18,5 +19,4 @@ public class RenderData
     {
         CameraView = aView;
     }
-
 }

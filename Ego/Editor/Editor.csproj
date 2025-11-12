@@ -14,14 +14,17 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Development' ">
     <Optimize>true</Optimize>
     <DebugSymbols>true</DebugSymbols>
+    <OutputPath>Binaries/</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <OutDir>Binaries\</OutDir>
+    <OutputPath>Binaries/</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <OutDir>Binaries\</OutDir>
+    <OutputPath>Binaries/</OutputPath>
   </PropertyGroup>
   
   <ItemGroup>

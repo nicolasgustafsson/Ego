@@ -25,7 +25,25 @@ public partial class SceneEditor : Node
         
         movement.UpdateRotation();
     }
-    
+
+    protected override void Update()
+    {
+        base.Update();
+
+        float segmentSize = 10f;
+        int segments = 10;
+
+        for(int x = -segments; x <= segments; x++)
+        {
+            Shapes.DrawLine(new Vector3(x * segmentSize, 0f, segments * -1f * segmentSize), new Vector3(x * segmentSize, 0f, segments * 1f * segmentSize));
+        }
+        
+        for(int z = -10; z <= 10; z++)
+        {
+            Shapes.DrawLine(new Vector3(segments * -1f * segmentSize, 0f, z * segmentSize), new Vector3(segments * 1f * segmentSize, 0f, z * segmentSize));
+        }
+    }
+
     public void PrepareForHotReload()
     {
         if (TreeInspector.InspectedNode != null)
