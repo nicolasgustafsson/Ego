@@ -105,7 +105,7 @@ public partial class Shapes : Node
         DrawCommands.Add(new() { Start = aStart, End = aEnd, Color = aColor, Thickness = aThickness});
     }
     
-    public void DrawPoint(Vector3 aPosition, Vector4 aColor, float aSize) 
+    public void DrawPoint(Vector3 aPosition, Vector4 aColor, float aSize)
     {
         PointDrawCommands.Add(new() { Position = aPosition, Color = aColor, Size = aSize});
     }

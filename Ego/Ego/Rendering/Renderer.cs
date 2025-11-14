@@ -3,6 +3,9 @@ global using static VulkanApi.Api;
 global using static VulkanApi.Surface;
 global using static VulkanApi.MemoryAllocator;
 global using static VulkanApi.Gpu;
+using System.Drawing;
+using Ego;
+using MessagePack;
 using VulkanApi;
 using SharpGLTF.Schema2;
 using Silk.NET.Windowing;
@@ -18,11 +21,13 @@ public partial class Renderer : IGpuImmediateSubmit
     public RenderQueue RenderQueue = null!;
     public GpuDataTransferer DataTransferer = null!;
     public Image RenderImage = null!;
-    public Image MSAAImage = null!;
+    public Image MsaaImage = null!;
     private Image DepthImage = null!;
     public DescriptorAllocatorGrowable GlobalDescriptorAllocator = new();
-    VkSampleCountFlags MsaaSamples = VkSampleCountFlags.Count8;
-    public ShaderObject.Shader GradientShader = null!;
+    [Inspect] VkSampleCountFlags MsaaSamples = VkSampleCountFlags.Count8;
+    private VkSampleCountFlags PrevMsaaSamples = VkSampleCountFlags.Count8;
+
+    public Vector4 ClearColor = Color.CornflowerBlue.ToVec4();
         
     private Fence ImmediateFence = null!;
     private CommandBuffer ImmediateCommandBuffer = null!;
@@ -123,7 +128,13 @@ public partial class Renderer : IGpuImmediateSubmit
         RenderResult result = RenderInternal();
         
         if (result == RenderResult.ResizeNeeded)
-            Resize();
+            RecreateFramebuffer();
+        else if (PrevMsaaSamples != MsaaSamples)
+        {
+            PrevMsaaSamples = MsaaSamples;
+            RecreateFramebuffer();
+        }
+            
     }
     
     public void SetPresentMode(VkPresentModeKHR aPresentMode)

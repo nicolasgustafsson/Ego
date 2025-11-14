@@ -16,7 +16,6 @@ struct VertexBuffer
 
 struct OutVertex
 {
-    float3 Normal;
     float2 Uv;
 };
 
@@ -46,7 +45,6 @@ VertexStageOutput vertex(uint aVertexId : SV_VertexID)
 
     output.Position =  mul(mul(position, PushConstants.RenderMatrix), sceneData.viewProj);
     
-    output.OutVertex.Normal = mul(float4(v.Normal, 0.f), PushConstants.RenderMatrix).xyz;
     output.OutVertex.Uv.x = v.Uv_x;
     output.OutVertex.Uv.y = v.Uv_y;  
     

@@ -21,7 +21,7 @@ enum RenderResult
 
 public partial class Renderer
 {
-    private RenderResult RenderInternal()
+    private unsafe RenderResult RenderInternal()
     {
         CurrentFrame.RenderFence.Wait();
         CurrentFrame.RenderFence.Reset();
@@ -42,17 +42,20 @@ public partial class Renderer
         {
             cmd.EnableShaderObjects(MsaaSamples);
 
-            cmd.TransitionImage(MSAAImage, VkImageLayout.General);
-            cmd.ClearColor(MSAAImage, VkImageLayout.General, new VkClearColorValue());
+            cmd.TransitionImage(MsaaImage, VkImageLayout.General);
             
-            cmd.TransitionImage(MSAAImage, VkImageLayout.ColorAttachmentOptimal);
+            var clear = new VkClearColorValue(ClearColor.X, ClearColor.Y, ClearColor.Z, ClearColor.W);
+
+            cmd.ClearColor(MsaaImage, VkImageLayout.General, clear);
+            
+            cmd.TransitionImage(MsaaImage, VkImageLayout.ColorAttachmentOptimal);
             
             RenderGeometry(cmd, globalDescriptor);
             
-            cmd.TransitionImage(MSAAImage, VkImageLayout.TransferSrcOptimal);
+            cmd.TransitionImage(MsaaImage, VkImageLayout.TransferSrcOptimal);
             cmd.TransitionImage(RenderImage, VkImageLayout.TransferDstOptimal);
             //Resolve MSAA here!
-            cmd.ResolveMsaa(MSAAImage, RenderImage);
+            cmd.ResolveMsaa(MsaaImage, RenderImage);
             cmd.SetMsaa(VkSampleCountFlags.Count1);
             
             cmd.TransitionImage(RenderImage, VkImageLayout.General);
@@ -87,7 +90,7 @@ public partial class Renderer
 
     private void RenderGeometry(CommandBufferHandle cmd, VkDescriptorSet aSceneDataDescriptor)
     {
-        cmd.BeginRendering(MSAAImage, DepthImage);
+        cmd.BeginRendering(MsaaImage, DepthImage);
         
         foreach(var renderData in RenderRequests)
         {
@@ -129,17 +132,4 @@ public partial class Renderer
         writer.UpdateSet(TextureRegistryDescriptorSet);
     }
 
-    private void RenderBackground(CommandBufferHandle cmd)
-    {
-        cmd.BindShader(GradientShader);
-
-        cmd.BindDescriptorSet(GradientShader.PipelineLayout, RenderImageDescriptorSet, VkPipelineBindPoint.Compute);
-
-        PushConstants pushConstants = new();
-        pushConstants.data1.X = 0f;
-
-        cmd.SetPushConstants(pushConstants, GradientShader.PipelineLayout);
-
-        cmd.DispatchCompute((uint)Math.Ceiling(Swapchain.Extents.width / 16d), (uint)Math.Ceiling(Swapchain.Extents.height / 16d));
-    }
 }

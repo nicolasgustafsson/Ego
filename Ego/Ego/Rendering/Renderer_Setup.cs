@@ -63,8 +63,6 @@ public partial class Renderer : Node
         
         InitializeDescriptors();
 
-        InitializePipelines();
-        
         Log.Info($"Renderer successfully created!");
     }
 
@@ -105,7 +103,7 @@ public partial class Renderer : Node
         CleanupQueue.Add(DefaultNearestSampler);
     }
 
-    private void Resize()
+    private void RecreateFramebuffer()
     {
         Device.WaitUntilIdle();
 
@@ -137,23 +135,12 @@ public partial class Renderer : Node
         CleanupQueue.Add(ImmediateCommandBuffer);
     }
 
-    private void InitializePipelines()
-    {
-        InitializeBackgroundPipelines();
-    }
-
-    
-    private unsafe void InitializeBackgroundPipelines()
-    {
-        GradientShader = ShaderCompiler.LoadShaderImmediate<PushConstants>("Shaders/background.slang", VkShaderStageFlags.Compute, new() { RenderImageDescriptorLayout })!;
-    }
-
     private void CreateRenderImage()
     {
          RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false, aIsRenderTexture:true, VkSampleCountFlags.Count1);
-         MSAAImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false, aIsRenderTexture:true, MsaaSamples);
+         MsaaImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false, aIsRenderTexture:true, MsaaSamples);
          CleanupQueue.Add(RenderImage);
-         CleanupQueue.Add(MSAAImage);
+         CleanupQueue.Add(MsaaImage);
          
          DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false, aIsRenderTexture:true, MsaaSamples);
          CleanupQueue.Add(DepthImage);
