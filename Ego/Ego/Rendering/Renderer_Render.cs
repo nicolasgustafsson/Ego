@@ -78,26 +78,13 @@ public partial class Renderer
         return RenderResult.Success;
     }
 
-    private void RenderGeometry(CommandBufferHandle cmd, VkDescriptorSet aGlobalDescriptor)
+    private void RenderGeometry(CommandBufferHandle cmd, VkDescriptorSet aSceneDataDescriptor)
     {
         cmd.BeginRendering(RenderImage, DepthImage);
-
-        foreach(var renderData in MeshRenderData)
+        
+        foreach(var renderData in RenderRequests)
         {
-            renderData.Material.Bind(cmd);
-            
-            cmd.BindDescriptorSet(renderData.Material.VertexShader.PipelineLayout, aGlobalDescriptor, VkPipelineBindPoint.Graphics, 0);
-            cmd.BindDescriptorSet(renderData.Material.VertexShader.PipelineLayout, TextureRegistryDescriptorSet, VkPipelineBindPoint.Graphics, 1);
-
-            cmd.BindIndexBuffer(renderData.MyMeshData.MeshBuffers.IndexBuffer);
-            
-            DefaultPushConstants pushConstants = new();
-            pushConstants.MaterialUniformBufferAddress = renderData.Material.UniformBuffer.GetDeviceAddress();
-            pushConstants.WorldMatrix = renderData.WorldMatrix; 
-            pushConstants.VertexBufferAddress = renderData.MyMeshData.MeshBuffers.VertexBufferAddress;
-            cmd.SetPushConstants(pushConstants, renderData.Material.VertexShader.PipelineLayout);
-
-            cmd.DrawIndexed(renderData.MyMeshData.Surfaces[0].Count);
+            renderData.Render(cmd, aSceneDataDescriptor, TextureRegistryDescriptorSet);
         }
         
        

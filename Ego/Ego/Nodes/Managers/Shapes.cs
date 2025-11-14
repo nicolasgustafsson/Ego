@@ -4,6 +4,36 @@ using VulkanApi;
 
 namespace Ego;
 
+public class LineRenderRequest : RenderRequest
+{
+    public MeshData MyMeshData = null!;
+    public Material Material = null!;
+    public Matrix4x4 WorldMatrix;
+    
+    public override void Render(CommandBufferHandle cmd, VkDescriptorSet aSceneDataDescriptor, VkDescriptorSet aTextureRegistryDescriptor)
+    {
+        Material.Bind(cmd);
+            
+        cmd.BindDescriptorSet(Material.VertexShader.PipelineLayout, aSceneDataDescriptor, VkPipelineBindPoint.Graphics, 0);
+        cmd.BindDescriptorSet(Material.VertexShader.PipelineLayout, aTextureRegistryDescriptor, VkPipelineBindPoint.Graphics, 1);
+
+        cmd.BindIndexBuffer(MyMeshData.MeshBuffers.IndexBuffer);
+
+        SetupPushConstants(cmd);
+
+        cmd.DrawIndexed(MyMeshData.Surfaces[0].Count);
+    }
+    
+    private void SetupPushConstants(CommandBufferHandle cmd)
+    {
+        DefaultPushConstants pushConstants = new();
+        pushConstants.MaterialUniformBufferAddress = Material.UniformBuffer.GetDeviceAddress();
+        pushConstants.WorldMatrix = WorldMatrix; 
+        pushConstants.VertexBufferAddress = MyMeshData.MeshBuffers.VertexBufferAddress;
+        cmd.SetPushConstants(pushConstants, Material.VertexShader.PipelineLayout);
+    }
+}
+
 //Immediate mode shapes drawing!
 [Node(AllowAddingToScene = false)]
 public partial class Shapes : Node
@@ -94,7 +124,7 @@ public partial class Shapes : Node
             matrix[3,2] = command.Color.Z;
             matrix[3,3] = command.Color.W;
             
-            RendererApi.RenderData.MeshRenders.Add(new() { MyMeshData = SquareMesh, Material = LineMaterial, WorldMatrix = matrix });
+            RendererApi.RenderData.MeshRenders.Add(new MeshRenderRequest() { MyMeshData = SquareMesh, Material = LineMaterial, WorldMatrix = matrix });
         }
         
         foreach(var command in PointDrawCommands)
@@ -110,7 +140,7 @@ public partial class Shapes : Node
             matrix[3,2] = command.Color.Z;
             matrix[3,3] = command.Color.W;
             
-            RendererApi.RenderData.MeshRenders.Add(new() { MyMeshData = SquareMesh, Material = PointMaterial, WorldMatrix = matrix });
+            RendererApi.RenderData.MeshRenders.Add(new MeshRenderRequest() { MyMeshData = SquareMesh, Material = PointMaterial, WorldMatrix = matrix });
         }
         
         DrawCommands.Clear();

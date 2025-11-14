@@ -2,17 +2,16 @@ namespace Rendering;
 
 public class RenderData
 {
-    public List<MeshRenderData> MeshRenders = new();
-    public List<IRenderCommand> CustomRenders = new();
+    public List<RenderRequest> MeshRenders = new();
     public Matrix4x4 CameraView;
     public Vector4 AmbientColor;
     public Vector4 SunlightColor;
     public Vector4 SunlightDirection;
     public Vector3 CameraPosition;
     
-    public void RenderMesh(MeshRenderData aRenderData)
+    public void Render(RenderRequest aRenderRequest)
     {
-        MeshRenders.Add(aRenderData);
+        MeshRenders.Add(aRenderRequest);
     }
     
     public void SetCameraView(Matrix4x4 aView)

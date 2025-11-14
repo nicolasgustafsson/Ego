@@ -19,7 +19,7 @@ public static partial class EmGui
     
     public static bool Inspect(string aName, ref float aNumber)
     {
-        return Imgui.DragFloat(aName, ref aNumber);
+        return Imgui.DragFloat(aName, ref aNumber, aSpeed: 0.1f);
     }
     
     public static bool Inspect(string aName, ref Color aColor)

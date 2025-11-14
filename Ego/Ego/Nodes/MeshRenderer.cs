@@ -64,7 +64,7 @@ public partial class MeshRenderer : Node3D
     protected override void Update()
     {
         if (MeshData != null)
-            RendererApi.RenderData.RenderMesh(new(){MyMeshData = MeshData, Material = Material, WorldMatrix = WorldMatrix}); 
+            RendererApi.RenderData.Render(new MeshRenderRequest(){MyMeshData = MeshData, Material = Material, WorldMatrix = WorldMatrix}); 
         
         if (Window.IsKeyboardKeyDown(KeyboardKey.Backspace) && (myLoadTextureTask == null || myLoadTextureTask.IsCompleted))
         {
