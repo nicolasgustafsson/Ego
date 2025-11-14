@@ -4,11 +4,21 @@ using VulkanApi;
 
 namespace Ego;
 
+public struct LinePushConstants
+{
+    public Vector4 Color;
+    public Vector3 Start;
+    public float Thickness;
+    public Vector3 End;
+    public VkDeviceAddress VertexBufferAddress;
+}
+
 public class LineRenderRequest : RenderRequest
 {
     public MeshData MyMeshData = null!;
     public Material Material = null!;
-    public Matrix4x4 WorldMatrix;
+
+    public LinePushConstants LineData;
     
     public override void Render(CommandBufferHandle cmd, VkDescriptorSet aSceneDataDescriptor, VkDescriptorSet aTextureRegistryDescriptor)
     {
@@ -26,11 +36,8 @@ public class LineRenderRequest : RenderRequest
     
     private void SetupPushConstants(CommandBufferHandle cmd)
     {
-        DefaultPushConstants pushConstants = new();
-        pushConstants.MaterialUniformBufferAddress = Material.UniformBuffer.GetDeviceAddress();
-        pushConstants.WorldMatrix = WorldMatrix; 
-        pushConstants.VertexBufferAddress = MyMeshData.MeshBuffers.VertexBufferAddress;
-        cmd.SetPushConstants(pushConstants, Material.VertexShader.PipelineLayout);
+        LineData.VertexBufferAddress = MyMeshData.MeshBuffers.VertexBufferAddress;
+        cmd.SetPushConstants(LineData, Material.VertexShader.PipelineLayout);
     }
 }
 
@@ -110,21 +117,15 @@ public partial class Shapes : Node
         {
             Matrix4x4 matrix = new();
 
-            ClippedLine line = new() { Start = command.Start, End = command.End };//GetClippedLine(command.Start, command.End);
+            //ClippedLine line = new() { Start = command.Start, End = command.End };//GetClippedLine(command.Start, command.End);
             
-            matrix[0,0] = line.Start.X;
-            matrix[0,1] = line.Start.Y;
-            matrix[0,2] = line.Start.Z;
-            matrix[1,0] = line.End.X;
-            matrix[1,1] = line.End.Y;
-            matrix[1,2] = line.End.Z;
-            matrix[2,0] = command.Thickness;
-            matrix[3,0] = command.Color.X;
-            matrix[3,1] = command.Color.Y;
-            matrix[3,2] = command.Color.Z;
-            matrix[3,3] = command.Color.W;
+            LinePushConstants lineData = new();
+            lineData.Color = command.Color;
+            lineData.Start = command.Start;
+            lineData.End = command.End;
+            lineData.Thickness = command.Thickness;
             
-            RendererApi.RenderData.MeshRenders.Add(new MeshRenderRequest() { MyMeshData = SquareMesh, Material = LineMaterial, WorldMatrix = matrix });
+            RendererApi.RenderData.RenderRequests.Add(new LineRenderRequest() { MyMeshData = SquareMesh, Material = LineMaterial, LineData = lineData});
         }
         
         foreach(var command in PointDrawCommands)
@@ -140,7 +141,7 @@ public partial class Shapes : Node
             matrix[3,2] = command.Color.Z;
             matrix[3,3] = command.Color.W;
             
-            RendererApi.RenderData.MeshRenders.Add(new MeshRenderRequest() { MyMeshData = SquareMesh, Material = PointMaterial, WorldMatrix = matrix });
+            RendererApi.RenderData.RenderRequests.Add(new MeshRenderRequest() { MyMeshData = SquareMesh, Material = PointMaterial, WorldMatrix = matrix });
         }
         
         DrawCommands.Clear();

@@ -106,7 +106,7 @@ public partial class Renderer : IGpuImmediateSubmit
         if (MainWindow.IsMinimized)
             return;
 
-        RenderRequests = aRenderData.MeshRenders; 
+        RenderRequests = aRenderData.RenderRequests; 
         SceneData.View = aRenderData.CameraView;
         SceneData.Projection = MatrixExtensions.CreatePerspectiveFieldOfView(90f * (float)(Math.PI/180f), (float)RenderImage.Extent.width / (float)RenderImage.Extent.height, 10000f, 0.1f);
         SceneData.Projection[1, 1] *= -1f;

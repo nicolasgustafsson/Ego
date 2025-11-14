@@ -2,7 +2,7 @@ namespace Rendering;
 
 public class RenderData
 {
-    public List<RenderRequest> MeshRenders = new();
+    public List<RenderRequest> RenderRequests = new();
     public Matrix4x4 CameraView;
     public Vector4 AmbientColor;
     public Vector4 SunlightColor;
@@ -11,7 +11,7 @@ public class RenderData
     
     public void Render(RenderRequest aRenderRequest)
     {
-        MeshRenders.Add(aRenderRequest);
+        RenderRequests.Add(aRenderRequest);
     }
     
     public void SetCameraView(Matrix4x4 aView)

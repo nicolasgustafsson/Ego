@@ -49,7 +49,7 @@ public partial class RendererApi : ParallelBranch<RendererApi>
     public override void UpdateSynchronous()
     {
         RenderDataBuffer.Swap();
-        RenderDataBuffer.Producer.MeshRenders.Clear();
+        RenderDataBuffer.Producer.RenderRequests.Clear();
     }
 
     public override void UpdateRoot()

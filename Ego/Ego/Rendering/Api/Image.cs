@@ -17,7 +17,7 @@ public unsafe class Image : IGpuDestroyable
     
     public VkImageLayout CurrentLayout = VkImageLayout.Undefined;
     
-    public Image(VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps, bool aIsRenderTexture)
+    public Image(VkFormat aFormat, VkImageUsageFlags aUsageFlags, VkExtent3D aExtent, bool aMipMaps, bool aIsRenderTexture, VkSampleCountFlags aSamples = VkSampleCountFlags.Count1)
     {
         Stopwatch watch = new();
         Stopwatch totalWatch = new();
@@ -40,7 +40,7 @@ public unsafe class Image : IGpuDestroyable
         
         createInfo.arrayLayers = 1;
         
-        createInfo.samples = VkSampleCountFlags.Count1;
+        createInfo.samples = aSamples;
         
         createInfo.tiling = VkImageTiling.Optimal;
         createInfo.usage = aUsageFlags;

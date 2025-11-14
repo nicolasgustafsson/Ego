@@ -13,7 +13,10 @@ struct VertexBuffer
 
 struct InputData 
 {
-    float4x4 render_matrix;
+    float4 Color;
+    float3 Start;
+    float Thickness;
+    float3 End;
     VertexBuffer* VertexBuffer;
 };
 
@@ -84,9 +87,9 @@ VertexStageOutput vertex(uint vertexID : SV_VertexID)
     
     float4 position = float4(v.position, 1.0f);
     
-    float3 start = float3(PushConstants.render_matrix[0][0], PushConstants.render_matrix[0][1], PushConstants.render_matrix[0][2]);
-    float3 end = float3(PushConstants.render_matrix[1][0], PushConstants.render_matrix[1][1], PushConstants.render_matrix[1][2]);
-    float4 color = float4(PushConstants.render_matrix[3][0], PushConstants.render_matrix[3][1],PushConstants.render_matrix[3][2],PushConstants.render_matrix[3][3]);
+    float3 start = PushConstants.Start;
+    float3 end = PushConstants.End;
+    float4 color = PushConstants.Color;
     float verticalMovement = (position.y - 0.5);
     
     position.xyz = lerp(start, end, position.x);
@@ -95,7 +98,7 @@ VertexStageOutput vertex(uint vertexID : SV_VertexID)
     float3 cameraPosition = sceneData.cameraPosition;
     float3 normal = normalize(cross((position.xyz - cameraPosition), lineDirection));
     
-    float requestedThickness = PushConstants.render_matrix[2][0];
+    float requestedThickness = PushConstants.Thickness;
     
     float3 positionInFrustum = position.xyz;
     float minimumThickness = CalculateSizeOfPixel(distance(position.xyz, cameraPosition))  * 1.4142f; //diagonal of a unit square
