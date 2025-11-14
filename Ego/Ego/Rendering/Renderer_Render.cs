@@ -40,20 +40,27 @@ public partial class Renderer
         
         using (CommandBufferHandle cmd = CurrentFrame.CommandBuffer.BeginRecording())
         {
-            cmd.TransitionImage(RenderImage, VkImageLayout.General);
-            cmd.TransitionImage(DepthImage, VkImageLayout.DepthAttachmentOptimal);
+            cmd.EnableShaderObjects(MsaaSamples);
 
-            cmd.EnableShaderObjects();
-            RenderBackground(cmd);
-
-            cmd.TransitionImage(RenderImage, VkImageLayout.ColorAttachmentOptimal);
-
+            cmd.TransitionImage(MSAAImage, VkImageLayout.General);
+            cmd.ClearColor(MSAAImage, VkImageLayout.General, new VkClearColorValue());
+            
+            cmd.TransitionImage(MSAAImage, VkImageLayout.ColorAttachmentOptimal);
+            
             RenderGeometry(cmd, globalDescriptor);
             
-            cmd.BeginRendering(RenderImage, DepthImage);
+            cmd.TransitionImage(MSAAImage, VkImageLayout.TransferSrcOptimal);
+            cmd.TransitionImage(RenderImage, VkImageLayout.TransferDstOptimal);
+            //Resolve MSAA here!
+            cmd.ResolveMsaa(MSAAImage, RenderImage);
+            cmd.SetMsaa(VkSampleCountFlags.Count1);
+            
+            cmd.TransitionImage(RenderImage, VkImageLayout.General);
+            
+            cmd.BeginRendering(RenderImage);
             ERenderImgui(cmd.VkCommandBuffer);
             cmd.EndRendering();
-
+            
             cmd.TransitionImage(RenderImage, VkImageLayout.TransferSrcOptimal);
             
             VkImage currentSwapchainImage = Swapchain.Images[(int)imageIndex];
@@ -80,13 +87,12 @@ public partial class Renderer
 
     private void RenderGeometry(CommandBufferHandle cmd, VkDescriptorSet aSceneDataDescriptor)
     {
-        cmd.BeginRendering(RenderImage, DepthImage);
+        cmd.BeginRendering(MSAAImage, DepthImage);
         
         foreach(var renderData in RenderRequests)
         {
             renderData.Render(cmd, aSceneDataDescriptor, TextureRegistryDescriptorSet);
         }
-        
        
         cmd.EndRendering();
     }

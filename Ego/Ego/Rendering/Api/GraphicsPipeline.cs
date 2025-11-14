@@ -97,6 +97,17 @@ public class GraphicsPipeline : Pipeline
             return this;
         }
         
+        public GraphicsPipelineBuilder SetMultipsample(VkSampleCountFlags aSampleCount)
+        {
+            Multisample.sampleShadingEnable = false;
+            Multisample.rasterizationSamples = VkSampleCountFlags.Count1;
+            Multisample.minSampleShading = 1f;
+            Multisample.pSampleMask = null;
+            Multisample.alphaToCoverageEnable = false;
+            Multisample.alphaToOneEnable = false;
+            return this;
+        }
+        
         public GraphicsPipelineBuilder SetBlendMode(BlendMode aBlendMode)
         {
             ColorBlendAttachment = aBlendMode.ToVkBlendAttachment();

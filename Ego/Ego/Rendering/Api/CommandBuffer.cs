@@ -154,6 +154,8 @@ public unsafe class CommandBufferHandle : IDisposable
     {
         VkImageSubresourceRange clearRange = new VkImageSubresourceRange(VkImageAspectFlags.Color);
         VkApiDevice.vkCmdClearColorImage(VkCommandBuffer, aImage.VkImage, aImageLayout, &aColor, 1, &clearRange);
+
+        aImage.CurrentLayout = aImageLayout;
     }
     
     public void SetPushConstants<T>(T aPushConstants, VkPipelineLayout aLayout) where T : unmanaged
@@ -203,7 +205,6 @@ public unsafe class CommandBufferHandle : IDisposable
     {
         VkApiDevice.vkCmdSetPrimitiveTopology(VkCommandBuffer, aTopology);
         VkApiDevice.vkCmdSetPrimitiveRestartEnableEXT(VkCommandBuffer, VkBool32.False);
-        VkApiDevice.vkCmdSetRasterizationSamplesEXT(VkCommandBuffer, VkSampleCountFlags.Count1);
     }
     
     public void SetFrontFace(VkFrontFace aFrontFace)
@@ -231,7 +232,7 @@ public unsafe class CommandBufferHandle : IDisposable
         VkApiDevice.vkCmdSetDepthWriteEnable(VkCommandBuffer, aEnable);
     }
     
-    public void EnableShaderObjects()
+    public void EnableShaderObjects(VkSampleCountFlags aMultisample)
     {
         VkApiDevice.vkCmdSetRasterizerDiscardEnable(VkCommandBuffer, VkBool32.False);
         VkApiDevice.vkCmdSetDepthBoundsTestEnableEXT(VkCommandBuffer, false);
@@ -244,9 +245,15 @@ public unsafe class CommandBufferHandle : IDisposable
 
         VkApiDevice.vkCmdSetColorWriteMaskEXT(VkCommandBuffer, 0, 1, &flags);
         VkApiDevice.vkCmdSetPolygonModeEXT(VkCommandBuffer, VkPolygonMode.Fill);
-        uint sampleMask = 0x1;
-        VkApiDevice.vkCmdSetSampleMaskEXT(VkCommandBuffer, VkSampleCountFlags.Count1, &sampleMask);
-        VkApiDevice.vkCmdSetAlphaToCoverageEnableEXT(VkCommandBuffer, VkBool32.False);
+        uint sampleMask = ~(uint)(0);
+        VkApiDevice.vkCmdSetSampleMaskEXT(VkCommandBuffer, aMultisample, &sampleMask);
+        VkApiDevice.vkCmdSetRasterizationSamplesEXT(VkCommandBuffer, aMultisample);
+        VkApiDevice.vkCmdSetAlphaToCoverageEnableEXT(VkCommandBuffer, VkBool32.True);
+    }
+
+    public void SetMsaa(VkSampleCountFlags aMultisample)
+    {
+        VkApiDevice.vkCmdSetRasterizationSamplesEXT(VkCommandBuffer, aMultisample);
     }
     
     public void BindShader(ShaderObject.Shader aShader)
@@ -295,7 +302,7 @@ public unsafe class CommandBufferHandle : IDisposable
         VkApiDevice.vkCmdBeginRendering(VkCommandBuffer, &renderingInfo);
         
         VkViewport dynamicViewport = new();
-        dynamicViewport.x = 0;
+        dynamicViewport.x = 0; 
         dynamicViewport.y = 0;
         dynamicViewport.width = aDrawImage.Extent.width;
         dynamicViewport.height = aDrawImage.Extent.height;
@@ -311,6 +318,50 @@ public unsafe class CommandBufferHandle : IDisposable
 
         VkApiDevice.vkCmdSetScissor(VkCommandBuffer, 0, scissor);
         VkApiDevice.vkCmdSetScissorWithCount(VkCommandBuffer, 1, &scissor);
+    }
+    
+    public void BeginRendering(Image aDrawImage)
+    {
+        VkRenderingAttachmentInfo attachmentInfo = aDrawImage.GetAttachmentInfo(null);
+        VkRenderingInfo renderingInfo = aDrawImage.GetRenderingInfo(new VkExtent2D(aDrawImage.Extent.width, aDrawImage.Extent.height), attachmentInfo);
+
+        VkApiDevice.vkCmdBeginRendering(VkCommandBuffer, &renderingInfo);
+        
+        VkViewport dynamicViewport = new();
+        dynamicViewport.x = 0; 
+        dynamicViewport.y = 0;
+        dynamicViewport.width = aDrawImage.Extent.width;
+        dynamicViewport.height = aDrawImage.Extent.height;
+        dynamicViewport.minDepth = 0f;
+        dynamicViewport.maxDepth = 1f;
+
+        VkApiDevice.vkCmdSetViewport(VkCommandBuffer, 0, dynamicViewport);
+        VkApiDevice.vkCmdSetViewportWithCount(VkCommandBuffer, 1, &dynamicViewport);
+
+        VkRect2D scissor = new();
+        scissor.extent = new VkExtent2D(aDrawImage.Extent.width, aDrawImage.Extent.height);
+        scissor.offset = new VkOffset2D(0, 0);
+
+        VkApiDevice.vkCmdSetScissor(VkCommandBuffer, 0, scissor);
+        VkApiDevice.vkCmdSetScissorWithCount(VkCommandBuffer, 1, &scissor);
+    }
+    
+    public void ResolveMsaa(Image aFrom, Image aTo)
+    {
+        VkImageResolve resolveRegion;
+        //resolveRegion.srcSubresource = 
+            
+        resolveRegion.srcSubresource.aspectMask = VkImageAspectFlags.Color;
+        resolveRegion.srcSubresource.baseArrayLayer = 0;
+        resolveRegion.srcSubresource.layerCount = 1;
+        resolveRegion.srcSubresource.mipLevel = 0;
+        
+        resolveRegion.dstSubresource.aspectMask = VkImageAspectFlags.Color;
+        resolveRegion.dstSubresource.baseArrayLayer = 0;
+        resolveRegion.dstSubresource.layerCount = 1;
+        resolveRegion.dstSubresource.mipLevel = 0;
+        resolveRegion.extent = aFrom.Extent;
+        VkApiDevice.vkCmdResolveImage(VkCommandBuffer, aFrom.VkImage, aFrom.CurrentLayout, aTo.VkImage, aTo.CurrentLayout, 1, &resolveRegion);
     }
     
     public void EndRendering()

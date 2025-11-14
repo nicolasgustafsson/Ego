@@ -82,7 +82,7 @@ VertexStageOutput vertex(uint vertexID : SV_VertexID)
 [shader("pixel")]
 float4 pixel(float4 aInColor, float2 aUV) : SV_Target0
 {
-    float inCircle = step(distance(aUV, float2(0.5, 0.5)), 0.5);
+    float inCircle = smoothstep( 0.502, 0.498, distance(aUV, float2(0.5, 0.5)));
     
     aInColor.w *= inCircle;
 

@@ -18,14 +18,12 @@ public partial class Renderer : IGpuImmediateSubmit
     public RenderQueue RenderQueue = null!;
     public GpuDataTransferer DataTransferer = null!;
     public Image RenderImage = null!;
+    public Image MSAAImage = null!;
     private Image DepthImage = null!;
     public DescriptorAllocatorGrowable GlobalDescriptorAllocator = new();
-
+    VkSampleCountFlags MsaaSamples = VkSampleCountFlags.Count8;
     public ShaderObject.Shader GradientShader = null!;
         
-    private ComputePipeline GradientPipeline = null!;
-    private GraphicsPipeline TrianglePipeline = null!;
-
     private Fence ImmediateFence = null!;
     private CommandBuffer ImmediateCommandBuffer = null!;
     

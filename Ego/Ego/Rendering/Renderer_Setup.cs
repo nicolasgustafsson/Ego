@@ -150,10 +150,12 @@ public partial class Renderer : Node
 
     private void CreateRenderImage()
     {
-         RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false, aIsRenderTexture:true);
+         RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false, aIsRenderTexture:true, VkSampleCountFlags.Count1);
+         MSAAImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false, aIsRenderTexture:true, MsaaSamples);
          CleanupQueue.Add(RenderImage);
+         CleanupQueue.Add(MSAAImage);
          
-         DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false, aIsRenderTexture:true);
+         DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false, aIsRenderTexture:true, MsaaSamples);
          CleanupQueue.Add(DepthImage);
     }
 

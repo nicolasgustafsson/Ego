@@ -19,7 +19,7 @@ public class MeshRenderRequest : RenderRequest
     public override void Render(CommandBufferHandle cmd, VkDescriptorSet aSceneDataDescriptor, VkDescriptorSet aTextureRegistryDescriptor)
     {
         Material.Bind(cmd);
-            
+        
         cmd.BindDescriptorSet(Material.VertexShader.PipelineLayout, aSceneDataDescriptor, VkPipelineBindPoint.Graphics, 0);
         cmd.BindDescriptorSet(Material.VertexShader.PipelineLayout, aTextureRegistryDescriptor, VkPipelineBindPoint.Graphics, 1);
 

@@ -132,4 +132,19 @@ public unsafe class Image : IGpuDestroyable
 
         return renderInfo;
     }
+    
+    public VkRenderingInfo GetRenderingInfo(VkExtent2D renderExtent, VkRenderingAttachmentInfo colorAttachment)
+    {
+        VkRenderingInfo renderInfo = new();
+        
+        renderInfo.renderArea = new VkRect2D(new VkOffset2D ( 0, 0 ), renderExtent);
+        renderInfo.layerCount = 1;
+        renderInfo.colorAttachmentCount = 1;
+        renderInfo.pColorAttachments = &colorAttachment;
+        renderInfo.pDepthAttachment = null;
+        
+        renderInfo.pStencilAttachment = null;
+
+        return renderInfo;
+    }
 }
