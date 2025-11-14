@@ -4,7 +4,7 @@ using Utilities;
 
 namespace Ego;
 
-[Node]
+[Node(AllowAddingToScene = true)]
 public partial class Node
 {
     [MessagePackObject(true)]

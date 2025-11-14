@@ -78,7 +78,6 @@ public partial class Renderer
         return RenderResult.Success;
     }
 
-
     private void RenderGeometry(CommandBufferHandle cmd, VkDescriptorSet aGlobalDescriptor)
     {
         cmd.BeginRendering(RenderImage, DepthImage);

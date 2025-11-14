@@ -9,8 +9,10 @@ struct SceneData
     float4 sunlightDirection; //w for sun power
     float4 sunlightColor;
     float3 cameraPosition;
-    float3 cameraDirection;
+    float fieldOfView; 
+    float3 cameraForward;
     float time;
+    float2 resolution;
 };
 
 [[vk::binding(0, 0)]]

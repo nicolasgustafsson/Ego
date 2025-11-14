@@ -25,12 +25,12 @@ public partial class TestNode : Node3D
     { 
         LocalPosition = LocalPosition with { Y = (float)Math.Sin(Time.ElapsedTime.TotalSeconds) * 3f };
         
-        Shapes.DrawLine(new Vector3(0f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f));
-        Shapes.DrawLine(new Vector3(1f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f));
-        Shapes.DrawLine(new Vector3(2f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f));
-        Shapes.DrawLine(new Vector3(3f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f));
+        Shapes.DrawLine(new Vector3(0f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f), Vector4.One, 0.1f);
+        Shapes.DrawLine(new Vector3(1f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f), Vector4.One, 0.1f);
+        Shapes.DrawLine(new Vector3(2f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f), Vector4.One, 0.1f);
+        Shapes.DrawLine(new Vector3(3f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f), Vector4.One, 0.1f);
         
-        Shapes.DrawLine(new Vector3(3f, 2f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f)); 
+        Shapes.DrawLine(new Vector3(3f, 2f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f), Vector4.One, 0.1f); 
     }
     
     public void Inspect()

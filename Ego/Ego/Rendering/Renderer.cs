@@ -51,7 +51,7 @@ public partial class Renderer : IGpuImmediateSubmit
     public int TextureCount = 2048;
     private VkDescriptorSet TextureRegistryDescriptorSet;
 
-    private SceneData SceneData = new SceneData();
+    public SceneData SceneData = new SceneData();
     public VkDescriptorSetLayout SceneDataLayout;
     public VkDescriptorSetLayout BindlessTextureLayout;
     
@@ -106,7 +106,7 @@ public partial class Renderer : IGpuImmediateSubmit
         if (MainWindow.IsMinimized)
             return;
 
-        MeshRenderData = aRenderData.MeshRenders;
+        MeshRenderData = aRenderData.MeshRenders; 
         CustomRenderCommands = aRenderData.CustomRenders;
         SceneData.View = aRenderData.CameraView;
         SceneData.Projection = MatrixExtensions.CreatePerspectiveFieldOfView(90f * (float)(Math.PI/180f), (float)RenderImage.Extent.width / (float)RenderImage.Extent.height, 10000f, 0.1f);
@@ -121,6 +121,7 @@ public partial class Renderer : IGpuImmediateSubmit
         SceneData.Time = (float)Time.ElapsedTime.TotalSeconds;
         SceneData.CameraPosition = aRenderData.CameraPosition;
         SceneData.FieldOfView = 90f;
+        SceneData.Resolution = new Vector2(RenderImage.Extent.width, RenderImage.Extent.height);
         
         RenderResult result = RenderInternal();
         

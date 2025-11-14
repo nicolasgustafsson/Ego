@@ -11,10 +11,12 @@ public struct SceneData
     public Matrix4x4 InverseViewProj;
     public Vector4 AmbientColor;
     public Vector4 SunlightDirection;
-    public Vector4 SunlightColor;
+    public Vector4 SunlightColor; 
     public Vector3 CameraPosition;
     public float FieldOfView;
+    public Vector3 CameraDirection;
     public float Time;
+    public Vector2 Resolution;
 
     public SceneData()
     {

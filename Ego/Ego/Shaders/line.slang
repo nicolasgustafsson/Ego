@@ -20,19 +20,18 @@ struct InputData
 [[vk::push_constant]] 
 InputData PushConstants;
 
-struct outputThing
+struct OutVertex
 {
-    float3 Color;
+    float4 Color;
 };
 
 struct VertexStageOutput
 {
-    outputThing    coarseVertex    : outputThing;
+    OutVertex    coarseVertex    : OutVertex;
     float4          sv_position     : SV_Position;
 };
 
 //TODO: Move this to a module
-//TODO: Add inverse view and inverse viewproj to scene data
 float4x4 inverse(float4x4 m) {
     float n11 = m[0][0], n12 = m[1][0], n13 = m[2][0], n14 = m[3][0];
     float n21 = m[0][1], n22 = m[1][1], n23 = m[2][1], n24 = m[3][1];
@@ -71,36 +70,47 @@ float4x4 inverse(float4x4 m) {
 
     return ret;
 }
+
+float CalculateSizeOfPixel(float aDistance)
+{
+    //pixel size = 2 * tan ( horiz.fov /2 ) * distance / image width in pixels.
+    return 2.0 * (tan(sceneData.fieldOfView * 2) * (aDistance / sceneData.resolution.x));
+}
+
 [shader("vertex")]
 VertexStageOutput vertex(uint vertexID : SV_VertexID)
 {
-    //load vertex data from device address
     Vertex v = PushConstants.VertexBuffer.vertices[vertexID];
     
     float4 position = float4(v.position, 1.0f);
     
     float3 start = float3(PushConstants.render_matrix[0][0], PushConstants.render_matrix[0][1], PushConstants.render_matrix[0][2]);
     float3 end = float3(PushConstants.render_matrix[1][0], PushConstants.render_matrix[1][1], PushConstants.render_matrix[1][2]);
-    float thickness = PushConstants.render_matrix[2][0];
+    float4 color = float4(PushConstants.render_matrix[3][0], PushConstants.render_matrix[3][1],PushConstants.render_matrix[3][2],PushConstants.render_matrix[3][3]);
+    float verticalMovement = (position.y - 0.5);
     
-    float verticalMovement = (position.y * 0.5);
     position.xyz = lerp(start, end, position.x);
-    float3 lineDirection = (end - start);
     
+    float3 lineDirection = (end - start);
     float3 cameraPosition = sceneData.cameraPosition;
-    float3 cameraDirection = mul(float4(0, 0, 1, 1), sceneData.inverseView).xyz;
     float3 normal = normalize(cross((position.xyz - cameraPosition), lineDirection));
     
-    position.xyz -= normal * verticalMovement * thickness;
+    float requestedThickness = PushConstants.render_matrix[2][0];
+    
+    float3 positionInFrustum = position.xyz;
+    float minimumThickness = CalculateSizeOfPixel(distance(position.xyz, cameraPosition))  * 1.4142f; //diagonal of a unit square
+    position.xyz -= normal * verticalMovement * max(requestedThickness, minimumThickness);
+    
     VertexStageOutput output;
     output.sv_position = mul(position, sceneData.viewProj);
-    output.coarseVertex.Color = float3(0, 1, 1); 
+    output.coarseVertex.Color = color;
+    //output.coarseVertex.Color.a *= min((requestedThickness/minimumThickness), 1.0);
     
     return output;
 }
 
 [shader("pixel")]
-float4 pixel(float3 aInColor) : SV_Target0
+float4 pixel(float4 aInColor) : SV_Target0
 {
-    return float4(aInColor, 1.0f);
+    return aInColor;
 }

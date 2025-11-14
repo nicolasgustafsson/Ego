@@ -10,6 +10,8 @@ public partial class NodeTypeDatabase : Node
     public NodeTypeDatabase()
     {
         AddNode(typeof(Node));
+        AddNode(typeof(Node3D));
+        AddNode(typeof(DrawnPoint));
 
         Build(typeof(Node).Assembly);
     }

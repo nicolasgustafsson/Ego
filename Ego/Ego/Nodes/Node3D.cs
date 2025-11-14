@@ -3,7 +3,7 @@ using Utilities;
 
 namespace Ego;
 
-[Node]
+[Node(AllowAddingToScene = true)]
 public partial class Node3D : Node
 {
     [Inspect] private Transform Transform = new();
@@ -19,5 +19,11 @@ public partial class Node3D : Node
     public override Vector4? GetIconColor()
     {
         return new Vector4(0.95f, 0.5f, 0.5f, 1f);   
+    }
+
+    protected override void Update()
+    {
+        base.Update();
+        //Shapes.DrawPoint(WorldMatrix.Translation, Vector4.One, 0.5f);
     }
 }

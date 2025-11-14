@@ -33,14 +33,17 @@ public partial class SceneEditor : Node
         float segmentSize = 10f;
         int segments = 10;
 
+        float thickness = 0.05f;
+        //float x = 0;
+        //Shapes.DrawLine(new Vector3(x * segmentSize, 0f, segments * -1f * segmentSize), new Vector3(x * segmentSize, 0f, segments * 1f * segmentSize), Vector4.One, 0.1f);
         for(int x = -segments; x <= segments; x++)
         {
-            Shapes.DrawLine(new Vector3(x * segmentSize, 0f, segments * -1f * segmentSize), new Vector3(x * segmentSize, 0f, segments * 1f * segmentSize));
+            Shapes.DrawLine(new Vector3(x * segmentSize, 0f, segments * -1f * segmentSize), new Vector3(x * segmentSize, 0f, segments * 1f * segmentSize), Vector4.One, thickness);
         }
-        
+
         for(int z = -10; z <= 10; z++)
         {
-            Shapes.DrawLine(new Vector3(segments * -1f * segmentSize, 0f, z * segmentSize), new Vector3(segments * 1f * segmentSize, 0f, z * segmentSize));
+            Shapes.DrawLine(new Vector3(segments * -1f * segmentSize, 0f, z * segmentSize), new Vector3(segments * 1f * segmentSize, 0f, z * segmentSize), Vector4.One, thickness);
         }
     }
 
