@@ -46,12 +46,8 @@ public class MainRenderSchedule : RenderSchedule
 
         cmd.TransitionImage(MsaaImage, VkImageLayout.ColorAttachmentOptimal);
         
-        cmd.BeginRendering(MsaaImage, DepthImage, ClearColor);
+        RenderGeometry(MsaaImage, DepthImage, cmd, globalDescriptor, ClearColor);
         
-        RenderGeometry(cmd, globalDescriptor);
-        
-        cmd.EndRendering();
-            
         cmd.ResolveMsaa(MsaaImage, RenderImage);
         cmd.DisableMsaa();
             
