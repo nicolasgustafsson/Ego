@@ -1,3 +1,5 @@
+using System.Drawing;
+
 namespace VulkanApi;
 
 //Currently only one buffer per pool, this might change in the future
@@ -50,6 +52,7 @@ public unsafe class CommandBufferHandle : IDisposable
 
         if (aShouldReset)
             VkApiDevice.vkResetCommandBuffer(VkCommandBuffer, VkCommandBufferResetFlags.None).CheckResult();
+        
         VkApiDevice.vkBeginCommandBuffer(VkCommandBuffer, VkCommandBufferUsageFlags.OneTimeSubmit).CheckResult();
     }
     
@@ -115,6 +118,8 @@ public unsafe class CommandBufferHandle : IDisposable
     
     public void Blit(Image aFrom, VkImage aTo, VkExtent2D aExtent)
     {
+        TransitionImage(aFrom, VkImageLayout.TransferSrcOptimal);
+        
         VkImageBlit2 blitRegion = new();
 
         blitRegion.srcOffsets[1].x = (int)aFrom.Extent.width;
@@ -148,6 +153,18 @@ public unsafe class CommandBufferHandle : IDisposable
         blitInfo.pRegions = &blitRegion;
 
         VkApiDevice.vkCmdBlitImage2(VkCommandBuffer, &blitInfo);
+    }
+    
+    public void ClearColor(Image aImage, Color aClearColor)
+    {
+        TransitionImage(aImage, VkImageLayout.General);
+
+        Vector4 clearColorVec = aClearColor.ToVec4();
+        
+        var clear = new VkClearColorValue(clearColorVec.X, clearColorVec.Y, clearColorVec.Z, clearColorVec.W);
+
+        VkImageSubresourceRange clearRange = new VkImageSubresourceRange(VkImageAspectFlags.Color);
+        VkApiDevice.vkCmdClearColorImage(VkCommandBuffer, aImage.VkImage, VkImageLayout.General, &clear, 1, &clearRange);
     }
     
     public void ClearColor(Image aImage, VkImageLayout aImageLayout, VkClearColorValue aColor)
@@ -232,7 +249,7 @@ public unsafe class CommandBufferHandle : IDisposable
         VkApiDevice.vkCmdSetDepthWriteEnable(VkCommandBuffer, aEnable);
     }
     
-    public void EnableShaderObjects(VkSampleCountFlags aMultisample)
+    public void EnableShaderObjects()
     {
         VkApiDevice.vkCmdSetRasterizerDiscardEnable(VkCommandBuffer, VkBool32.False);
         VkApiDevice.vkCmdSetDepthBoundsTestEnableEXT(VkCommandBuffer, false);
@@ -245,14 +262,18 @@ public unsafe class CommandBufferHandle : IDisposable
 
         VkApiDevice.vkCmdSetColorWriteMaskEXT(VkCommandBuffer, 0, 1, &flags);
         VkApiDevice.vkCmdSetPolygonModeEXT(VkCommandBuffer, VkPolygonMode.Fill);
-        uint sampleMask = ~(uint)(0);
-        VkApiDevice.vkCmdSetSampleMaskEXT(VkCommandBuffer, aMultisample, &sampleMask);
-        VkApiDevice.vkCmdSetRasterizationSamplesEXT(VkCommandBuffer, aMultisample);
         VkApiDevice.vkCmdSetAlphaToCoverageEnableEXT(VkCommandBuffer, VkBool32.True);
+    }
+    
+    public void DisableMsaa()
+    {
+        SetMsaa(VkSampleCountFlags.Count1);
     }
 
     public void SetMsaa(VkSampleCountFlags aMultisample)
     {
+        uint sampleMask = ~(uint)(0);
+        VkApiDevice.vkCmdSetSampleMaskEXT(VkCommandBuffer, aMultisample, &sampleMask);
         VkApiDevice.vkCmdSetRasterizationSamplesEXT(VkCommandBuffer, aMultisample);
     }
     
@@ -322,6 +343,8 @@ public unsafe class CommandBufferHandle : IDisposable
     
     public void BeginRendering(Image aDrawImage)
     {
+        TransitionImage(aDrawImage, VkImageLayout.General);
+        
         VkRenderingAttachmentInfo attachmentInfo = aDrawImage.GetAttachmentInfo(null);
         VkRenderingInfo renderingInfo = aDrawImage.GetRenderingInfo(new VkExtent2D(aDrawImage.Extent.width, aDrawImage.Extent.height), attachmentInfo);
 
@@ -348,6 +371,9 @@ public unsafe class CommandBufferHandle : IDisposable
     
     public void ResolveMsaa(Image aFrom, Image aTo)
     {
+        TransitionImage(aFrom, VkImageLayout.TransferSrcOptimal);
+        TransitionImage(aTo, VkImageLayout.TransferDstOptimal);
+        
         VkImageResolve resolveRegion;
         //resolveRegion.srcSubresource = 
             

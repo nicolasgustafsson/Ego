@@ -5,6 +5,7 @@ global using static VulkanApi.MemoryAllocator;
 global using static VulkanApi.Gpu;
 using System.Drawing;
 using Ego;
+using Ego.Rendering;
 using MessagePack;
 using VulkanApi;
 using SharpGLTF.Schema2;
@@ -17,18 +18,14 @@ namespace Rendering;
 
 public partial class Renderer : IGpuImmediateSubmit
 {
-    private Swapchain Swapchain = null!;
+    public Swapchain Swapchain = null!;
     public RenderQueue RenderQueue = null!;
     public GpuDataTransferer DataTransferer = null!;
-    public Image RenderImage = null!;
-    public Image MsaaImage = null!;
-    private Image DepthImage = null!;
     public DescriptorAllocatorGrowable GlobalDescriptorAllocator = new();
-    [Inspect] VkSampleCountFlags MsaaSamples = VkSampleCountFlags.Count8;
+    VkSampleCountFlags MsaaSamples = VkSampleCountFlags.Count8;
     private VkSampleCountFlags PrevMsaaSamples = VkSampleCountFlags.Count8;
 
-    public Vector4 ClearColor = Color.CornflowerBlue.ToVec4();
-        
+    private MainRenderSchedule RenderSchedule = null!;
     private Fence ImmediateFence = null!;
     private CommandBuffer ImmediateCommandBuffer = null!;
     
@@ -52,7 +49,7 @@ public partial class Renderer : IGpuImmediateSubmit
     public Sampler DefaultLinearSampler = null!;
 
     public int TextureCount = 2048;
-    private VkDescriptorSet TextureRegistryDescriptorSet;
+    public VkDescriptorSet TextureRegistryDescriptorSet;
 
     public SceneData SceneData = new SceneData();
     public VkDescriptorSetLayout SceneDataLayout;
@@ -64,7 +61,7 @@ public partial class Renderer : IGpuImmediateSubmit
     public Action<VkCommandBuffer> ERenderImgui = delegate {};
     public Action EPostRender = delegate {};
 
-    private List<RenderRequest> RenderRequests = new();
+    public List<RenderRequest> RenderRequests = new();
     private List<IRenderCommand> CustomRenderCommands = new();
 
     public Window MainWindow;
@@ -111,7 +108,7 @@ public partial class Renderer : IGpuImmediateSubmit
 
         RenderRequests = aRenderData.RenderRequests; 
         SceneData.View = aRenderData.CameraView;
-        SceneData.Projection = MatrixExtensions.CreatePerspectiveFieldOfView(90f * (float)(Math.PI/180f), (float)RenderImage.Extent.width / (float)RenderImage.Extent.height, 10000f, 0.1f);
+        SceneData.Projection = MatrixExtensions.CreatePerspectiveFieldOfView(90f * (float)(Math.PI/180f), (float)Swapchain.Extents.width / (float)Swapchain.Extents.height, 10000f, 0.1f);
         SceneData.Projection[1, 1] *= -1f;
         SceneData.ViewProjection = SceneData.View * SceneData.Projection;
         Matrix4x4.Invert(SceneData.View, out SceneData.InverseView);
@@ -123,7 +120,7 @@ public partial class Renderer : IGpuImmediateSubmit
         SceneData.Time = (float)Time.ElapsedTime.TotalSeconds;
         SceneData.CameraPosition = aRenderData.CameraPosition;
         SceneData.FieldOfView = 90f;
-        SceneData.Resolution = new Vector2(RenderImage.Extent.width, RenderImage.Extent.height);
+        SceneData.Resolution = new Vector2(Swapchain.Extents.width, Swapchain.Extents.height);
         
         RenderResult result = RenderInternal();
         

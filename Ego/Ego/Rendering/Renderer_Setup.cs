@@ -53,7 +53,7 @@ public partial class Renderer : Node
 
         CreateMemoryAllocator();
         
-        CreateRenderImage();
+        CreateRenderSchedule();
 
         CreateImmediateCommandBuffer();
         
@@ -107,8 +107,7 @@ public partial class Renderer : Node
     {
         Device.WaitUntilIdle();
 
-        CleanupQueue.RunDeletor(RenderImage);
-        CleanupQueue.RunDeletor(DepthImage);
+        CleanupQueue.RunDeletor(RenderSchedule);
         
         foreach (var imageView in ImageViews)
             CleanupQueue.RunDeletor(imageView);
@@ -117,8 +116,7 @@ public partial class Renderer : Node
 
         RecreateSwapchain();
         CreateImageViews();
-        CreateRenderImage();
-        UpdateRenderImageDescriptorSet();
+        CreateRenderSchedule();
     }
     
     public void RecreateSwapchain()
@@ -135,15 +133,9 @@ public partial class Renderer : Node
         CleanupQueue.Add(ImmediateCommandBuffer);
     }
 
-    private void CreateRenderImage()
+    private void CreateRenderSchedule()
     {
-         RenderImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.Storage | VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false, aIsRenderTexture:true, VkSampleCountFlags.Count1);
-         MsaaImage = new Image(VkFormat.R16G16B16A16Sfloat, VkImageUsageFlags.ColorAttachment | VkImageUsageFlags.TransferDst | VkImageUsageFlags.TransferSrc, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false, aIsRenderTexture:true, MsaaSamples);
-         CleanupQueue.Add(RenderImage);
-         CleanupQueue.Add(MsaaImage);
-         
-         DepthImage = new Image(VkFormat.D32Sfloat, VkImageUsageFlags.DepthStencilAttachment, new VkExtent3D(Swapchain.Extents.width, Swapchain.Extents.height, 1), false, aIsRenderTexture:true, MsaaSamples);
-         CleanupQueue.Add(DepthImage);
+        RenderSchedule = new(this);
     }
 
     private unsafe void InitializeDescriptors()
@@ -160,7 +152,6 @@ public partial class Renderer : Node
         GlobalDescriptorAllocator = new();
         GlobalDescriptorAllocator.InitPool(100, sizes);
 
-        CreateRenderImageDescriptor();
 
         CleanupQueue.Add(() =>
         {
@@ -214,23 +205,6 @@ public partial class Renderer : Node
         variable_info.pDescriptorCounts = &NumDescriptorsStreaming;
         */
         TextureRegistryDescriptorSet = GlobalDescriptorAllocator.AllocateVariable(layout, TextureCount);
-    }
-
-    private void CreateRenderImageDescriptor()
-    {
-        DescriptorLayoutBuilder builder = new();
-        builder.AddBinding(0, VkDescriptorType.StorageImage);
-        RenderImageDescriptorLayout = builder.Build(VkShaderStageFlags.Compute | VkShaderStageFlags.Fragment);
-        RenderImageDescriptorSet = GlobalDescriptorAllocator.Allocate(RenderImageDescriptorLayout);
-        
-        UpdateRenderImageDescriptorSet();
-    }
-
-    private void UpdateRenderImageDescriptorSet()
-    {
-        DescriptorWriter writer = new();
-        writer.WriteImage(0, RenderImage.ImageView, null, VkImageLayout.General, VkDescriptorType.StorageImage);
-        writer.UpdateSet(RenderImageDescriptorSet);
     }
 
     private void CreateMemoryAllocator()

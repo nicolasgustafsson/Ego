@@ -10,7 +10,6 @@ public partial class Renderer
     private VkColorSpaceKHR PreferredColorSpace = VkColorSpaceKHR.SrgbNonLinear;
     public VkPresentModeKHR PreferredPresentMode { get; private set; } = VkPresentModeKHR.Mailbox;
 
-    //how many frames we are able to handle at once. Change to 3 to make it triple buffer maybe?
     private const int FrameOverlap = 2;
 
     private readonly bool PrintExtensions = false;

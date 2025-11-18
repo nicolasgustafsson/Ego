@@ -35,45 +35,20 @@ public partial class Renderer
         
         uint imageIndex = nextImageAcquisition.imageIndex;
         
-        VkDescriptorSet globalDescriptor = UpdateSceneData();
         UpdateBindlessTextures();
         
         using (CommandBufferHandle cmd = CurrentFrame.CommandBuffer.BeginRecording())
         {
-            cmd.EnableShaderObjects(MsaaSamples);
-
-            cmd.TransitionImage(MsaaImage, VkImageLayout.General);
-            
-            var clear = new VkClearColorValue(ClearColor.X, ClearColor.Y, ClearColor.Z, ClearColor.W);
-
-            cmd.ClearColor(MsaaImage, VkImageLayout.General, clear);
-            
-            cmd.TransitionImage(MsaaImage, VkImageLayout.ColorAttachmentOptimal);
-            
-            RenderGeometry(cmd, globalDescriptor);
-            
-            cmd.TransitionImage(MsaaImage, VkImageLayout.TransferSrcOptimal);
-            cmd.TransitionImage(RenderImage, VkImageLayout.TransferDstOptimal);
-            //Resolve MSAA here!
-            cmd.ResolveMsaa(MsaaImage, RenderImage);
-            cmd.SetMsaa(VkSampleCountFlags.Count1);
-            
-            cmd.TransitionImage(RenderImage, VkImageLayout.General);
-            
-            cmd.BeginRendering(RenderImage);
-            ERenderImgui(cmd.VkCommandBuffer);
-            cmd.EndRendering();
-            
-            cmd.TransitionImage(RenderImage, VkImageLayout.TransferSrcOptimal);
+            RenderSchedule.Execute(CurrentFrame, SceneData, cmd);
             
             VkImage currentSwapchainImage = Swapchain.Images[(int)imageIndex];
             cmd.TransitionImage(currentSwapchainImage, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal);
 
-            cmd.Blit(RenderImage, currentSwapchainImage, Swapchain.Extents);
+            cmd.Blit(RenderSchedule.RenderImage, currentSwapchainImage, Swapchain.Extents);
             
             cmd.TransitionImage(currentSwapchainImage, VkImageLayout.TransferDstOptimal, VkImageLayout.PresentSrcKHR);
         }
-
+        
         RenderQueue.Submit(CurrentFrame.CommandBuffer, CurrentFrame.ImageAvailableSemaphore, CurrentFrame.RenderFinishedSemaphore, CurrentFrame.RenderFence);
         
         VkResult presentResult = RenderQueue.Present(Swapchain, CurrentFrame.RenderFinishedSemaphore, imageIndex);
@@ -88,34 +63,6 @@ public partial class Renderer
         return RenderResult.Success;
     }
 
-    private void RenderGeometry(CommandBufferHandle cmd, VkDescriptorSet aSceneDataDescriptor)
-    {
-        cmd.BeginRendering(MsaaImage, DepthImage);
-        
-        foreach(var renderData in RenderRequests)
-        {
-            renderData.Render(cmd, aSceneDataDescriptor, TextureRegistryDescriptorSet);
-        }
-       
-        cmd.EndRendering();
-    }
-
-    private unsafe VkDescriptorSet UpdateSceneData()
-    {
-        AllocatedBuffer<SceneData> sceneDataBuffer = new(VkBufferUsageFlags.UniformBuffer, VmaMemoryUsage.CpuToGpu);
-        CurrentFrame.DeletionQueue.Add(sceneDataBuffer);
-        sceneDataBuffer.SetWriteData(SceneData);
-        VkDescriptorSet globalDescriptor = CurrentFrame.FrameDescriptors.Allocate(SceneDataLayout);
-        
-        {
-            DescriptorWriter writer = new();
-            writer.WriteBuffer(0, sceneDataBuffer, 0, VkDescriptorType.UniformBuffer);
-            writer.UpdateSet(globalDescriptor);
-        }
-
-        return globalDescriptor;
-    }
-    
     private void UpdateBindlessTextures()
     {
         DescriptorWriter writer = new();
