@@ -44,9 +44,13 @@ public class MainRenderSchedule : RenderSchedule
         cmd.EnableShaderObjects();
         cmd.SetMsaa(MsaaSamples);
 
-        cmd.ClearColor(MsaaImage, ClearColor);
-
-        RenderGeometry(MsaaImage, DepthImage, cmd, globalDescriptor);
+        cmd.TransitionImage(MsaaImage, VkImageLayout.ColorAttachmentOptimal);
+        
+        cmd.BeginRendering(MsaaImage, DepthImage, ClearColor);
+        
+        RenderGeometry(cmd, globalDescriptor);
+        
+        cmd.EndRendering();
             
         cmd.ResolveMsaa(MsaaImage, RenderImage);
         cmd.DisableMsaa();

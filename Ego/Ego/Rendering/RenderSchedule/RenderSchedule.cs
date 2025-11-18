@@ -19,18 +19,12 @@ public abstract class RenderSchedule : IGpuDestroyable
     {
     }
     
-    protected void RenderGeometry(Image aRenderImage, Image aDepthImage, CommandBufferHandle cmd, VkDescriptorSet aSceneDataDescriptor)
+    protected void RenderGeometry(CommandBufferHandle cmd, VkDescriptorSet aSceneDataDescriptor)
     {
-        cmd.TransitionImage(aRenderImage, VkImageLayout.ColorAttachmentOptimal);
-        
-        cmd.BeginRendering(aRenderImage, aDepthImage);
-        
         foreach(var renderData in Renderer.RenderRequests)
         {
             renderData.Render(cmd, aSceneDataDescriptor, Renderer.TextureRegistryDescriptorSet);
         }
-       
-        cmd.EndRendering();
     }
     
     protected void FullscreenPass(Image aRenderImage, CommandBufferHandle cmd, Material aFullscreenMaterial, VkDescriptorSet aSceneDataDescriptor)

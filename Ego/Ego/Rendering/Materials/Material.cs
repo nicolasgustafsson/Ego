@@ -42,7 +42,7 @@ public class Material
         
         UniformBuffer = aUniformBuffer;
         VertexShader = vertexShader!;
-        FragmentShader = pixelShader!; 
+        FragmentShader = pixelShader!;
         
         PassType = MaterialPassType.Opaque;
     }
