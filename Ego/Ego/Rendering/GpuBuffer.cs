@@ -29,6 +29,13 @@ public abstract class GpuBuffer : IGpuDestroyable
     {
         return MyInternalBuffer.GetDeviceAddress();
     }
+    
+    public unsafe void SetSubset<T>(T aValue, uint aByteOffset) where T : unmanaged
+    {
+        byte* mappedData = (byte*)MyInternalBuffer.AllocationInfo.pMappedData;
+        Span<T> destination = new(mappedData + aByteOffset, sizeof(T));
+        destination[0] = aValue;
+    }
 }
 
 public class GpuBuffer<T> : GpuBuffer where T : unmanaged
@@ -105,6 +112,8 @@ public class GpuBuffer<T> : GpuBuffer where T : unmanaged
                 throw new ArgumentOutOfRangeException();
         }
     }
+    
+
 }
 
 

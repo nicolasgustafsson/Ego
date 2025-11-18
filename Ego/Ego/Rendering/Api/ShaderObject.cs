@@ -1,4 +1,5 @@
-﻿using Utilities;
+﻿using Slangc.NET;
+using Utilities;
 using Vortice.ShaderCompiler;
 
 namespace VulkanApi;
@@ -10,6 +11,12 @@ public class ShaderObject : IGpuDestroyable
         
     }
     
+    public struct UniformMemberInfo
+    {
+        public uint Offset;
+        public uint Size;
+    }
+    
     public unsafe class Shader
     {
         public VkShaderStageFlags VkStage;
@@ -17,7 +24,20 @@ public class ShaderObject : IGpuDestroyable
         public VkShaderEXT VkShader = VkShaderEXT.Null;
         private VkShaderCreateInfoEXT VkShaderCreateInfo;
         public List<VkDescriptorSetLayout> Layouts;
-        public VkPipelineLayout PipelineLayout; 
+        public VkPipelineLayout PipelineLayout;
+        public Dictionary<string, UniformMemberInfo> UniformTable = new();
+        
+        public void BuildUniformTable(SlangReflection aReflection)
+        {
+            if (aReflection.Parameters.FirstOrDefault((parameter) => parameter.Name == "Uniform") is not { } uniformBuffer)
+                return;
+            
+            //we assume it's a struct :) 
+            foreach(var field in uniformBuffer.Type.Struct!.Fields)
+            {
+                UniformTable.Add(field.Name, new(){Offset = field.Binding!.Offset, Size = field.Binding!.Size});
+            }
+        }
         
         public Shader(VkShaderStageFlags aStage, byte[] aSpirvSource, List<VkDescriptorSetLayout> aLayouts, VkPushConstantRange aPushConstantRange)
         {

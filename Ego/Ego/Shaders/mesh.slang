@@ -5,7 +5,7 @@ struct GLTFMaterialData
     float4 ColorFactors;
     float4 MetalRoughness;
     int TextureIndex;
-};
+} Uniform;
 
 struct Vertex 
 {

@@ -33,7 +33,9 @@ public class MeshRenderRequest : RenderRequest
     private void SetupPushConstants(CommandBufferHandle cmd)
     {
         DefaultPushConstants pushConstants = new();
-        pushConstants.MaterialUniformBufferAddress = Material.UniformBuffer.GetDeviceAddress();
+        if (Material.UniformBuffer != null)
+            pushConstants.MaterialUniformBufferAddress = Material.UniformBuffer.GetDeviceAddress();
+        
         pushConstants.WorldMatrix = WorldMatrix; 
         pushConstants.VertexBufferAddress = MyMeshData.MeshBuffers.VertexBufferAddress;
         cmd.SetPushConstants(pushConstants, Material.VertexShader.PipelineLayout);

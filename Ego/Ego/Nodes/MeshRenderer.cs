@@ -18,7 +18,6 @@ public partial class MeshRenderer : Node3D
     private string ModelPath = "Models/structure.glb";
     private MeshData? MeshData = null;
     private Material Material = null!;
-    private GpuBuffer<MaterialConstants> MaterialConstantsBuffer = null!;
 
     [Serialize] private int MeshIndex = 0;
     private string lastPath = "";
@@ -43,22 +42,16 @@ public partial class MeshRenderer : Node3D
     {
         base.Start();
 
-        MaterialConstantsBuffer = new(GpuBufferType.Uniform, GpuBufferTransferType.Direct);
-        
-        MaterialConstants constants = new();
-        constants.Color = Vector4.One;
-        constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
-        constants.ColorTexture = RendererApi.Renderer.WhiteImage.Index!.Value;
-        MaterialConstantsBuffer.SetData(constants);
+        Material = new Material("Shaders/mesh.slang", this);
 
-        Material = new Material("Shaders/mesh.slang", MaterialConstantsBuffer, this);
+        Material.Set("ColorFactors", myColor);
+        Material.Set("MetalRoughness", new Vector4(1f, 0.5f, 0f, 0f));
+        Material.Set("TextureIndex", RendererApi.Renderer.WhiteImage);
     }
 
     public override void OnDestroy()
     {
         base.OnDestroy();
-
-        MaterialConstantsBuffer.Destroy();
     }
 
     protected override void Update()
@@ -101,12 +94,8 @@ public partial class MeshRenderer : Node3D
         
         Image vulkanImage = new(rawTextureData.AsSpan(), VkFormat.R8G8B8A8Unorm, VkImageUsageFlags.Sampled, new VkExtent3D(image.Width, image.Height, 1), true);
 
-        MaterialConstants constants = new();
-        
-        constants.Color = myColor;
-        constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
-        constants.ColorTexture = vulkanImage.Index!.Value;
-        MaterialConstantsBuffer.SetData(constants);
+        Material.Set("ColorFactors", myColor);
+        Material.Set("TextureIndex", vulkanImage);
         
         await EgoTask.MainThread();
 
@@ -138,7 +127,7 @@ public partial class MeshRenderer : Node3D
             constants.Color = myColor;
             constants.MetallicRoughness = new Vector4(1f, 0.5f, 0f, 0f);
             constants.ColorTexture = myPreviousVulkanImage?.Index!.Value ?? RendererApi.Renderer.WhiteImage.Index!.Value;
-            MaterialConstantsBuffer.SetData(constants);
+            Material.Set("ColorFactors", myColor);
         }
     }
 }
