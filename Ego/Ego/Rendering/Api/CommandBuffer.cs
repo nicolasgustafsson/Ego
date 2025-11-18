@@ -328,7 +328,7 @@ public unsafe class CommandBufferHandle : IDisposable
             clearValue = actualizedClearValue;
         }
         VkRenderingAttachmentInfo attachmentInfo = aDrawImage.GetAttachmentInfo(clearValue);
-        VkRenderingAttachmentInfo depthAttachmentInfo = aDepthImage.GetDepthAttachmentInfo(VkImageLayout.DepthAttachmentOptimal);
+        VkRenderingAttachmentInfo depthAttachmentInfo = aDepthImage.GetDepthAttachmentInfo(VkImageLayout.DepthAttachmentOptimal, aClear: aClearColor.HasValue);
         VkRenderingInfo renderingInfo = aDrawImage.GetRenderingInfo(new VkExtent2D(aDrawImage.Extent.width, aDrawImage.Extent.height), attachmentInfo, depthAttachmentInfo);
 
         VkApiDevice.vkCmdBeginRendering(VkCommandBuffer, &renderingInfo);

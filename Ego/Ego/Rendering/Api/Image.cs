@@ -97,7 +97,7 @@ public unsafe class Image : IGpuDestroyable
 
         colorAttachment.imageView = ImageView.VkImageView;
         colorAttachment.imageLayout = aLayout;
-        colorAttachment.loadOp = aClear == null ? VkAttachmentLoadOp.Load : VkAttachmentLoadOp.Clear;
+        colorAttachment.loadOp = aClear.HasValue ? VkAttachmentLoadOp.Clear : VkAttachmentLoadOp.Load;
         colorAttachment.storeOp = VkAttachmentStoreOp.Store;
         if (aClear.HasValue)
             colorAttachment.clearValue = aClear.Value;
@@ -105,13 +105,13 @@ public unsafe class Image : IGpuDestroyable
         return colorAttachment;
     }
     
-    public VkRenderingAttachmentInfo GetDepthAttachmentInfo(VkImageLayout layout = VkImageLayout.DepthAttachmentOptimal)
+    public VkRenderingAttachmentInfo GetDepthAttachmentInfo(VkImageLayout layout = VkImageLayout.DepthAttachmentOptimal, bool aClear = true)
     {
         VkRenderingAttachmentInfo depthAttachment = new();
         
         depthAttachment.imageView = ImageView.VkImageView;
         depthAttachment.imageLayout = layout;
-        depthAttachment.loadOp = VkAttachmentLoadOp.Clear;
+        depthAttachment.loadOp = aClear ? VkAttachmentLoadOp.Clear : VkAttachmentLoadOp.Load;
         depthAttachment.storeOp = VkAttachmentStoreOp.Store;
         depthAttachment.clearValue.depthStencil = new(0f, 0);
 
