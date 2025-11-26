@@ -29,6 +29,7 @@ struct OutVertex
     float2 UV;
     float3 WorldPosition;
     float RequestedThickness;
+    float VertexThickness;
 };
 
 struct VertexStageOutput
@@ -114,18 +115,27 @@ VertexStageOutput vertex(uint vertexID : SV_VertexID)
     output.coarseVertex.Color = color;
     output.coarseVertex.UV = float2(position.x, verticalMovement);
     output.coarseVertex.RequestedThickness = requestedThickness;
+    output.coarseVertex.VertexThickness = max(requestedThickness, minimumThickness);
     //output.coarseVertex.Color.a *= min((requestedThickness/minimumThickness), 1.0);
     
     return output;
 }
 
 [shader("pixel")]
-float4 pixel(float4 aInColor, float2 aUV, float3 aWorldPosition, float aRequestedThickness) : SV_Target0
+float4 pixel(float4 aInColor, float2 aUV, float3 aWorldPosition, float aRequestedThickness, float aVertexThickness) : SV_Target0
 {
     float3 cameraPosition = sceneData.cameraPosition;
     float dist = distance(aWorldPosition.xyz, cameraPosition);
-    float minimumThickness = (CalculateSizeOfPixel(dist)  * 1.4142f); //diagonal of a unit square
-    float thickness = max(minimumThickness, aRequestedThickness);
-    //aInColor.w *= 1 - smoothstep(thickness, thickness , abs(aUV.y) * 2);
+    float pixelSize = CalculateSizeOfPixel(dist);
+    float minimumThickness = (pixelSize * 1.4142f); //diagonal of a unit square
+    
+    if (minimumThickness < aRequestedThickness)
+    {
+        float thickness = minimumThickness / aVertexThickness;
+        aInColor.w *= 1 - smoothstep(thickness - minimumThickness * 4, thickness + minimumThickness * 4, abs(aUV.y) * 2);
+        
+        aInColor.r = minimumThickness * 10;
+        aInColor.g = aRequestedThickness * 10;
+    }
     return aInColor;
 }

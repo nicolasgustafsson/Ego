@@ -15,8 +15,8 @@ public partial class EditorCameraMovement : Node3D
 
     public float PitchRotation = 0f;
 
-    [Inspect] private float Speed = 7f;
-    [Inspect] private float SprintMultiplier = 2f;
+    [Inspect] private float Speed = 14f;
+    [Inspect] private float SprintMultiplier = 3f;
     [Inspect] private float MouseSensitivity = 4f;
     
     private Vector2 CursorPositionBeforeCameraMoveInitiated = Vector2.Zero;

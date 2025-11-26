@@ -40,7 +40,7 @@ public class MainRenderSchedule : RenderSchedule
     {
         Setup();
         SkyMaterial = new("Shaders/Sky.slang", aRenderer);
-        SkyMaterial.UseDepth = true;
+        SkyMaterial.UseDepth = false;
         SkyMaterial.CullMode = VkCullModeFlags.None;
     }
     
@@ -60,7 +60,7 @@ public class MainRenderSchedule : RenderSchedule
             extents, aMipMaps: false, aIsRenderTexture:true, MsaaSamples);
         
         List<FullscreenVertex> vertices = new(){new(-1f, -1f, 0.0001f), new(1f, -1f, 0.0001f), new(1f, 1f, 0.0001f), new(-1f, 1f, 0.0001f)};
-        List<uint> indices = new() {0, 2, 3, 2, 0, 1 };
+        List<uint> indices = new() {0, 2, 3, 2, 0, 1 }; 
 
         SquareMesh = new MeshData("Line", (new[]{new GeoSurface(){StartIndex = 0, Count = 6}}).ToList(), new MeshBuffers<FullscreenVertex>(Renderer, MemoryAllocator.GlobalAllocator, indices, vertices));
     }
@@ -75,9 +75,9 @@ public class MainRenderSchedule : RenderSchedule
 
         cmd.TransitionImage(MsaaImage, VkImageLayout.ColorAttachmentOptimal);
         
-        RenderGeometry(MsaaImage, DepthImage, cmd, globalDescriptor, ClearColor);
+        RenderSky(MsaaImage, DepthImage, cmd, globalDescriptor);
+        RenderGeometry(MsaaImage, DepthImage, cmd, globalDescriptor);
         
-        PostProcess(MsaaImage, DepthImage, cmd, globalDescriptor);
         
         cmd.ResolveMsaa(MsaaImage, RenderImage);
         cmd.DisableMsaa();
@@ -87,9 +87,9 @@ public class MainRenderSchedule : RenderSchedule
         cmd.EndRendering();
     }
     
-    private void PostProcess(Image aRenderImage, Image aDepthImage, CommandBufferHandle cmd, VkDescriptorSet aSceneDataDescriptor)
+    private void RenderSky(Image aRenderImage, Image aDepthImage, CommandBufferHandle cmd, VkDescriptorSet aSceneDataDescriptor)
     {
-        cmd.BeginRendering(aRenderImage, aDepthImage);
+        cmd.BeginRendering(aRenderImage, aDepthImage, ClearColor);
 
         FullscreenPushConstants pushConstants = new();
         pushConstants.MaterialUniformBufferAddress = SkyMaterial.UniformBuffer!.GetDeviceAddress();

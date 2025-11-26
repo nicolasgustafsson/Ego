@@ -378,7 +378,7 @@ public unsafe class CommandBufferHandle : IDisposable
         scissor.extent = new VkExtent2D(aDrawImage.Extent.width, aDrawImage.Extent.height);
         scissor.offset = new VkOffset2D(0, 0);
 
-        VkApiDevice.vkCmdSetScissor(VkCommandBuffer, 0, scissor);
+        VkApiDevice.vkCmdSetScissor(VkCommandBuffer, 0, scissor); 
         VkApiDevice.vkCmdSetScissorWithCount(VkCommandBuffer, 1, &scissor);
     }
     

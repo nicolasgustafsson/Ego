@@ -18,6 +18,6 @@ internal class Program
         {
             if (args.Length > 0)
                 ProjectEditor.Instance.SelectProject(args[0]);
-        });
+        }); 
     }
 }

@@ -91,7 +91,7 @@ public partial class Shapes : Node
         PointMaterial = new Material("Shaders/point.slang", this);
     }
 
-    public void DrawLine(Vector3 aStart, Vector3 aEnd, Vector4 aColor, float aThickness)
+    public void DrawLine(Vector3 aStart, Vector3 aEnd, Vector4 aColor, float aThickness) 
     {
         DrawCommands.Add(new() { Start = aStart, End = aEnd, Color = aColor, Thickness = aThickness});
     }
