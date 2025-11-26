@@ -255,6 +255,14 @@ public static unsafe partial class Imgui
         fixed(float* number = &aNumber)
             return ImguiNative.DragFloat(aName.AsBytes(), number, aSpeed, aMin , aMax, aFormat.AsBytes(), (int)aFlags) > 0;
     }
+    
+    public static bool ColorEdit4(string aName, ref Vector4 aColorAsVec4, ImGuiColorEditFlags aFlags = 0)
+    {
+        fixed (Vector4* color = &aColorAsVec4)
+        {
+            return ImguiNative.ColorEdit4(aName.AsBytes(), (float*)color, (int)aFlags) > 0;
+        }
+    }
 
     public static bool ColorPicker4(string aName, ref Vector4 aColorAsVec4, ImGuiColorEditFlags aFlags = 0)
     {

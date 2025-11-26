@@ -25,8 +25,8 @@ public static partial class EmGui
     public static bool Inspect(string aName, ref Color aColor)
     {
         Vector4 colorAsVec4 = aColor.ToVec4();
-        bool result = Imgui.ColorPicker4(aName, ref colorAsVec4);
-        aColor = colorAsVec4.ToColor();
+        bool result = Imgui.ColorEdit4(aName, ref colorAsVec4, ImGuiColorEditFlags.NoInputs); 
+        aColor = colorAsVec4.ToColor(); 
 
         return result;
     }

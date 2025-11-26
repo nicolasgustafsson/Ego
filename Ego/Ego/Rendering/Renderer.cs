@@ -68,7 +68,7 @@ public partial class Renderer : IGpuImmediateSubmit
 
     [Inspect] public Color ZenithColor = Color.FromArgb( 	101, 136, 168);
     [Inspect] public Color BelowHorizonColor = Color.FromArgb(101, 97, 93);
-    [Inspect] public Color OverHorizonColor = Color.FromArgb(220, 230, 240);
+    [Inspect] public Color OverHorizonColor = Color.FromArgb(255, 255, 245);
     [Inspect] public float HorizonLength = 0.01f;
     [Inspect] public float ZenithLength = 0.05f;
     

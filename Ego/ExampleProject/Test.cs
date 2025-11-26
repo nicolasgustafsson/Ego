@@ -8,6 +8,7 @@ public partial class TestNode : Node3D
 {
     [Inspect] private partial int IconNum { get; set; } = 59392;
     [Inspect] private partial int Yippee { get; set; } = 59392;
+    Vector4 hello = Vector4.One;
     
     public override void Start()
     {
@@ -25,12 +26,12 @@ public partial class TestNode : Node3D
     { 
         LocalPosition = LocalPosition with { Y = (float)Math.Sin(Time.ElapsedTime.TotalSeconds) * 3f };
         
-        Shapes.DrawLine(new Vector3(0f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f), Vector4.One, 0.1f);
-        Shapes.DrawLine(new Vector3(1f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f), Vector4.One, 0.1f);
-        Shapes.DrawLine(new Vector3(2f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f), Vector4.One, 0.1f);
-        Shapes.DrawLine(new Vector3(3f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f), Vector4.One, 0.1f);
+        Shapes.DrawLine(new Vector3(0f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f), Vector4.One, 0.01f);
+        Shapes.DrawLine(new Vector3(1f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f), Vector4.One, 0.01f);
+        Shapes.DrawLine(new Vector3(2f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f), Vector4.One, 0.01f);
+        Shapes.DrawLine(new Vector3(3f, 0f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f), Vector4.One, 0.01f);
         
-        Shapes.DrawLine(new Vector3(3f, 2f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f), Vector4.One, 0.1f); 
+        Shapes.DrawLine(new Vector3(3f, 2f, 0f), new Vector3(MathF.Cos((float)Time.ElapsedTime.TotalSeconds), MathF.Sin((float)Time.ElapsedTime.TotalSeconds), 0f), Vector4.One, 0.01f);  
     }
     
     public void Inspect()
@@ -47,7 +48,12 @@ public partial class TestNode : Node3D
                 continue;
             
             Imgui.Text($"{(char)(IconNum + i)}");
-            Imgui.SameLine();
+            
+            if (i < 8)
+                Imgui.SameLine();
         }
+
+        //ImGui::ColorEdit4("MyColor##3", (float*)&color, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | base_flags);
+        Imgui.ColorEdit4("whal", ref hello, ImGuiColorEditFlags.NoInputs); 
     }
 }
