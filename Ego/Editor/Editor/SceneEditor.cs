@@ -5,6 +5,7 @@ public partial class SceneEditor : Node
 {
     private Scene WorkingScene = new(); 
     private Guid InspectedNodeGuid;
+    [Inspect] float thickness = 1f;
     
     public override void Start()
     {
@@ -33,7 +34,6 @@ public partial class SceneEditor : Node
         float segmentSize = 10f;
         int segments = 10;
 
-        float thickness = 0.1f;
         //float x = 0;
         //Shapes.DrawLine(new Vector3(x * segmentSize, 0f, segments * -1f * segmentSize), new Vector3(x * segmentSize, 0f, segments * 1f * segmentSize), Vector4.One, 0.1f);
         for(int x = -segments; x <= segments; x++)
