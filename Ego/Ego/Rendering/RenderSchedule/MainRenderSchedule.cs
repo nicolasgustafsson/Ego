@@ -41,6 +41,7 @@ public class MainRenderSchedule : RenderSchedule
         Setup();
         SkyMaterial = new("Shaders/Sky.slang", aRenderer);
         SkyMaterial.UseDepth = false;
+        SkyMaterial.WriteDepth = false;
         SkyMaterial.CullMode = VkCullModeFlags.None;
     }
     

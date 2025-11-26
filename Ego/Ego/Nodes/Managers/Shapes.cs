@@ -88,7 +88,12 @@ public partial class Shapes : Node
 
         SquareMesh = new MeshData("Line", (new[]{new GeoSurface(){StartIndex = 0, Count = 6}}).ToList(), new MeshBuffers<LineVertex>(RendererApi.Renderer, MemoryAllocator.GlobalAllocator, indices, vertices));
         LineMaterial = new Material("Shaders/line.slang", this);
+
+        LineMaterial.WriteDepth = false;
+        
         PointMaterial = new Material("Shaders/point.slang", this);
+
+        PointMaterial.WriteDepth = false;
     }
 
     public void DrawLine(Vector3 aStart, Vector3 aEnd, Vector4 aColor, float aThickness) 

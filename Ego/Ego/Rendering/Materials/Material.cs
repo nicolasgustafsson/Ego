@@ -22,8 +22,11 @@ public class Material
     public ShaderObject.Shader VertexShader = null!;
     public ShaderObject.Shader PixelShader = null!;
 
+    public bool WriteDepth = true;
     public bool UseDepth = true;
+    public bool CheckStencil = true;
     public VkCullModeFlags CullMode = VkCullModeFlags.Front;
+    public VkCompareOp DepthMode = VkCompareOp.Greater;
     
     //Should be double-buffered probably!
     public GpuBuffer? UniformBuffer = null;
@@ -92,10 +95,10 @@ public class Material
         aCommandBuffer.SetBlendMode(BlendMode.Alpha);
         aCommandBuffer.SetPrimitiveTopology(VkPrimitiveTopology.TriangleList);
         aCommandBuffer.SetFrontFace(VkFrontFace.Clockwise);
-        aCommandBuffer.SetDepthCompareOperation(VkCompareOp.Greater);
-        aCommandBuffer.SetDepthWrite(UseDepth);
-        aCommandBuffer.SetDepthTestEnable(UseDepth);
-        aCommandBuffer.SetStencilTestEnable(UseDepth);
+        aCommandBuffer.SetDepthCompareOperation(DepthMode);
+        aCommandBuffer.SetDepthWrite(WriteDepth);
+        aCommandBuffer.SetDepthTestEnable(DepthMode != VkCompareOp.Always);
+        aCommandBuffer.SetStencilTestEnable(CheckStencil);
     }
     
     //Nothing calls this right now :/

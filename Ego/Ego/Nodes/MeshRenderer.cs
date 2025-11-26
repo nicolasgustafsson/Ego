@@ -20,10 +20,7 @@ public partial class MeshRenderer : Node3D
     private Material Material = null!;
 
     [Serialize] private int MeshIndex = 0;
-    private string lastPath = "";
     private Task? myLoadTextureTask;
-
-    private static int index = 0;
     private Image? myPreviousVulkanImage = null;
 
     private Vector4 myColor = Vector4.One;
@@ -77,10 +74,6 @@ public partial class MeshRenderer : Node3D
     
     private async Task LoadATexture(string aPath)
     {
-        index++;
-        
-        lastPath = aPath;
-        
         await EgoTask.WorkerThread();
         
         /*RecyclableMemoryStreamManager manager;
@@ -120,7 +113,7 @@ public partial class MeshRenderer : Node3D
             }
         }
         
-        if (Imgui.ColorPicker4("Color", ref myColor))
+        if (Imgui.ColorEdit4("Color", ref myColor, ImGuiColorEditFlags.NoInputs))
         {
             MaterialConstants constants = new();
         

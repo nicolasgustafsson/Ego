@@ -5,7 +5,7 @@ public partial class SceneEditor : Node
 {
     private Scene WorkingScene = new(); 
     private Guid InspectedNodeGuid;
-    [Inspect] float thickness = 1f;
+    [Inspect] float thickness = 0.1f;
     
     public override void Start()
     {
