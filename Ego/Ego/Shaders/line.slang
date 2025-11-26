@@ -129,7 +129,7 @@ float4 pixel(float4 aInColor, float2 aUV, float3 aWorldPosition, float aRequeste
     float pixelSize = CalculateSizeOfPixel(dist);
     float minimumThickness = (pixelSize * 1.4142f); //diagonal of a unit square
     
-    if (minimumThickness < aVertexThickness && minimumThickness > aRequestedThickness)
+    if (minimumThickness < aRequestedThickness)
     {
         float thickness = minimumThickness / aVertexThickness;
         aInColor.w *= 1 - pow(smoothstep(thickness - minimumThickness, thickness + minimumThickness * 24, abs(aUV.y) * 2), 6);
