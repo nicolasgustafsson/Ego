@@ -132,10 +132,7 @@ float4 pixel(float4 aInColor, float2 aUV, float3 aWorldPosition, float aRequeste
     if (minimumThickness < aRequestedThickness)
     {
         float thickness = minimumThickness / aVertexThickness;
-        aInColor.w *= 1 - smoothstep(thickness - minimumThickness * 4, thickness + minimumThickness * 4, abs(aUV.y) * 2);
-        
-        aInColor.r = minimumThickness * 10;
-        aInColor.g = aRequestedThickness * 10;
+        aInColor.w *= 1 - pow(smoothstep(thickness - minimumThickness, thickness + minimumThickness * 24, abs(aUV.y) * 2), 6);
     }
     return aInColor;
 }
