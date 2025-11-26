@@ -1,4 +1,6 @@
 using System.Drawing;
+using Rendering;
+using Rendering.Materials;
 
 namespace VulkanApi;
 
@@ -378,6 +380,20 @@ public unsafe class CommandBufferHandle : IDisposable
 
         VkApiDevice.vkCmdSetScissor(VkCommandBuffer, 0, scissor);
         VkApiDevice.vkCmdSetScissorWithCount(VkCommandBuffer, 1, &scissor);
+    }
+    
+    public void DrawGeometry<TPushConstants>(MeshData aMeshData, Material aMaterial, VkDescriptorSet aSceneDataDescriptor, VkDescriptorSet aTextureRegistryDescriptor, TPushConstants aPushConstants) where TPushConstants : unmanaged
+    {
+        aMaterial.Bind(this);
+        
+        BindDescriptorSet(aMaterial.VertexShader.PipelineLayout, aSceneDataDescriptor, VkPipelineBindPoint.Graphics, 0);
+        BindDescriptorSet(aMaterial.VertexShader.PipelineLayout, aTextureRegistryDescriptor, VkPipelineBindPoint.Graphics, 1);
+
+        BindIndexBuffer(aMeshData.MeshBuffers.IndexBuffer.MyInternalBuffer);
+
+        SetPushConstants(aPushConstants, aMaterial.VertexShader.PipelineLayout);
+
+        DrawIndexed(aMeshData.Surfaces[0].Count);
     }
     
     public void ResolveMsaa(Image aFrom, Image aTo)

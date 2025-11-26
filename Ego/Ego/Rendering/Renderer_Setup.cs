@@ -52,8 +52,6 @@ public partial class Renderer : Node
         CreateImageViews();
 
         CreateMemoryAllocator();
-        
-        CreateRenderSchedule();
 
         CreateImmediateCommandBuffer();
         
@@ -62,6 +60,8 @@ public partial class Renderer : Node
         CreateDefaultImages(); 
         
         InitializeDescriptors();
+        
+        CreateRenderSchedule();
 
         Log.Info($"Renderer successfully created!");
     }

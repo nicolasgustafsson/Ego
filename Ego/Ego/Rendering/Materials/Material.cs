@@ -21,12 +21,15 @@ public class Material
     public MaterialPassType PassType;
     public ShaderObject.Shader VertexShader = null!;
     public ShaderObject.Shader PixelShader = null!;
-    public GpuBuffer? UniformBuffer = null;
+
+    public bool UseDepth = true;
+    public VkCullModeFlags CullMode = VkCullModeFlags.Front;
     
+    //Should be double-buffered probably!
+    public GpuBuffer? UniformBuffer = null;
     public Material() { }
     
     //Assumes that the shader path contains vertex and pixel shaders with the entry point "vertex" and "pixel"
-    //Todo: Uniform buffer should be created dynamically based on shader reflection, instead of being sent in here.
     public unsafe Material(string aShaderPath, Node aContext)
     {
         DescriptorLayoutBuilder descriptorLayoutBuilder = new();
@@ -57,6 +60,12 @@ public class Material
         UniformBuffer = new GpuBuffer<byte>(GpuBufferType.Uniform, GpuBufferTransferType.Direct, size);
     }
     
+    public void Set(string aName, float aFloat)
+    {
+        uint offset = PixelShader.UniformTable[aName].Offset;
+        UniformBuffer!.SetSubset(aFloat, offset);
+    }
+    
     public void Set(string aName, Image aImage)
     {
         uint offset = PixelShader.UniformTable[aName].Offset;
@@ -75,28 +84,18 @@ public class Material
         UniformBuffer!.SetSubset(aVector, offset);
     }
     
-    //Todo: Uniform buffer should be created dynamically based on shader reflection, instead of being sent in here.
-    public unsafe Material(ShaderObject.Shader aVertexShader, ShaderObject.Shader aPixelShader, GpuBuffer aUniformBuffer)
-    {
-        UniformBuffer = aUniformBuffer;
-        VertexShader = aVertexShader;
-        PixelShader = aPixelShader; 
-        
-        PassType = MaterialPassType.Opaque;
-    }
-    
     public void Bind(CommandBufferHandle aCommandBuffer)
     {
         aCommandBuffer.BindShader(VertexShader);
         aCommandBuffer.BindShader(PixelShader);
-        aCommandBuffer.SetCullMode(VkCullModeFlags.Front);
+        aCommandBuffer.SetCullMode(CullMode);
         aCommandBuffer.SetBlendMode(BlendMode.Alpha);
         aCommandBuffer.SetPrimitiveTopology(VkPrimitiveTopology.TriangleList);
         aCommandBuffer.SetFrontFace(VkFrontFace.Clockwise);
         aCommandBuffer.SetDepthCompareOperation(VkCompareOp.Greater);
-        aCommandBuffer.SetDepthWrite(true);
-        aCommandBuffer.SetDepthTestEnable(true);
-        aCommandBuffer.SetStencilTestEnable(false);
+        aCommandBuffer.SetDepthWrite(UseDepth);
+        aCommandBuffer.SetDepthTestEnable(UseDepth);
+        aCommandBuffer.SetStencilTestEnable(UseDepth);
     }
     
     //Nothing calls this right now :/

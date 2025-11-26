@@ -62,15 +62,18 @@ public partial class Renderer : IGpuImmediateSubmit
     public Action EPostRender = delegate {};
 
     public List<RenderRequest> RenderRequests = new();
-    private List<IRenderCommand> CustomRenderCommands = new();
+    private List<IRenderCommand> CustomRenderCommands = new(); 
 
     public Window MainWindow;
-    
-    
 
+    [Inspect] public Color ZenithColor = Color.FromArgb( 	101, 136, 168);
+    [Inspect] public Color BelowHorizonColor = Color.FromArgb(101, 97, 93);
+    [Inspect] public Color OverHorizonColor = Color.FromArgb(220, 230, 240);
+    [Inspect] public float HorizonLength = 0.01f;
+    [Inspect] public float ZenithLength = 0.05f;
+    
     public Renderer(Window aWindow) : this(aWindow, new())
     {
-        
     }
     
     public Renderer(Window aWindow, RendererInitSettings aSettings)
@@ -138,5 +141,15 @@ public partial class Renderer : IGpuImmediateSubmit
     {
         PreferredPresentMode = aPresentMode;
         RecreateSwapchain();
+    }
+
+    protected override void Update()
+    {
+        RenderSchedule.SkyMaterial.Set("OverHorizonColor", OverHorizonColor.ToVec4());
+        RenderSchedule.SkyMaterial.Set("BelowHorizonColor", BelowHorizonColor.ToVec4());
+        RenderSchedule.SkyMaterial.Set("ZenithColor", ZenithColor.ToVec4());
+        RenderSchedule.SkyMaterial.Set("HorizonLength", HorizonLength);
+        RenderSchedule.SkyMaterial.Set("ZenithLength", ZenithLength);
+        base.Update();
     }
 }

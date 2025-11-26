@@ -6,7 +6,7 @@ using Vortice.Vulkan;
 
 internal class Program
 {
-    static void Main(string[] args)
+    static void Main(string[] args) 
     {
         EgoRoot engine = new();
         

@@ -38,7 +38,8 @@ public partial class EgoRoot : Node
         MyContext.ShaderCompiler = AddChild(new ShaderCompiler());
         MyContext.Time = AddChild(new TimeKeeper());
         MyContext.Window = new Window(aSettings.Name, aSettings.WindowSize);
-        MyContext.RendererApi = AddChild(new RendererApi(Window, aSettings.RendererInitSettings));
+        MyContext.RendererApi = new RendererApi(Window, aSettings.RendererInitSettings);
+        AddChild(MyContext.RendererApi);
         MyContext.Debug = AddChild(new Debug());
         MyContext.AssetManager = AddChild(new AssetManager());
         MyContext.TreeInspector = AddChild(new TreeInspector());

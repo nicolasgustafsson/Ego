@@ -5,20 +5,43 @@ using VulkanApi;
 
 namespace Ego.Rendering;
 
+public struct FullscreenVertex
+{
+    public Vector3 Position;
+    public float Dummy;
+        
+    public FullscreenVertex(float X, float Y, float Z)
+    {
+        Position.X = X;
+        Position.Y = Y;
+        Position.Z = Z;
+    }
+}
+
+public struct FullscreenPushConstants
+{
+    public VkDeviceAddress VertexBufferAddress;
+    public VkDeviceAddress MaterialUniformBufferAddress;
+}
+
 public class MainRenderSchedule : RenderSchedule
 {
     public Image RenderImage = null!;
     public Image MsaaImage = null!;
     private Image DepthImage = null!;
     VkSampleCountFlags MsaaSamples = VkSampleCountFlags.Count8;
-    
+
     public Color ClearColor = Color.CornflowerBlue;
 
-    //public Material SkyMaterial;
+    public Material SkyMaterial;
+    public MeshData SquareMesh = null!;
 
     public MainRenderSchedule(Renderer aRenderer) : base(aRenderer)
     {
         Setup();
+        SkyMaterial = new("Shaders/Sky.slang", aRenderer);
+        SkyMaterial.UseDepth = true;
+        SkyMaterial.CullMode = VkCullModeFlags.None;
     }
     
     public void Setup()
@@ -35,8 +58,14 @@ public class MainRenderSchedule : RenderSchedule
         DepthImage = new Image(VkFormat.D32Sfloat, 
             VkImageUsageFlags.DepthStencilAttachment, 
             extents, aMipMaps: false, aIsRenderTexture:true, MsaaSamples);
-    }
         
+        List<FullscreenVertex> vertices = new(){new(-1f, -1f, 0.0001f), new(1f, -1f, 0.0001f), new(1f, 1f, 0.0001f), new(-1f, 1f, 0.0001f)};
+        List<uint> indices = new() {0, 2, 3, 2, 0, 1 };
+
+        SquareMesh = new MeshData("Line", (new[]{new GeoSurface(){StartIndex = 0, Count = 6}}).ToList(), new MeshBuffers<FullscreenVertex>(Renderer, MemoryAllocator.GlobalAllocator, indices, vertices));
+    }
+
+
     public override void Execute(FrameData aFrameData, SceneData aSceneData, CommandBufferHandle cmd)
     {
         VkDescriptorSet globalDescriptor = UpdateSceneData(aFrameData, aSceneData);
@@ -48,11 +77,26 @@ public class MainRenderSchedule : RenderSchedule
         
         RenderGeometry(MsaaImage, DepthImage, cmd, globalDescriptor, ClearColor);
         
+        PostProcess(MsaaImage, DepthImage, cmd, globalDescriptor);
+        
         cmd.ResolveMsaa(MsaaImage, RenderImage);
         cmd.DisableMsaa();
-            
+
         cmd.BeginRendering(RenderImage);
         Renderer.ERenderImgui(cmd.VkCommandBuffer);
+        cmd.EndRendering();
+    }
+    
+    private void PostProcess(Image aRenderImage, Image aDepthImage, CommandBufferHandle cmd, VkDescriptorSet aSceneDataDescriptor)
+    {
+        cmd.BeginRendering(aRenderImage, aDepthImage);
+
+        FullscreenPushConstants pushConstants = new();
+        pushConstants.MaterialUniformBufferAddress = SkyMaterial.UniformBuffer!.GetDeviceAddress();
+        pushConstants.VertexBufferAddress = SquareMesh.MeshBuffers.VertexBufferAddress;
+        
+        cmd.DrawGeometry(SquareMesh, SkyMaterial, aSceneDataDescriptor, Renderer.TextureRegistryDescriptorSet, pushConstants);
+
         cmd.EndRendering();
     }
     

@@ -7,7 +7,7 @@ namespace Ego.Rendering;
 
 public abstract class RenderSchedule : IGpuDestroyable
 {
-    public Renderer Renderer;
+    protected Renderer Renderer;
     
     public RenderSchedule(Renderer aRenderer)
     {

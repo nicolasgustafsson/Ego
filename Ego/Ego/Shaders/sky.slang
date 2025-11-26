@@ -3,10 +3,7 @@
 struct Vertex 
 {
     float3 Position;
-    float Uv_x;
-    float3 Normal;
-    float Uv_y;
-    float4 Color;
+    float Dummy;
 };
 
 struct VertexBuffer
@@ -17,6 +14,7 @@ struct VertexBuffer
 struct OutVertex
 {
     float2 Uv;
+    float3 cameraDirection;
 };
 
 struct VertexStageOutput
@@ -25,10 +23,19 @@ struct VertexStageOutput
     float4          Position     : SV_Position;
 };
 
+struct SkyData
+{
+    float4 OverHorizonColor;
+    float4 BelowHorizonColor;
+    float4 ZenithColor;
+    float HorizonLength;
+    float ZenithLength;
+} Uniform;
+
 struct InputData 
 {
-    float4x4 RenderMatrix;
     VertexBuffer* VertexBuffer;
+    SkyData* MaterialBuffer; 
 };
 
 [[vk::push_constant]] 
@@ -43,16 +50,26 @@ VertexStageOutput vertex(uint aVertexId : SV_VertexID)
     
     float4 position = float4(v.Position, 1.0f);
 
-    output.Position =  mul(mul(position, PushConstants.RenderMatrix), sceneData.viewProj);
+    output.Position =  position;
     
-    output.OutVertex.Uv.x = v.Uv_x;
-    output.OutVertex.Uv.y = v.Uv_y;  
+    output.OutVertex.Uv.x = (position.x * 0.5f) + 0.5f;
+    output.OutVertex.Uv.y = (position.y * 0.5f) + 0.5f;  
+    
+    position.z = 0;
+    
+    output.OutVertex.cameraDirection = normalize(mul(position, sceneData.inverseViewProj).xyz);
     
     return output; 
 }
 
 [shader("pixel")]
-float4 pixel(float3 inNormal, float3 inColor, float2 inUV) : SV_Target0
+float4 pixel(float2 inUV, float3 inCameraDirection) : SV_Target0
 {
-    return float4(1.0f, 1.0f, 0.0f, 1.0f); 
+    float4 belowToHorizon = lerp(PushConstants.MaterialBuffer.BelowHorizonColor, PushConstants.MaterialBuffer.OverHorizonColor, 
+    smoothstep(-PushConstants.MaterialBuffer.HorizonLength * 0.5, PushConstants.MaterialBuffer.HorizonLength * 0.5, inCameraDirection.y));
+    
+    float4 horizonToZenith = lerp(belowToHorizon, PushConstants.MaterialBuffer.ZenithColor, 
+    smoothstep(PushConstants.MaterialBuffer.HorizonLength * 0.5, PushConstants.MaterialBuffer.HorizonLength * 0.5 + PushConstants.MaterialBuffer.ZenithLength, inCameraDirection.y));
+    
+    return horizonToZenith;
 }
